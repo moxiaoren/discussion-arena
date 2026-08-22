@@ -78,7 +78,7 @@ input{font-family:inherit}
 .msg-del-btn{display:inline-block;margin:4px 0 0 8px;font-size:12px;color:#c0392b;background:none;border:none;cursor:pointer;opacity:0;transition:opacity .2s}
 .msg:hover .msg-del-btn{opacity:.7}.msg-del-btn:hover{opacity:1;font-weight:700}
 
-/* ---------- 大厅（进入） ---------- */
+/* ---------- 大厅(进入) ---------- */
 #lobby{flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef0ff,#fbeaff)}
 .card{background:#fff;border-radius:16px;padding:28px 30px;box-shadow:0 10px 40px rgba(108,92,231,.15);width:360px}
 .card h2{margin-bottom:6px}
@@ -127,7 +127,7 @@ input{font-family:inherit}
 .summary-card .history .hov{margin:2px 0;color:#7c6cf0;cursor:pointer}
 
 /* AI 阶段点评卡 */
-/* AI 论证点评卡（⚖️ 多维度评估 + 质询） */
+/* AI 论证点评卡(⚖️ 多维度评估 + 质询) */
 .arena-card{background:linear-gradient(180deg,#fdf8ff,#f6f0ff);border:1.5px solid #c9a2ff;border-left:5px solid #7c3aed;border-radius:14px;padding:12px 14px;margin:6px 0 14px 8px;font-size:13px;max-width:88%;box-shadow:0 2px 10px rgba(124,58,237,.08)}
 .arena-card .head{font-weight:700;color:#6d28d9;margin-bottom:8px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .arena-badge{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-radius:6px;padding:2px 8px;font-size:11px}
@@ -266,27 +266,27 @@ input{font-family:inherit}
   <div id="helpBox">
     <h3>📖 使用说明·论证点评间</h3>
     <div id="helpBody">
-      <h4>① 怎么开两个"人"</h4>
+      <h4>1 怎么开两个"人"</h4>
       <ol>
-        <li>在 <b>同一个浏览器</b> 开两个标签页打开此页面；</li>
-        <li>一个标签填昵称点 <b>「＋创建讨论间」</b> 当甲方，会显示 6 位口令；</li>
-        <li>另一个标签点 <b>「🔑 我有口令」</b> 输入口令当乙方，即可双人实时对话</li>
+        <li>在 <b>同一个浏览器</b> 开两个标签页打开此页面;</li>
+        <li>一个标签填昵称点 <b>「+创建讨论间」</b> 当甲方,会显示 6 位口令;</li>
+        <li>另一个标签点 <b>「🔑 我有口令」</b> 输入口令当乙方,即可双人实时对话</li>
       </ol>
-      <h4>② 三种表达通道</h4>
+      <h4>2 三种表达通道</h4>
       <ul>
-        <li><b>💬 讨论</b>：正文对话，会进 AI 总结与复盘；</li>
-        <li><b>🎤 弹幕</b>：场外吐槽，飘过展示，<b>永不进</b>总结/复盘，放心说；</li>
-        <li><b>🤖 AI</b>：可配 DeepSeek Key 让 AI 做真实总结与复盘</li>
+        <li><b>💬 讨论</b>:正文对话,会进 AI 总结与复盘;</li>
+        <li><b>🎤 弹幕</b>:场外吐槽,飘过展示,<b>永不进</b>总结/复盘,放心说;</li>
+        <li><b>🤖 AI</b>:可配 DeepSeek Key 让 AI 做真实总结与复盘</li>
       </ul>
-      <h4>③ AI 总结怎么用</h4>
-      <p>说了一段后点 <b>「总结 ✨」</b> → 选择 <b>你自己的发言</b>（可多条）一起总结，表达「我说完了、请对方理解回复」；<b>开头发言会提炼「🧭 讨论意图」</b>（意图不明会提示补充）；卡片会展示「🎯 在回应 / ↔️ 是否跑题 / 💬 建议补充 / ⚠️ 论据支撑问题」；可「🧠重新生成 / 📝补充 / 🕘历史版本」。</p>
-      <p style="color:#999;font-size:12px">💡 开头第一段发言没有之前上下文，不做「回应/跑题」判断；「反驳、举反例、质疑」算同一话题的正常交流，不算跑题。</p>
-      <h4>④ 复盘怎么进</h4>
-      <p>双方都点 <b>「🛑 结束讨论」</b> 并确认 → 进入复盘：对话式回放（拖动/倍速/筛选）+ AI 总评与逐段点评。</p>
-      <h4>⑤ 配置真实 AI（可选）</h4>
-      <p>大厅下方 <b>「真实 AI · DeepSeek」</b> 粘贴你的 Key 并保存；Key 只存当前浏览器、双标签共用、<b>不会发送给任何服务器</b>；不配则用内置模拟 AI。</p>
-      <h4>⑥ 数据与隐私</h4>
-      <p>对话与 Key 全在<b>本机浏览器</b>（localStorage），刷新不丢、换设备不共享；页面为纯前端，无后端。</p>
+      <h4>3 AI 总结怎么用</h4>
+      <p>说了一段后点 <b>「总结 ✨」</b> → 选择 <b>你自己的发言</b>(可多条)一起总结,表达「我说完了、请对方理解回复」;<b>开头发言会提炼「🧭 讨论意图」</b>(意图不明会提示补充);卡片会展示「🎯 在回应 / ↔️ 是否跑题 / 💬 建议补充 / ⚠️ 论据支撑问题」;可「🧠重新生成 / 📝补充 / 🕘历史版本」。</p>
+      <p style="color:#999;font-size:12px">💡 开头第一段发言没有之前上下文,不做「回应/跑题」判断;「反驳、举反例、质疑」算同一话题的正常交流,不算跑题。</p>
+      <h4>4 复盘怎么进</h4>
+      <p>双方都点 <b>「🛑 结束讨论」</b> 并确认 → 进入复盘:对话式回放(拖动/倍速/筛选)+ AI 总评与逐段点评。</p>
+      <h4>5 配置真实 AI(可选)</h4>
+      <p>大厅下方 <b>「真实 AI · DeepSeek」</b> 粘贴你的 Key 并保存;Key 只存当前浏览器、双标签共用、<b>不会发送给任何服务器</b>;不配则用内置模拟 AI。</p>
+      <h4>6 数据与隐私</h4>
+      <p>对话与 Key 全在<b>本机浏览器</b>(localStorage),刷新不丢、换设备不共享;页面为纯前端,无后端。</p>
     </div>
     <div class="confirm-row"><button class="btn" id="btnHelpClose" style="margin:0;margin-left:auto">我知道了</button></div>
   </div>
@@ -297,12 +297,12 @@ input{font-family:inherit}
   <div class="card">
     <div id="resumeCard" class="hidden"></div>
     <h2>👋 进入讨论间</h2>
-    <div class="tip">在线网页（本地对话）· 请在同一浏览器开两个标签页，一个当「我」、一个当「好友」，数据在本地实时同步；可填自己的 DeepSeek Key 让 AI 做真实总结与复盘。</div>
+    <div class="tip">在线网页(本地对话)· 请在同一浏览器开两个标签页,一个当「我」、一个当「好友」,数据在本地实时同步;可填自己的 DeepSeek Key 让 AI 做真实总结与复盘。</div>
     <div class="lbl">你的昵称</div>
-    <input id="myName" class="inp" placeholder="例：小林">
+    <input id="myName" class="inp" placeholder="例:小林">
     <div class="lbl">模式</div>
-    <button class="btn" id="btnCreate">＋ 创建讨论间（我是发起人）</button>
-    <button class="btn secondary" id="btnJoin">🔑 我有口令，加入好友的讨论间</button>
+    <button class="btn" id="btnCreate">+ 创建讨论间(我是发起人)</button>
+    <button class="btn secondary" id="btnJoin">🔑 我有口令,加入好友的讨论间</button>
     <div id="joinBox" class="hidden">
       <div class="lbl">输入口令</div>
       <input id="pwdInput" class="inp" placeholder="6 位口令">
@@ -314,23 +314,23 @@ input{font-family:inherit}
       <button class="btn secondary" id="btnHistory">📂 历史讨论</button>
     </div>
     <div class="hint" id="newHint"></div>
-    <div id="serverAiBadge" class="hint" style="margin:12px 0 6px;font-weight:700;color:#0a7">🔒 正在连接服务器…</div>
+    <div id="serverAiBadge" class="hint" style="margin:12px 0 6px;font-weight:700;color:#0a7">🔒 正在连接服务器...</div>
     <details id="advancedPanel" class="adv-panel">
-      <summary>🛠 高级设置（服务端已配好，一般无需填写）</summary>
-    <div class="lbl" style="margin-top:16px">🤖 真实 AI · DeepSeek（可选 · 后门）</div>
+      <summary>🛠 高级设置(服务端已配好,一般无需填写)</summary>
+    <div class="lbl" style="margin-top:16px">🤖 真实 AI · DeepSeek(可选 · 后门)</div>
     <div style="display:flex;gap:6px">
-      <input id="aiKey" class="inp" type="password" placeholder="粘贴你的 DeepSeek API Key（sk-…）" style="margin:0">
+      <input id="aiKey" class="inp" type="password" placeholder="粘贴你的 DeepSeek API Key(sk-...)" style="margin:0">
       <button class="btn secondary" id="btnSaveKey" style="width:auto;margin:0;white-space:nowrap">保存</button>
     </div>
     <div class="hint" id="aiKeyState"></div>
-    <div class="lbl" style="margin-top:14px">☁️ GitHub 存档（可选 · 后门）</div>
+    <div class="lbl" style="margin-top:14px">☁️ GitHub 存档(可选 · 后门)</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <input id="ghToken" class="inp" type="password" placeholder="GitHub Token（PAT，需勾选 repo 权限）" style="margin:0;flex:1;min-width:200px">
-      <input id="ghRepo" class="inp" placeholder="仓库 owner/repo（如 moxiaoren/discussion-room-history）" style="margin:0;flex:1;min-width:200px">
+      <input id="ghToken" class="inp" type="password" placeholder="GitHub Token(PAT,需勾选 repo 权限)" style="margin:0;flex:1;min-width:200px">
+      <input id="ghRepo" class="inp" placeholder="仓库 owner/repo(如 moxiaoren/discussion-room-history)" style="margin:0;flex:1;min-width:200px">
       <button class="btn secondary" id="btnSaveGh" style="width:auto;margin:0;white-space:nowrap">保存</button>
     </div>
-    <div class="hint" id="ghState">把「历史讨论」一键存到 GitHub 私有仓库，实现云端留存、跨设备可见。Token 仅存当前浏览器，不发送给第三方。</div>
-    <div class="hint">创建方会自动生成一个口令；好友选「我有口令」输入即可。服务器版支持两台不同设备异地实时讨论。<br>以下为高级设置，服务端已配置好时无需改动。</div>
+    <div class="hint" id="ghState">把「历史讨论」一键存到 GitHub 私有仓库,实现云端留存、跨设备可见。Token 仅存当前浏览器,不发送给第三方。</div>
+    <div class="hint">创建方会自动生成一个口令;好友选「我有口令」输入即可。服务器版支持两台不同设备异地实时讨论。<br>以下为高级设置,服务端已配置好时无需改动。</div>
     </details>
     <style>.adv-panel{border:1px dashed #ccc;border-radius:8px;padding:4px 10px;margin-top:6px}.adv-panel summary{cursor:pointer;color:#888;font-size:13px;padding:6px 0;user-select:none}.adv-panel[open] summary{margin-bottom:4px}</style>
   </div>
@@ -347,26 +347,26 @@ input{font-family:inherit}
       <button id="btnCopyPwd" class="rm-copy">📋 复制</button>
     </div>
     <div style="flex:1"></div>
-    <button id="btnArena" class="arena-chip" title="切换「论证点评」玩法：总结时做多维度论证评估与质询反问">⚖️ 整理</button>
+    <button id="btnArena" class="arena-chip" title="切换「论证点评」玩法:总结时做多维度论证评估与质询反问">⚖️ 整理</button>
     <button id="btnNewRoom" title="开启全新空白的新话题">🆕 新话题</button>
     <button id="btnEnd" title="双方都确认后进入复盘">🛑 结束讨论</button>
   </div>
   <div id="stream"></div>
   <div id="inputBar">
     <div id="modeSwitch">
-      <button class="mode-chip on" data-mode="discuss" title="讨论：正文对话，会进 AI 总结与复盘">💬 讨论模式</button>
-      <button class="mode-chip" data-mode="danmaku" title="弹幕：场外吐槽，飘过展示，永不进总结与复盘">🎤 弹幕模式</button>
+      <button class="mode-chip on" data-mode="discuss" title="讨论:正文对话,会进 AI 总结与复盘">💬 讨论模式</button>
+      <button class="mode-chip" data-mode="danmaku" title="弹幕:场外吐槽,飘过展示,永不进总结与复盘">🎤 弹幕模式</button>
     </div>
     <div id="inputRow">
-      <textarea id="input" rows="1" placeholder="输入你的观点…（Enter 发送，Shift+Enter 换行）"></textarea>
-      <button class="act-btn hidden" id="btnDanmaku" title="弹幕只作吐槽展示，不参与 AI 总结与复盘">发弹幕</button>
+      <textarea id="input" rows="1" placeholder="输入你的观点...(Enter 发送,Shift+Enter 换行)"></textarea>
+      <button class="act-btn hidden" id="btnDanmaku" title="弹幕只作吐槽展示,不参与 AI 总结与复盘">发弹幕</button>
       <button class="act-btn" id="btnSend" title="发送当前输入为正式讨论">发送</button>
-      <button class="act-btn" id="btnSendSum" title="总结我自己的发言（可多条）：表达「我说完了」，AI 结合之前话题判断回应与是否跑题">总结 ✨</button>
+      <button class="act-btn" id="btnSendSum" title="总结我自己的发言(可多条):表达「我说完了」,AI 结合之前话题判断回应与是否跑题">总结 ✨</button>
     </div>
     <div id="statusLine">
       <span id="roomTopic">💬 讨论进行中</span>
       <span id="others"></span>
-      <span id="aiBusy" class="hidden">🤖 AI 正在模拟总结…</span>
+      <span id="aiBusy" class="hidden">🤖 AI 正在模拟总结...</span>
     </div>
   </div>
 </div>
@@ -374,7 +374,7 @@ input{font-family:inherit}
 <!-- 结束确认 -->
 <div id="endOverlay" class="hidden">
   <div id="endBox">
-    <h3>🛑 结束这场讨论？</h3>
+    <h3>🛑 结束这场讨论?</h3>
     <div style="font-size:13px;color:#777;line-height:1.7">需<b>双方都确认</b>后才会生成复盘。<br>确认后将进入「对话式回放 + AI 评价」。</div>
     <div id="endState" class="hidden"></div>
     <div class="confirm-row">
@@ -388,9 +388,9 @@ input{font-family:inherit}
 <div id="sumOverlay" class="hidden">
   <div id="sumBox">
     <h3>🧠 总结我的发言</h3>
-    <div style="font-size:12px;color:#888;margin-bottom:4px">只列 <b>你已说的</b> 发言，勾选一起总结（表达「我说完了」，请对方理解并回复）。AI 会结合<b>此前的讨论</b>判断你在回应什么、是否跑题。</div>
+    <div style="font-size:12px;color:#888;margin-bottom:4px">只列 <b>你已说的</b> 发言,勾选一起总结(表达「我说完了」,请对方理解并回复)。AI 会结合<b>此前的讨论</b>判断你在回应什么、是否跑题。</div>
     <div id="sumPickList"></div>
-    <label class="ev-toggle" style="margin:8px 0 0"><input type="checkbox" id="sumEv"> 🔍 本次总结附带「证据检索指引」（给你核实渠道与关键词，不编造事实）</label>
+    <label class="ev-toggle" style="margin:8px 0 0"><input type="checkbox" id="sumEv"> 🔍 本次总结附带「证据检索指引」(给你核实渠道与关键词,不编造事实)</label>
     <div class="confirm-row">
       <button class="btn secondary" id="btnSumCancel" style="margin:0">取消</button>
       <button class="btn" id="btnSumConfirm" style="margin:0">✨ 确认总结</button>
@@ -398,12 +398,12 @@ input{font-family:inherit}
   </div>
 </div>
 
-<!-- 恢复进行中的讨论：身份确认 -->
+<!-- 恢复进行中的讨论:身份确认 -->
 <div id="resumeOverlay" class="hidden">
   <div id="resumeBox">
     <h3>📌 继续进行中的讨论</h3>
     <div class="tip" id="resumeTopic"></div>
-    <div class="lbl">你的身份昵称（必须是该讨论的<b>创建者或参与者</b>昵称）</div>
+    <div class="lbl">你的身份昵称(必须是该讨论的<b>创建者或参与者</b>昵称)</div>
     <input id="resumeName" class="inp" placeholder="输入你的原昵称">
     <div class="confirm-row">
       <button class="btn secondary" id="btnResumeCancel" style="margin:0">取消</button>
@@ -416,9 +416,9 @@ input{font-family:inherit}
 <div id="histOverlay" class="hidden">
   <div id="histBox">
     <h3>📂 历史讨论</h3>
-    <div style="font-size:12px;color:#888">结束讨论或新建话题时，会在这里自动存档（只保存在本机浏览器）。</div>
+    <div style="font-size:12px;color:#888">结束讨论或新建话题时,会在这里自动存档(只保存在本机浏览器)。</div>
     <div id="histList"></div>
-    <div style="color:#888;font-size:12px;margin:16px 0 4px">☁️ 云端存档（GitHub）——公开仓库打开即可查看，无需 Token</div>
+    <div style="color:#888;font-size:12px;margin:16px 0 4px">☁️ 云端存档(GitHub)--公开仓库打开即可查看,无需 Token</div>
     <div style="display:flex;gap:6px;margin:2px 0 8px;align-items:center;flex-wrap:wrap">
       <button class="btn secondary" id="btnCloudList" style="width:auto;margin:0;padding:5px 12px;font-size:12px">🔍 读取云端存档</button>
     </div>
@@ -451,7 +451,7 @@ input{font-family:inherit}
         <span class="speed on" data-s="1">1x</span>
         <span class="speed" data-s="2">2x</span>
         <span class="speed" data-s="4">4x</span>
-        <span id="tlTime">–:– / –:–</span>
+        <span id="tlTime">-:- / -:-</span>
       </div>
       <div id="filters">
         <span class="fchip on" data-f="all">全部</span>
@@ -467,15 +467,15 @@ input{font-family:inherit}
 
 <script>
 "use strict";
-/* ========== AI 输出字符清洗：剔除控制符/零宽/替换符/孤立代理，防手机端字体缺失显示乱码（❓） ========== */
+/* ========== AI 输出字符清洗:剔除控制符/零宽/替换符/孤立代理,防手机端字体缺失显示乱码(❓) ========== */
 function sanitize(s){
   if(s==null) return '';
   s=String(s);
-  // 移除控制字符（保留 \n \t \r）
+  // 移除控制字符(保留 \n \t \r)
   s=s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,'');
-  // 移除零宽/不可见格式字符、BOM、Unicode 替换符 U+FFFD（这是各种 ❓ 的主要来源）
+  // 移除零宽/不可见格式字符、BOM、Unicode 替换符 U+FFFD(这是各种 ❓ 的主要来源)
   s=s.replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFFD]/g,'');
-  // 移除孤立的代理码元（保留配对的 emoji surrogate pair）
+  // 移除孤立的代理码元���保留配对的 emoji surrogate pair)
   let out='';
   for(let i=0;i<s.length;i++){
     const c=s.charCodeAt(i);
@@ -486,14 +486,14 @@ function sanitize(s){
   return out.trim();
 }
 /* ================= 模拟 AI 引擎 ================= */
-/* ================= AI 引擎（真实 DeepSeek，未配置 Key 时回退模拟） ================= */
+/* ================= AI 引擎(真实 DeepSeek,未配置 Key 时回退模拟) ================= */
 const AI = {
   _hasKey(){ const k=(localStorage.getItem('discuss_dskey')||'').trim(); const sa=(typeof NetBridge!=='undefined'&&NetBridge.serverAi); return !!k||!!sa; },
   async _chat(system, user){
     const nb=(typeof NetBridge!=='undefined')?NetBridge:null;
     const localKey=(localStorage.getItem('discuss_dskey')||'').trim();
     if(nb && nb.serverAi && !localKey){
-      // 优先走服务器 AI（key 在服务器，前端免填）
+      // 优先走服务器 AI(key 在服务器,前端免填)
       try{ const c=await nb.ai([{role:'system',content:system},{role:'user',content:user}]); if(c) return c; }catch(e){}
     }
     if(!localKey) throw new Error('no-key');
@@ -509,45 +509,45 @@ const AI = {
   /* ---- 模拟回退 ---- */
   _pick(sentences){ return sentences.filter(s=>s.length>=6)||[]; },
   _mockSummarize(text,bg,ev){
-    const noName = text.replace(/^[^：:]+[：:]\s*/,'');
-    const clean = noName.replace(/[，。！？、；：\n]+/g,'|').split('|').map(s=>s.trim()).filter(s=>s);
+    const noName = text.replace(/^[^::]+[::]\s*/,'');
+    const clean = noName.replace(/[,。!?、;:\n]+/g,'|').split('|').map(s=>s.trim()).filter(s=>s);
     let core = clean[0]||noName.slice(0,20);
     let points = clean.slice(1,4);
-    if(points.length===0) points = [text.length>20?text.slice(0,26)+'…':text];
+    if(points.length===0) points = [text.length>20?text.slice(0,26)+'...':text];
     let issue='';
-    if(!/因为|所以|因此|由于|于是|可见|证明|足以说明|主要因为/.test(text)) issue='这段发言提出了观点，但缺少具体论据，论点支撑略显不足。';
+    if(!/因为|所以|因此|由于|于是|可见|证明|足以说明|主要因为/.test(text)) issue='这段发言提出了观点,但缺少具体论据,论点支撑略显不足。';
     const hasBg = !!(bg && String(bg).trim());
-    let focus = hasBg ? '承接之前的话题，进一步表达自己的观点' : '';
-    let topic = hasBg ? '' : '围绕「'+(core||'').slice(0,18)+'…」展开的讨论';
+    let focus = hasBg ? '承接之前的话题,进一步表达自己的观点' : '';
+    let topic = hasBg ? '' : '围绕「'+(core||'').slice(0,18)+'...」展开的讨论';
     let evidence={sourceTypes:[],keywords:[]};
     if(ev){
       evidence={sourceTypes:['权威行业报告 / 白皮书','学术或期刊文献','官方与政府统计数据','主流媒体深度报道'],
-        keywords:(core||'').split(/[，。！？、;\s]+/).filter(w=>w.length>=3).slice(0,4)};
+        keywords:(core||'').split(/[,。!?、;\s]+/).filter(w=>w.length>=3).slice(0,4)};
       if(!evidence.keywords.length) evidence.keywords=[(core||'').slice(0,12)+' 相关关键词'];
     }
     return {core, points, issue, topic, clarify:'', focus, offtopic:'', evidence};
   },
   _mockComment(sumText){
     const t = sumText;
-    if(/是不是|为什么|怎么办/.test(t)) return {style:'good', text:'🤔 这一段抛出了很关键的问题，值得深挖。'}
-    if(/但是|其实|不过|我觉得|我认为/.test(t)) return {style:'good', text:'✨ 这一段在自我澄清，观点越来越清晰了！'}
-    if(/啊|哈哈|算了|随便/.test(t)) return {style:'off', text:'🎈 这段似乎有点跑题，可以拉回主线。'}
-    return {style:'good', text:'✨ 这一段表达得很清楚，双方思路有了新进展。'};
+    if(/是不是|为什么|怎么办/.test(t)) return {style:'good', text:'🤔 这一段抛出了很关键的问题,值得深挖。'}
+    if(/但是|其实|不过|我觉得|我认为/.test(t)) return {style:'good', text:'✨ 这一段在自我澄清,观点越来越清晰了!'}
+    if(/啊|哈哈|算了|随便/.test(t)) return {style:'off', text:'🎈 这段似乎有点跑题,可以拉回主线。'}
+    return {style:'good', text:'✨ 这一段表达得很清楚,双方思路有了新进展。'};
   },
-  /* ---- 对外（异步） ---- */
+  /* ---- 对外(异步) ---- */
   async summarize(text, bg, ev){
     const hasBg = !!(bg && String(bg).trim());
     if(!this._hasKey()) return this._mockSummarize(text, bg, ev);
-    const EV_EXT = '另外请额外生成 **evidence 证据检索指引**（帮助发言者去核实观点，**不编造任何具体事实/数据/链接**）：sourceTypes 为 2-4 个建议核实的资料渠道类型（如权威/行业报告、学术/期刊文献、官方/政府统计数据、主流媒体深度报道、可查证的案例资料）；keywords 为 3-5 个推荐检索关键词（可含细分/英文）。返回 JSON 额外带字段 "evidence":{"sourceTypes":[...],"keywords":[...]}；若不需要证据指引，evidence 返回空对象 {"sourceTypes":[],"keywords":[]}。';
+    const EV_EXT = '另外请额外生成 **evidence 证据检索指引**(帮助发言者去核实观点,**不编造任何具体事实/数据/链接**):sourceTypes 为 2-4 个建议核实的资料渠道类型(如权威/行业报告、学术/期刊文献、官方/政府统计数据、主流媒体深度报道、可查证的案例资料);keywords 为 3-5 个推荐检索关键词(可含细分/英文)。返回 JSON 额外带字段 "evidence":{"sourceTypes":[...],"keywords":[...]};若不需要证据指引,evidence 返回空对象 {"sourceTypes":[],"keywords":[]}。';
     let sys = hasBg
-      ? '你是两人讨论的中立整理师。我将给你「之前对话背景」和发言者这次要总结的「新发言」。理解的核心是**准确把握发言者想表达什么、不要曲解**。请：1) 提炼新发言核心观点 core 和论据 points（points 最多3条）；2) 判断新发言在回应背景中的哪个话题/哪句观点，用 focus 一句话说明（如"回应你关于做MVP的提议，补充了时间与人力约束"；无明显对应则写"承接对当前话题的进一步阐述"）；3) 判断是否跑题——**反驳、提出反例、质疑、补充、举相反例子，都是围绕当前话题的正常交流，不算跑题**；只有明显偏离当前话题、另起不相干话题才算跑题，确实跑题才用 offtopic 一句提示，否则空字符串；4) 若发言语义不明确、无法确定其意图、或可能被曲解，用 clarify 一句向发言者提出提示（如"你是指…吗？能否补充说明"），让发言者明确或确认，否则 clarify 空字符串；论点明显缺乏论据支撑则用 issue 一句指出，否则空。不评价、不站队。返回严格 JSON：{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。'
-      : '你是两人讨论的中立整理师。这是**讨论的开头**，发言者的第一段表达，它将决定整个讨论的方向，请详尽总结。请：1) 提炼**讨论意图 / 话题** topic——这段想围绕什么核心问题讨论、想达成什么目的、重点想表达什么（一句话概括）；2) 提炼核心观点 core 和论据 points（最多3条）；3) 判断开头的意图与表达是否**足够清晰、能支撑起后续讨论**：若含糊、指向不明、可能被曲解，用 clarify 一句向发言者提出"建议补充/明确"的提示；若清晰则 clarify 为空字符串；4) 论点明显缺乏论据支撑用 issue 一句指出，否则空。**不要**判断是否回应、不要判断跑题（focus 与 offtopic 一律返回空字符串）。不评价、不站队。返回严格 JSON：{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。';
+      ? '你是两人讨论的中立整理师。我将给你「之前对话背景」和发言者这次要总结的「新发言」。理解的核心是**准确把握发言者想表达什么、不要曲解**。请:1) 提炼新发言核心观点 core 和论据 points(points 最多3条);2) 判断新发言在回应背景中的哪个话题/哪句观点,用 focus 一句话说明(如"回应你关于做MVP的提议,补充了时间与人力约束";无明显对应则写"承接对当前话题的进一步阐述");3) 判断是否跑题--**反驳、提出反例、质疑、补充、举相反例子,都是围绕当前话题的正常交流,不算跑题**;只有明显偏离当前话题、另起不相干话题才算跑题,确实跑题才用 offtopic 一句提示,否则空字符串;4) 若发言语义不明确、无法确定其意图、或可能被曲解,用 clarify 一句向发言者提出提示(如"你是指...吗?能否补充说明"),让发言者明确或确认,否则 clarify 空字符串;论点明显缺乏论据支撑则用 issue 一句指出,否则空。不评价、不站队。返回严格 JSON:{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。'
+      : '你是两人讨论的中立整理师。这是**讨论的开头**,发言者的第一段表达,它将决定整个讨论的方向,请详尽总结。请:1) 提炼**讨论意图 / 话题** topic--这段想围绕什么核心问题讨论、想达成什么目的、重点想表达什么(一句话概括);2) 提炼核心观点 core 和论据 points(最多3条);3) 判断开头的意图与表达是否**足够清晰、能支撑起后续讨论**:若含糊、指向不明、可能被曲解,用 clarify 一句向发言者提出"建议补充/明确"的提示;若清晰则 clarify 为空字符串;4) 论点明显缺乏论据支撑用 issue 一句指出,否则空。**不要**判断是否回应、不要判断跑题(focus 与 offtopic 一律返回空字符串)。不评价、不站队。返回严格 JSON:{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。';
     if(ev) sys += EV_EXT;
     try{
       const out=await this._chat(sys,
         hasBg
-          ? '之前对话背景：\n'+(bg||'')+'\n\n本次要总结的发言：\n'+text
-          : '本次要总结的发言（讨论开头，无之前上下文）：\n'+text);
+          ? '之前对话背景:\n'+(bg||'')+'\n\n本次要总结的发言:\n'+text
+          : '本次要总结的发言(讨论开头,无之前上下文):\n'+text);
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]);
         const ev2 = (ev && j.evidence && typeof j.evidence==='object')
@@ -558,22 +558,22 @@ const AI = {
       }
       const lines=out.split('\n').map(s=>s.trim()).filter(Boolean);
       return {core:lines[0]||text.slice(0,20), points:lines.slice(1,4), issue:'', topic:'', clarify:'', focus:'', offtopic:'', evidence:{sourceTypes:[],keywords:[]}};
-    }catch(e){ console.warn('deepseek summarize fail', e); showAiErr('总结：'+(e&&e.message||e)); return this._mockSummarize(text, bg, ev); }
+    }catch(e){ console.warn('deepseek summarize fail', e); showAiErr('总结:'+(e&&e.message||e)); return this._mockSummarize(text, bg, ev); }
   },
   async evidence(text){
     if(!this._hasKey()) return this._mockEvidence(text);
     try{
       const out=await this._chat(
-        '你是资料检索助手。请为以下观点生成**证据检索指引**（**严格禁止编造任何具体事实、数据、链接**）：给出建议核实的资料渠道类型 sourceTypes（2-4类，如权威/行业报告、学术或期刊文献、官方/政府统计数据、主流媒体深度报道、可查证案例资料）和推荐检索关键词 keywords（3-5个，可细分/英文）。返回严格 JSON：{"sourceTypes":[...],"keywords":[...]}。',
-        '观点的内容：'+text);
+        '你是资料检索助手。请为以下观点生成**证据检索指引**(**严格禁止编造任何具体事实、数据、链接**):给出建议核实的资料渠道类型 sourceTypes(2-4类,如权威/行业报告、学术或期刊文献、官方/政府统计数据、主流媒体深度报道、可查证案例资料)和推荐检索关键词 keywords(3-5个,可细分/英文)。返回严格 JSON:{"sourceTypes":[...],"keywords":[...]}。',
+        '观点的内容:'+text);
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]); return {sourceTypes:(Array.isArray(j.sourceTypes)?j.sourceTypes.map(s=>sanitize(s)):[]).slice(0,4), keywords:(Array.isArray(j.keywords)?j.keywords.map(s=>sanitize(s)):[]).slice(0,5)}; }
       throw new Error('parse fail');
-    }catch(e){ console.warn('deepseek evidence fail', e); showAiErr('证据引导：'+(e&&e.message||e)); return this._mockEvidence(text); }
+    }catch(e){ console.warn('deepseek evidence fail', e); showAiErr('证据引导:'+(e&&e.message||e)); return this._mockEvidence(text); }
   },
   _mockEvidence(text){
-    const first=(text||'').replace(/^[^：:]+[：:]\s*/,'').split(/[，。！？、；:\n\s]+/).filter(x=>x&&x.trim())[0]||text.slice(0,14);
-    const kw=(text||'').replace(/^[^：:]+[：:]\s*/,'').split(/[，。！？、；:\s\n]+/).filter(w=>w.length>=3).slice(0,4);
+    const first=(text||'').replace(/^[^::]+[::]\s*/,'').split(/[,。!?、;:\n\s]+/).filter(x=>x&&x.trim())[0]||text.slice(0,14);
+    const kw=(text||'').replace(/^[^::]+[::]\s*/,'').split(/[,。!?、;:\s\n]+/).filter(w=>w.length>=3).slice(0,4);
     return {sourceTypes:['权威行业报告 / 白皮书','学术或期刊文献','官方与政府统计数据','主流媒体深度报道'],
       keywords: kw.length?kw:[(first||'').slice(0,12)+' 相关关键词']};
   },
@@ -581,44 +581,44 @@ const AI = {
     if(!this._hasKey()) return this._mockComment(text);
     try{
       const out=await this._chat(
-        '你是两人讨论复盘的点评者。给这一段做一句简短点评。返回严格 JSON：{"style":"good"或"off","text":"点评内容，一句话、30字内"}。good=肯定或有进展；off=跑题或需拉回。',
-        '该段内容：'+text);
+        '你是两人讨论复盘的点评者。给这一段做一句简短点评。返回严格 JSON:{"style":"good"或"off","text":"点评内容,一句话、30字内"}。good=肯定或有进展;off=跑题或需拉回。',
+        '该段内容:'+text);
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]); return {style:j.style==='off'?'off':'good', text:sanitize(j.text)}; }
       return {style:'good', text:sanitize((out||'').slice(0,40)||'这一段表达清晰。')};
-    }catch(e){ console.warn('deepseek comment fail', e); showAiErr('点评：'+(e&&e.message||e)); return this._mockComment(text); }
+    }catch(e){ console.warn('deepseek comment fail', e); showAiErr('点评:'+(e&&e.message||e)); return this._mockComment(text); }
   },
-  /* ---- 论证点评（多维度综合评估 + 质询反问） ---- */
+  /* ---- 论证点评(多维度综合评估 + 质询反问) ---- */
   _mockArenaJudge(text, bg){
-    const noName=text.replace(/^[^：:]+[：:]\s*/,'');
+    const noName=text.replace(/^[^::]+[::]\s*/,'');
     return {
-      claim: noName.slice(0,40)||'（未明确表达主张，建议先亮明核心观点）',
+      claim: noName.slice(0,40)||'(未明确表达主张,建议先亮明核心观点)',
       dims:{
-        logic:{score:6, point:'论证有基本推理线索，但严谨性一般，需避免绝对化表述与以偏概全。'},
-        language:{score:7, point:'表述总体清晰，个别用词可更精确，避免歧义。'},
-        system:{score:6, point:'结构上能成一段论证，但层次与论据组织可更完整。'},
-        value:{score:7, point:'话题有一定探讨价值，可往更深层追问。'},
-        hole:{score:5, point:'论据偏少，以观点陈述为主，缺少具体证据支撑。', weakpoints:['缺乏具体数据/事例支撑','前提假设未交代','可能的反例未回应']}
+        logic:{score:6, point:'论证有基本推理线索,但严谨性一般,需避免绝对化表述与以偏概全。'},
+        language:{score:7, point:'表述总体清晰,个别用词可更精确,避免歧义。'},
+        system:{score:6, point:'结构上能成一段论证,但层次与论据组织可更完整。'},
+        value:{score:7, point:'话题有一定探讨价值,可往更深层追问。'},
+        hole:{score:5, point:'论据偏少,以观点陈述为主,缺少具体证据支撑。', weakpoints:['缺乏具体数据/事例支撑','前提假设未交代','可能的反例未回应']}
       },
-      overall:{score:6, verdict:'这段表达了自己的立场，观点方向合理，但总体以陈述为主、论据支撑不足，说服力有限。若补充具体证据、厘清推理链条，论证会更扎实。', advice:'建议：先明确一句话主张；每条观点配一个具体论据（数据/事例/出处）；主动回应可能反例。'},
-      rebuttal:'对方可从「你的结论缺乏数据支撑、只是个人判断」切入反驳，并质疑前提的普遍性。'
+      overall:{score:6, verdict:'这段表达了自己的立场,观点方向合理,但总体以陈述为主、论据支撑不足,说服力有限。若补充具体证据、厘清推理链条,论证会更扎实。', advice:'建议:先明确一句话主张;每条观点配一个具体论据(数据/事例/出处);主动回应可能反例。'},
+      rebuttal:'对方可从「你的结论缺乏数据支撑、只是个人判断」切入反驳,并质疑前提的普遍性。'
     };
   },
   async arenaJudge(text, bg){
     if(!this._hasKey()) return this._mockArenaJudge(text,bg);
     const hasBg=!!(bg&&String(bg).trim());
-    const sys='你是「论证质量评委」。对发言者的这段论证做一次**详尽、公正、有说服力的综合点评**。请从以下五个维度分别评估并打分（各 0-10 分）：'+
-      '1) **逻辑**：推理是否准确、严谨，有无逻辑谬误（以偏概全、滑坡、偷换概念、循环论证等）、前提是否成立；'+
-      '2) **语言**：表述是否准确、清晰、无歧义，用词是否恰当；'+
-      '3) **体系**：论证的框架结构是否完整、内在是否自洽、是否全面（覆盖主要方面）；'+
-      '4) **价值**：话题的内涵与深度，讨论是否有意义、是否触及本质；'+
-      '5) **漏洞把控**：指出论证的薄弱点、证据缺口、可被攻破之处。'+
-      '最后给出：**总体评分**(0-10)、一段**详尽的总体评价**（公正、客观、有说服力；先肯定可取，再指出不足）、以及**改进建议**；再补充**反方可能如何反驳**（简要）。'+
-      '点评要具体、克制、专业，避免空话套话；打分要有理由。返回严格 JSON：'+
+    const sys='你是「论证质量评委」。对发言者的这段论证做一次**详尽、公正、有说服力的综合点评**。请从以下五个维度分别评估并打分(各 0-10 分):'+
+      '1) **逻辑**:推理是否准确、严谨,有无逻辑谬误(以偏概全、滑坡、偷换概念、循环论证等)、前提是否成立;'+
+      '2) **语言**:表述是否准确、清晰、无歧义,用词是否恰当;'+
+      '3) **体系**:论证的框架结构是否完整、内在是否自洽、是否全面(覆盖主要方面);'+
+      '4) **价值**:话题的内涵与深度,讨论是否有意义、是否触及本质;'+
+      '5) **漏洞把控**:指出论证的薄弱点、证据缺口、可被攻破之处。'+
+      '最后给出:**总体评分**(0-10)、一段**详尽的总体评价**(公正、客观、有说服力;先肯定可取,再指出不足)、以及**改进建议**;再补充**反方可能如何反驳**(简要)。'+
+      '点评要具体、克制、专业,避免空话套话;打分要有理由。返回严格 JSON:'+
       '{"claim":"这段的核心主张(一句话)","dims":{"logic":{"score":0,"point":"..."},"language":{"score":0,"point":"..."},"system":{"score":0,"point":"..."},"value":{"score":0,"point":"..."},"hole":{"score":0,"point":"...","weakpoints":["..."]}},"overall":{"score":0,"verdict":"总体评价","advice":"改进建议"},"rebuttal":"反方如何反驳"}'+
-      (hasBg?' 同时参考此前的对话背景，判断本段与前文的衔接与一致性（计入体系维度）。':'');
+      (hasBg?' 同时参考此前的对话背景,判断本段与前文的衔接与一致性(计入体系维度)。':'');
     try{
-      const out=await this._chat(sys, hasBg?('此前对话背景：\n'+(bg||'')+'\n\n本次要点评的发言：\n'+text):'本次要点评的发言：\n'+text);
+      const out=await this._chat(sys, hasBg?('此前对话背景:\n'+(bg||'')+'\n\n本次要点评的发言:\n'+text):'本次要点评的发言:\n'+text);
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]);
         const dim=(x)=>({score:Math.max(0,Math.min(10,parseInt(x&&x.score,10)||0)), point:sanitize((x&&x.point)||''), weakpoints:Array.isArray(x&&x.weakpoints)?x.weakpoints.map(s=>sanitize(s)).slice(0,5):[]});
@@ -630,17 +630,17 @@ const AI = {
         };
       }
       return this._mockArenaJudge(text,bg);
-    }catch(e){ console.warn('deepseek arena fail', e); showAiErr('论证点评：'+(e&&e.message||e)); return this._mockArenaJudge(text,bg); }
+    }catch(e){ console.warn('deepseek arena fail', e); showAiErr('论证点评:'+(e&&e.message||e)); return this._mockArenaJudge(text,bg); }
   },
   _mockArenaQuery(text){
-    return {questions:['你这句结论的依据是什么？能否给出具体数据或事例？','如果对方举出一个反例，你会怎么回应？','你观点的前提假设经得起推敲吗？']};
+    return {questions:['你这句结论的依据是什么?能否给出具体数据或事例?','如果对方举出一个反例,你会怎么回应?','你观点的前提假设经得起推敲吗?']};
   },
   async arenaQuery(text, claim, verdict){
     if(!this._hasKey()) return this._mockArenaQuery(text);
     try{
       const out=await this._chat(
-        '你是辩论「陪练」，针对发言者的论证做质询反问，帮 TA 补强论证。请基于发言（及已有点评）提出 1-3 个具体、犀利、能促进反思的问题（引导发言者补充论据、厘清推理）。返回严格 JSON：{"questions":["...","..."]}。',
-        '发言：'+text+(claim?'\n核心主张：'+claim:'')+(verdict?'\n已有点评：'+verdict:''));
+        '你是辩论「陪练」,针对发言者的论证做质询反问,帮 TA 补强论证。请基于发言(及已有点评)提出 1-3 个具体、犀利、能促进反思的问题(引导发言者补充论据、厘清推理)。返回严格 JSON:{"questions":["...","..."]}。',
+        '发言:'+text+(claim?'\n核心主张:'+claim:'')+(verdict?'\n已有点评:'+verdict:''));
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]); return {questions:(Array.isArray(j.questions)?j.questions.map(s=>sanitize(s)):[]).slice(0,3)}; }
       return {questions:[(out||'').slice(0,60)]};
@@ -649,7 +649,7 @@ const AI = {
 };
 
 /* ================= 全局状态 ================= */
-/* ============ 异地中继桥（对接 relay.js：跨设备同步 + 服务端AI + 自动存档） ============ */
+/* ============ 异地中继桥(对接 relay.js:跨设备同步 + 服务端AI + 自动存档) ============ */
 function __netUrl(){
   const q=new URLSearchParams(location.search);
   if(q.get('ws')) return q.get('ws');
@@ -666,7 +666,7 @@ const NetBridge=(function(){
     get roomId(){ return roomId; },
     get connected(){ return connected; },
     get serverAi(){ return serverAi; },
-    ai(messages){ // 服务端 AI 托管：发请求给 relay → 服务器调 DeepSeek → 返回
+    ai(messages){ // 服务端 AI 托管:发请求给 relay → 服务器调 DeepSeek → 返回
       return new Promise((resolve,reject)=>{
         const id='ai'+(++aiSeq);
         aiMap[id]={resolve,reject};
@@ -675,7 +675,7 @@ const NetBridge=(function(){
         setTimeout(()=>{ if(aiMap[id]){ delete aiMap[id]; reject(new Error('AI 请求超时')); } }, 90000);
       });
     },
-    save(data){ // 自动存档到服务器（节流）
+    save(data){ // 自动存档到服务器(节流)
         if(!roomId) return;
         const json=JSON.stringify(data||{});
         if(json===lastSave) return; lastSave=json;
@@ -696,7 +696,7 @@ const NetBridge=(function(){
       else if(m.type==='join-failed'){ if(typeof API.onjoinfailed==='function') API.onjoinfailed(m.reason); }
       else if(m.type==='peer-joined'){ if(typeof API.onpeerjoined==='function') API.onpeerjoined(); }
       else if(m.type==='relay'){ if(typeof API.onmessage==='function') API.onmessage({data:m.data}); }
-      else if(m.type==='server-info'){ serverAi=!!m.ai; const _b=document.querySelector('#serverAiBadge'); if(_b) _b.textContent = serverAi ? '🔒 服务端 AI 已启用，无需填 Key' : '⚠️ 服务端未配置 AI Key，当前为模拟 / 可在下方高级设置手填'; }
+      else if(m.type==='server-info'){ serverAi=!!m.ai; const _b=document.querySelector('#serverAiBadge'); if(_b) _b.textContent = serverAi ? '🔒 服务端 AI 已启用,无需填 Key' : '⚠️ 服务端未配置 AI Key,当前为模拟 / 可在下方高级设置手填'; }
       else if(m.type==='ai-result'){ const h=aiMap[m.data&&m.data.reqId]; if(h){ delete aiMap[m.data.reqId]; h.resolve(m.data.content); } }
       else if(m.type==='ai-error'){ const h=aiMap[m.data&&m.data.reqId]; if(h){ delete aiMap[m.data.reqId]; h.reject(new Error((m.data&&m.data.message)||'AI error')); } }
       else if(m.type==='load-result'){ const r=pendingLoad; pendingLoad=null; if(r) r(m.data); } };
@@ -706,7 +706,7 @@ const NetBridge=(function(){
   function __send(obj){ if(connected&&ws&&ws.readyState===1){ try{ ws.send(JSON.stringify(obj)); return true; }catch(e){} } queue.push(obj); return false; }
   return API;
 })();
-NetBridge.onpeerjoined=()=>{ const o=document.querySelector('#others'); if(o) o.textContent='好友已加入，正在实时同步…'; };
+NetBridge.onpeerjoined=()=>{ const o=document.querySelector('#others'); if(o) o.textContent='好友已加入,正在实时同步...'; };
 NetBridge.start();
 const bc = NetBridge;
 const S = {
@@ -715,7 +715,7 @@ const S = {
   inRoom:false,
   messages:[],   // {id,name,ts,content,appendTo,channel}
   summaries:[],  // {messageId, core, points, rev, versions:[]}
-  arenas:[],     // 论证点评：{id, ids[], messageId, judge, questions, rev, versions[]}
+  arenas:[],     // 论证点评:{id, ids[], messageId, judge, questions, rev, versions[]}
   comments:[],   // {id,msgId,atTs,style,text,source}
   verdict:null,  // 复盘 AI 总评文本
   danmakuActive:[],
@@ -726,10 +726,10 @@ const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,9);
 const now=()=>Date.now();
 
-/* ================= 工具：本地+广播双写 ================= */
+/* ================= 工具:本地+广播双写 ================= */
 function broadcast(obj){ bc.postMessage(obj); }
 
-/* ================= 内容留存（localStorage：刷新/一方先进/掉线重进不丢历史） ================= */
+/* ================= 内容留存(localStorage:刷新/一方先进/掉线重进不丢历史) ================= */
 const STATE_KEY='discuss_state';
 function persistState(){
   try{
@@ -791,14 +791,14 @@ function renderResumeCard(){
   const a=loadActive(), card=$('#resumeCard');
   if(a.active && S.messages.length>0){
     const roles=[a.creator,a.peer].filter(Boolean).join(' / ');
-    card.innerHTML='📌 <b>继续进行中的讨论：</b>「'+esc(a.title||'未命名')+'」<br><span style="font-size:12px;opacity:.8;color:#667">点击继续 · 原身份：'+esc(roles||'（尚未确定）')+'</span>';
+    card.innerHTML='📌 <b>继续进行中的讨论:</b>「'+esc(a.title||'未命名')+'」<br><span style="font-size:12px;opacity:.8;color:#667">点击继续 · 原身份:'+esc(roles||'(尚未确定)')+'</span>';
     card.classList.remove('hidden');
   }else card.classList.add('hidden');
 }
 $('#resumeCard').onclick=()=>{
   const a=loadActive();
   const roles=[a.creator,a.peer].filter(Boolean);
-  $('#resumeTopic').innerHTML='当前进行中的讨论：「<b>'+esc(a.title||'未命名')+'</b>」<br>身份需为任一原昵称：<b>'+esc(roles.join(' / '))+'</b>';
+  $('#resumeTopic').innerHTML='当前进行中的讨论:「<b>'+esc(a.title||'未命名')+'</b>」<br>身份需为任一原昵称:<b>'+esc(roles.join(' / '))+'</b>';
   $('#resumeName').value='';
   $('#resumeName').placeholder=roles[0]||'输入原昵称';
   $('#resumeOverlay').classList.remove('hidden');
@@ -810,13 +810,13 @@ $('#btnResumeConfirm').onclick=()=>{
   const roles=[a.creator,a.peer].filter(Boolean);
   const name=$('#resumeName').value.trim();
   if(!name){ alert('请输入身份昵称'); return; }
-  if(roles.length && !roles.includes(name)){ alert('身份不匹配：必须是该讨论的创建者或参与者昵称（'+roles.join(' / ')+'）。'); return; }
+  if(roles.length && !roles.includes(name)){ alert('身份不匹配:必须是该讨论的创建者或参与者昵称('+roles.join(' / ')+')。'); return; }
   $('#resumeOverlay').classList.add('hidden');
   const cur=(localStorage.getItem('discuss_pwd')||'').trim();
   const go=()=>enterRoom(name, !!(a.creator&&name===a.creator));
   if(cur){
     NetBridge.onjoined=go;
-    NetBridge.onjoinfailed=()=>{ alert('房间不存在或已重建，已在本地打开（可能无法实时同步）'); go(); };
+    NetBridge.onjoinfailed=()=>{ alert('房间不存在或已重建,已在本地打开(可能无法实时同步)'); go(); };
     NetBridge.join(cur);
   } else { go(); }
 };
@@ -825,7 +825,7 @@ function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=
 function leaveToLobby(){ S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
 function startNewTopic(){
   const has=S.messages.length>0;
-  const m=has ? '将把当前讨论存档到「历史讨论」，然后开启一个全新空白的讨论间开始新话题。确定吗？' : '将开启一个全新空白的讨论间开始新话题。确定吗？';
+  const m=has ? '将把当前讨论存档到「历史讨论」,然后开启一个全新空白的讨论间开始新话题。确定吗?' : '将开启一个全新空白的讨论间开始新话题。确定吗?';
   if(!confirm(m)) return;
   archiveCurrent(); resetCurrent();
   localStorage.setItem('discuss_session', uid());
@@ -834,7 +834,7 @@ function startNewTopic(){
     const pwd=NetBridge.roomId;
     localStorage.setItem('discuss_pwd',pwd);
     $('#pwdCode').textContent=pwd;
-    $('#newHint').innerHTML='✅ 已完成。新话题口令：<b>'+pwd+'</b> —— 在另一台设备点「🔑 我有口令」输入该口令即可加入。';
+    $('#newHint').innerHTML='✅ 已完成。新话题口令:<b>'+pwd+'</b> -- 在另一台设备点「🔑 我有口令」输入该口令即可加入。';
   };
   NetBridge.create();
   leaveToLobby();
@@ -844,21 +844,21 @@ function startNewTopic(){
 function fmtHistTime(ts){ const t=new Date(ts); return String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'); }
 function renderHistBody(el, h){
   let html='';
-  (h.messages||[]).forEach(m=>{ if(m.channel==='discuss') html+='<div class="hist-msg"><b>'+esc(m.name||'')+'</b>：'+esc(m.content)+'</div>'; });
+  (h.messages||[]).forEach(m=>{ if(m.channel==='discuss') html+='<div class="hist-msg"><b>'+esc(m.name||'')+'</b>:'+esc(m.content)+'</div>'; });
   (h.summaries||[]).forEach(sm=>{ const v=sm.versions[sm.rev]||sm.versions[sm.versions.length-1]||{}; if(v&&v.core) html+='<div class="hist-sum">🤖 '+esc(v.core)+'</div>'; });
   if(h.verdict) html+='<div class="hist-verdict">🏁 '+esc(h.verdict)+'</div>';
-  el.innerHTML=html||'<div style="color:#999">（该存档无内容）</div>';
+  el.innerHTML=html||'<div style="color:#999">(该存档无内容)</div>';
 }
 function renderHistory(){
   const list=histList();
   const el=$('#histList'); el.innerHTML='';
-  if(!list.length){ el.innerHTML='<div style="color:#999;padding:20px;text-align:center">还没有历史讨论。结束讨论或新建话题时，会把当前内容自动存档到这里。</div>'; return; }
+  if(!list.length){ el.innerHTML='<div style="color:#999;padding:20px;text-align:center">还没有历史讨论。结束讨论或新建话题时,会把当前内容自动存档到这里。</div>'; return; }
   list.forEach((h,i)=>{
     const d=document.createElement('div'); d.className='hist-item';
     d.innerHTML='<div class="hist-tt"><span>'+esc(h.title)+'</span><span class="ts">'+fmtHistTime(h.endTs)+' · '+(h.me||'我')+' · '+(h.msgCount||0)+' 条</span></div>'+
       '<div class="hist-btns"><button class="mini-btn2" data-rv="'+i+'">👁 完整复盘</button><button class="mini-btn2 warn" data-hd="'+i+'">删除</button><button class="mini-btn2 cloud'+(ghSavedIds().includes(h.id)?' saved':'')+'" data-gh="'+i+'">'+(ghSavedIds().includes(h.id)?'✅ 已存':'☁️ 存到GitHub')+'</button></div>';
     d.querySelector('[data-rv]').onclick=()=>openReviewArchive(h);
-    d.querySelector('[data-hd]').onclick=()=>{ if(!confirm('删除这条历史存档？此操作不可恢复。')) return; const l=histList(); l.splice(i,1); localStorage.setItem(HIST_KEY, JSON.stringify(l)); renderHistory(); };
+    d.querySelector('[data-hd]').onclick=()=>{ if(!confirm('删除这条历史存档?此操作不可恢复。')) return; const l=histList(); l.splice(i,1); localStorage.setItem(HIST_KEY, JSON.stringify(l)); renderHistory(); };
     d.querySelector('[data-gh]').onclick=()=>cmdGhSave(h, d.querySelector('[data-gh]'));
     el.appendChild(d);
   });
@@ -871,11 +871,11 @@ function enterRoom(name, isCreator){
   S.me.name = name; S.me.isCreator = isCreator; S.inRoom = true;
   $('#lobby').classList.add('hidden');
   $('#room').classList.remove('hidden');
-  $('#topSub').textContent = '讨论进行中 · 你：'+name+(isCreator?'（发起人）':'');
+  $('#topSub').textContent = '讨论进行中 · 你:'+name+(isCreator?'(发起人)':'');
   const __curPwd=localStorage.getItem('discuss_pwd')||'';
   if(__curPwd && $('#pwdCode')) $('#pwdCode').textContent=__curPwd;
   if(!sessionStorage.getItem('dr_guide')){
-    $('#guideBar').innerHTML='💡 <b>怎么玩：</b>左=你 / 右=好友 · 上方切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>（表达说完了，AI 会判断回应与是否跑题） · 结束点「🛑」双方确认进复盘 · 右上角「❓」可看完整说明';
+    $('#guideBar').innerHTML='💡 <b>怎么玩:</b>左=你 / 右=好友 · 上方切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(表达说完了,AI 会判断回应与是否跑题) · 结束点「🛑」双方确认进复盘 · 右上角「❓」可看完整说明';
     $('#guideBar').classList.remove('hidden');
     sessionStorage.setItem('dr_guide','1');
   }
@@ -908,7 +908,7 @@ $('#btnJoin').onclick=()=>{
   const pwd=$('#pwdInput').value.trim();
   if(!pwd){ alert('请输入口令'); return; }
   NetBridge.onjoined=()=>{ localStorage.setItem('discuss_pwd', pwd); enterRoom(name,false); };
-  NetBridge.onjoinfailed=()=>{ alert('房间口令不正确，或房间不存在'); };
+  NetBridge.onjoinfailed=()=>{ alert('房间口令不正确,或房间不存在'); };
   NetBridge.join(pwd);
 };
 
@@ -924,8 +924,8 @@ function renderStatus(){
   const names = new Set([S.me.name]);
   S.messages.forEach(m=>names.add(m.name));
   names.delete(S.me.name);
-  if(names.size) $('#others').textContent = '在线：'+(S.me.name)+' + '+ [...names].join('、');
-  else $('#others').textContent = '等待好友加入…（另开一个标签页输入口令加入）';
+  if(names.size) $('#others').textContent = '在线:'+(S.me.name)+' + '+ [...names].join('、');
+  else $('#others').textContent = '等待好友加入...(另开一个标签页输入口令加入)';
 }
 function renderStream(){
   const el=$('#stream'); el.innerHTML='';
@@ -938,32 +938,32 @@ function renderStream(){
     d.dataset.ts=m.ts;
     const appendTag = m.appendTo ? '<span class="appendTag">· 补充</span>' : '';
     const meta = '<div class="meta">'+(isMe?'':'')+(m.name||'')+' <span class="ts">'+fmtTime(m.ts)+'</span>'+appendTag+'</div>';
-    const delBtn = (m.channel==='discuss'&&isMe) ? '<button class="msg-del-btn" data-id="'+m.id+'" title="撤回这条消息（其 AI 总结/点评一并删除）">✕ 撤回</button>' : '';
+    const delBtn = (m.channel==='discuss'&&isMe) ? '<button class="msg-del-btn" data-id="'+m.id+'" title="撤回这条消息(其 AI 总结/点评一并删除)">✕ 撤回</button>' : '';
     const evBtn = (m.channel==='discuss') ? '<button class="msg-ev-btn" data-id="'+m.id+'" title="为这段话生成证据检索指引">🔍 证据</button>' : '';
     const evCard = (m.evidence && ((m.evidence.sourceTypes&&m.evidence.sourceTypes.length)||(m.evidence.keywords&&m.evidence.keywords.length)))
       ? '<div class="msg-ev"><b>🔍 证据指引</b>'+
-        (m.evidence.sourceTypes&&m.evidence.sourceTypes.length?'<br><b>建议核实渠道：</b>'+m.evidence.sourceTypes.map(esc).join('、'):'')+
-        (m.evidence.keywords&&m.evidence.keywords.length?'<br><b>推荐关键词：</b>'+m.evidence.keywords.map(esc).join('、'):'')+
-        '<div style="color:#999;font-size:11px;margin-top:3px">仅给方向与关键词，请自行查证。</div>'+
+        (m.evidence.sourceTypes&&m.evidence.sourceTypes.length?'<br><b>建议核实渠道:</b>'+m.evidence.sourceTypes.map(esc).join('、'):'')+
+        (m.evidence.keywords&&m.evidence.keywords.length?'<br><b>推荐���键词:</b>'+m.evidence.keywords.map(esc).join('、'):'')+
+        '<div style="color:#999;font-size:11px;margin-top:3px">仅给方向与关键词,请自行查证。</div>'+
         '<button class="msg-ev-close" data-id="'+m.id+'">✕ 收起</button></div>' : '';
     d.innerHTML = meta + '<div class="bubble">'+esc(m.content)+'</div>'+ delBtn + evBtn + evCard;
     el.appendChild(d);
-    // 若该消息有 summary，紧跟渲染
+    // 若该消息有 summary,紧跟渲染
     const sm = S.summaries.find(x=>x.messageId===m.id);
     if(sm) el.appendChild(renderSummaryCard(sm, m));
-    // 论证点评卡：点评模式下「总结」生成的⚖️评估报告 + 质询
+    // 论证点评卡:点评模式下「总结」生成的⚖️评估报告 + 质询
     const ar = S.arenas.find(x=>x.messageId===m.id);
     if(ar) el.appendChild(renderArenaCard(ar, m));
-    // AI 阶段点评卡：穿插在「总结」之后
+    // AI 阶段点评卡:穿插在「总结」之后
     const cm = S.comments.find(c=>c.msgId===m.id);
     if(cm) el.appendChild(renderComment(cm));
   });
-  // 弹幕浮层重现（无动画，直接提示）
+  // 弹幕浮层重现(无动画,直接提示)
   const dmsg = S.messages.filter(m=>m.channel==='danmaku');
   if(dmsg.length){
     const b=document.createElement('div');
     b.className='banner';
-    b.innerHTML='🎤 本场吐槽 '+dmsg.length+' 条：'+ dmsg.slice(-3).map(x=>esc(x.name)+'：'+esc(x.content)).join(' ｜ ');
+    b.innerHTML='🎤 本场吐槽 '+dmsg.length+' 条:'+ dmsg.slice(-3).map(x=>esc(x.name)+':'+esc(x.content)).join(' | ');
     el.appendChild(b);
   }
 }
@@ -974,8 +974,8 @@ function renderSummaryCard(sm, msg){
   const v = sm.versions[sm.rev] || sm.versions[sm.versions.length-1];
   let hist='';
   if(sm.versions.length>1){
-    hist='<div class="history">🕘 历史版本：'+ sm.versions.map((ver,idx)=>
-      '<span class="hov" data-hist="'+idx+'">v'+(idx+1)+(idx===sm.rev?'（当前）':'')+'</span>'
+    hist='<div class="history">🕘 历史版本:'+ sm.versions.map((ver,idx)=>
+      '<span class="hov" data-hist="'+idx+'">v'+(idx+1)+(idx===sm.rev?'(当前)':'')+'</span>'
     ).join(' · ')+'</div>';
   }
   const ownerId0=(sm.ids||[sm.messageId])[0];
@@ -983,15 +983,15 @@ function renderSummaryCard(sm, msg){
   const ownerName=ownerMsg?ownerMsg.name:'';
   const n=(sm.ids||[sm.messageId]).length;
   card.innerHTML=
-    '<div class="head">🤖 AI 总结 · '+esc(msg.name||'')+(n>1?'（涵盖 '+n+' 条发言）':'')+'<span class="badge">v'+(sm.rev+1)+'</span></div>'+
+    '<div class="head">🤖 AI 总结 · '+esc(msg.name||'')+(n>1?'(涵盖 '+n+' 条发言)':'')+'<span class="badge">v'+(sm.rev+1)+'</span></div>'+
     '<div class="body"><span class="field">【核心观点】</span>'+esc(v.core)+'</div>'+
     (v.points&&v.points.length?'<div class="body"><span class="field">【论据 / 细节】</span>'+v.points.map(p=>'<br>· '+esc(p)).join('')+'</div>':'')+
     (v.topic?'<div class="body"><span class="field">🧭 讨论意图</span>'+esc(v.topic)+'</div>':'')+
     (v.evidence && ((v.evidence.sourceTypes&&v.evidence.sourceTypes.length)||(v.evidence.keywords&&v.evidence.keywords.length))?
       '<div class="body ev-block"><span class="field">🔍 证据检索指引</span>'+
-      (v.evidence.sourceTypes&&v.evidence.sourceTypes.length?'<br><b>建议核实渠道：</b>'+v.evidence.sourceTypes.map(esc).join('、'):'')+
-      (v.evidence.keywords&&v.evidence.keywords.length?'<br><b>推荐关键词：</b>'+v.evidence.keywords.map(esc).join('、'):'')+
-      '<div style="color:#999;font-size:11px;margin-top:4px">仅给核实方向与关键词，请到搜索引擎/资料平台自行查证，不提供具体事实。</div></div>':'')+
+      (v.evidence.sourceTypes&&v.evidence.sourceTypes.length?'<br><b>建议核实渠道:</b>'+v.evidence.sourceTypes.map(esc).join('、'):'')+
+      (v.evidence.keywords&&v.evidence.keywords.length?'<br><b>推荐关键词:</b>'+v.evidence.keywords.map(esc).join('、'):'')+
+      '<div style="color:#999;font-size:11px;margin-top:4px">仅给核实方向与关键词,请到搜索引擎/资料平台自行查证,不提供具体事实。</div></div>':'')+
     (v.focus?'<div class="body"><span class="field">🎯 在回应</span>'+esc(v.focus)+'</div>':'')+
     (v.offtopic?'<div class="body" style="color:#b45309"><span class="field" style="color:#b45309">↔️ 是否跑题</span>'+esc(v.offtopic)+'</div>':'')+
     (v.clarify?'<div class="body" style="color:#1d4ed8"><span class="field" style="color:#1d4ed8">💬 建议补充</span>'+esc(v.clarify)+'</div>':'')+
@@ -1019,13 +1019,13 @@ function renderArenaCard(ar, msg){
     if(!d.point && !sc) return '';
     return '<div class="arena-dim"><div class="ad-head"><span class="ad-label">'+icon+' '+label+'</span><span class="ad-score">'+(d.point?sc:'')+'</span></div>'+
       '<div class="ad-body">'+bar+esc(d.point||'')+'</div>'+
-      ((key==='hole'&&d.weakpoints&&d.weakpoints.length)?'<div class="ad-weak">薄弱点：'+d.weakpoints.map(w=>'<span class="wk">'+esc(w)+'</span>').join('')+'</div>':'')+
+      ((key==='hole'&&d.weakpoints&&d.weakpoints.length)?'<div class="ad-weak">薄弱点:'+d.weakpoints.map(w=>'<span class="wk">'+esc(w)+'</span>').join('')+'</div>':'')+
       '</div>';
   };
   const o=v.overall||{};
   let hist='';
   if(ar.versions&&ar.versions.length>1){
-    hist='<div class="history">🕘 历史点评：'+ ar.versions.map((ver,idx)=>'<span class="hov" data-ahist="'+idx+'">v'+(idx+1)+(idx===ar.rev?'（当前）':'')+'</span>').join(' · ')+'</div>';
+    hist='<div class="history">🕘 历史点评:'+ ar.versions.map((ver,idx)=>'<span class="hov" data-ahist="'+idx+'">v'+(idx+1)+(idx===ar.rev?'(当前)':'')+'</span>').join(' · ')+'</div>';
   }
   const ownerId0=(ar.ids||[ar.messageId])[0];
   const ownerMsg=S.messages.find(x=>x.id===ownerId0);
@@ -1033,16 +1033,16 @@ function renderArenaCard(ar, msg){
   const n=(ar.ids||[ar.messageId]).length;
   const qs=(ar.questions||[]).filter(Boolean);
   card.innerHTML=
-    '<div class="head"><span class="arena-badge">⚖️ 论证点评</span>· '+esc(msg.name||'')+(n>1?'（涵盖 '+n+' 条发言）':'')+'<span class="badge">v'+(ar.rev+1)+'</span></div>'+
+    '<div class="head"><span class="arena-badge">⚖️ 论证点评</span>· '+esc(msg.name||'')+(n>1?'(涵盖 '+n+' 条发言)':'')+'<span class="badge">v'+(ar.rev+1)+'</span></div>'+
     (v.claim?'<div class="body arena-claim"><span class="field">🎯 核心主张</span>'+esc(v.claim)+'</div>':'')+
     dimRow('logic','逻辑','🔬')+dimRow('language','语言','🗣')+dimRow('system','体系','🏛')+dimRow('value','价值','🌟')+dimRow('hole','漏洞把控','🕳')+
-    '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+(o.score==null?'–':o.score)+'</span><span class="ao-total">/ 10</span></div>'+
+    '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+(o.score==null?'-':o.score)+'</span><span class="ao-total">/ 10</span></div>'+
     '<div class="ab-bar ao-bar"><div class="ab-fill" style="width:'+Math.max(0,Math.min(100,(o.score==null?0:o.score)*10))+'%"></div></div>'+
     (o.verdict?'<div class="ao-verdict">'+esc(o.verdict)+'</div>':'')+
-    (o.advice?'<div class="ao-advice">💡 改进建议：'+esc(o.advice)+'</div>':'')+
+    (o.advice?'<div class="ao-advice">💡 改进建议:'+esc(o.advice)+'</div>':'')+
     '</div>'+
     (v.rebuttal?'<div class="body arena-rebuttal"><span class="field">🔁 反方会怎么反驳</span>'+esc(v.rebuttal)+'</div>':'')+
-    (qs.length?'<div class="arena-query"><div class="field">❓ AI 质询反问（帮你补强论证）</div>'+qs.map(q=>'<div class="q">· '+esc(q)+'</div>').join('')+'</div>':'')+
+    (qs.length?'<div class="arena-query"><div class="field">❓ AI 质询反问(帮你补强论证)</div>'+qs.map(q=>'<div class="q">· '+esc(q)+'</div>').join('')+'</div>':'')+
     '<div class="btns">'+
       (ownerName===S.me.name?'<button class="sb-redo" data-aredo="'+ar.id+'">🧠 重新点评</button>':'')+
     '</div>'+hist;
@@ -1083,30 +1083,30 @@ function sendDanmaku(content){
 function spawnDanmaku(text){
   const layer=$('#danmakuLayer');
   const d=document.createElement('div');
-  d.className='danmaku'; d.textContent='🎤 '+S.me.name+'：'+text;
+  d.className='danmaku'; d.textContent='🎤 '+S.me.name+':'+text;
   d.style.top=(Math.random()*70)+'px';
   d.style.animationDuration=(4+Math.random()*2)+'s';
   layer.appendChild(d);
   setTimeout(()=>d.remove(), 7000);
 }
-/* ================= 论证点评模式（⚖️）：总结时进行多维度论证评估 + 质询反问 ================= */
+/* ================= 论证点评模式(⚖️):总结时进行多维度论证评估 + 质询反问 ================= */
 function isArenaMode(){ try{ return localStorage.getItem('arena_on')==='1'; }catch(e){ return false; } }
 async function genArena(ids, ev){
   const arr = S.messages.filter(m=>ids.includes(m.id)).sort((a,b)=>a.ts-b.ts);
   if(!arr.length) return;
   const anchor = arr[arr.length-1];
   const bgArr = S.messages.filter(m=>m.channel==='discuss' && !ids.includes(m.id) && m.ts < arr[0].ts).sort((a,b)=>a.ts-b.ts);
-  const bg = bgArr.map(m=>m.name+'：'+m.content).join('\n');
-  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key，当前为模拟点评。请在大厅「AI 设置」粘贴 Key 并点保存。');
+  const bg = bgArr.map(m=>m.name+':'+m.content).join('\n');
+  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key,当前为模拟点评。请在大厅「AI 设置」粘贴 Key 并点保存。');
   $('#aiBusy').classList.remove('hidden');
   try{
-    const text = arr.map(m=>m.name+'：'+m.content).join('\n');
+    const text = arr.map(m=>m.name+':'+m.content).join('\n');
     const judge = await AI.arenaJudge(text, bg);
     const ar={id:uid(), ids:arr.map(m=>m.id), messageId:anchor.id, judge, questions:[], rev:0, ts:now(), versions:[JSON.parse(JSON.stringify(judge))]};
     S.arenas.push(ar);
     persistState(); renderStream();
     broadcast({type:'arena', ar, replace:false, arId:ar.id});
-    // 质询反问（不阻塞点评卡展示）
+    // 质询反问(不阻塞点评卡展示)
     try{
       const q=await AI.arenaQuery(text, judge.claim, (judge.overall&&judge.overall.verdict)||'');
       const a=S.arenas.find(x=>x.id===ar.id);
@@ -1120,9 +1120,9 @@ async function redoArena(arId){
   const arr=S.messages.filter(m=>ids.includes(m.id)).sort((a,b)=>a.ts-b.ts);
   if(!arr.length) return;
   const bgArr=S.messages.filter(m=>m.channel==='discuss' && !ids.includes(m.id) && m.ts<arr[0].ts).sort((a,b)=>a.ts-b.ts);
-  const bg=bgArr.map(m=>m.name+'：'+m.content).join('\n');
-  const text=arr.map(m=>m.name+'：'+m.content).join('\n');
-  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key，当前为模拟点评。');
+  const bg=bgArr.map(m=>m.name+':'+m.content).join('\n');
+  const text=arr.map(m=>m.name+':'+m.content).join('\n');
+  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key,当前为模拟点评。');
   $('#aiBusy').classList.remove('hidden');
   try{
     const judge=await AI.arenaJudge(text,bg);
@@ -1137,13 +1137,13 @@ async function genSummary(ids, ev){
   const arr = S.messages.filter(m=>ids.includes(m.id)).sort((a,b)=>a.ts-b.ts);
   if(!arr.length) return;
   const anchor = arr[arr.length-1];
-  // 上下文 = 本次总结之前的所有讨论消息（含对方与之前的自己）
+  // 上下文 = 本次总结之前的所有讨论消息(含对方与之前的自己)
   const bgArr = S.messages.filter(m=>m.channel==='discuss' && !ids.includes(m.id) && m.ts < arr[0].ts).sort((a,b)=>a.ts-b.ts);
-  const bg = bgArr.map(m=>m.name+'：'+m.content).join('\n');
-  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key，当前为模拟 AI。请在大厅「AI 设置」粘贴 Key 并点保存。');
+  const bg = bgArr.map(m=>m.name+':'+m.content).join('\n');
+  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key,当前为模拟 AI。请在大厅「AI 设置」粘贴 Key 并点保存。');
   $('#aiBusy').classList.remove('hidden');
   try{
-    const text = arr.map(m=>m.name+'：'+m.content).join('\n');
+    const text = arr.map(m=>m.name+':'+m.content).join('\n');
     const res = await AI.summarize(text, bg, !!ev);
     const sm={id:uid(), ids:arr.map(m=>m.id), messageId:anchor.id, core:res.core, points:res.points, issue:res.issue||'', topic:res.topic||'', clarify:res.clarify||'', focus:res.focus||'', offtopic:res.offtopic||'', evidence:res.evidence==null?null:res.evidence, rev:0, versions:[{core:res.core, points:res.points, issue:res.issue||'', topic:res.topic||'', clarify:res.clarify||'', focus:res.focus||'', offtopic:res.offtopic||'', evidence:res.evidence==null?null:res.evidence}]};
     S.summaries.push(sm);
@@ -1160,14 +1160,14 @@ async function redoSummary(smId){
   const arr=S.messages.filter(m=>ids.includes(m.id)).sort((a,b)=>a.ts-b.ts);
   if(!arr.length) return;
   const bgArr=S.messages.filter(m=>m.channel==='discuss' && !ids.includes(m.id) && m.ts<arr[0].ts).sort((a,b)=>a.ts-b.ts);
-  const bg=bgArr.map(m=>m.name+'：'+m.content).join('\n');
-  const text=arr.map(m=>m.name+'：'+m.content).join('\n');
-  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key，当前为模拟 AI。请在大厅「AI 设置」粘贴 Key 并点保存。');
+  const bg=bgArr.map(m=>m.name+':'+m.content).join('\n');
+  const text=arr.map(m=>m.name+':'+m.content).join('\n');
+  if(!AI._hasKey()) showAiErr('未配置 DeepSeek Key,当前为模拟 AI。请在大厅「AI 设置」粘贴 Key 并点保存。');
   $('#aiBusy').classList.remove('hidden');
   try{
     const res=await AI.summarize(text, bg, false);
     sm.rev=sm.versions.length;
-    sm.versions.push({core:res.core+(AI._hasKey()?'':'（模拟）'), points:res.points, issue:res.issue||'', topic:res.topic||'', clarify:res.clarify||'', focus:res.focus||'', offtopic:res.offtopic||'', evidence:res.evidence==null?null:res.evidence});
+    sm.versions.push({core:res.core+(AI._hasKey()?'':'(模拟)'), points:res.points, issue:res.issue||'', topic:res.topic||'', clarify:res.clarify||'', focus:res.focus||'', offtopic:res.offtopic||'', evidence:res.evidence==null?null:res.evidence});
     persistState();
   }finally{
     $('#aiBusy').classList.add('hidden');
@@ -1179,7 +1179,7 @@ function startFill(msgId){
   const next=S.messages.find(m=>m.id===msgId); if(!next) return;
   $('#input').focus();
   $('#input').dataset.fill=msgId;
-  $('#input').placeholder='补充第「'+next.name+'」段的说明，然后回车（将作为"· 补充"）';
+  $('#input').placeholder='补充第「'+next.name+'」段的说明,然后回车(将作为"· 补充")';
 }
 function toggleHist(msgId){
   const card=document.querySelector('.summary-card[data-summary]'); // noop target
@@ -1204,7 +1204,7 @@ function doInput(fromFill){
     const m={id,name:S.me.name,ts,content:val,channel:'discuss',appendTo:fillId};
     S.messages.push(m);
     persistState();
-    $('#input').dataset.fill=''; $('#input').placeholder='输入你的观点…（Enter 发送，Shift+Enter 换行）';
+    $('#input').dataset.fill=''; $('#input').placeholder='输入你的观点...(Enter 发送,Shift+Enter 换行)';
     renderStream(); broadcast({type:'msg',m});
     clearInput();
     // 补充后自动并入所属总结并重新生成
@@ -1217,12 +1217,12 @@ function doInput(fromFill){
   clearInput();
 }
 $('#btnSend').onclick=()=>doInput();
-/* 选择纳入总结：可多条一起总结 */
+/* 选择纳入总结:可多条一起总结 */
 function openSumPicker(){
   const covered=new Set();
   S.summaries.forEach(sm=>(sm.ids||[sm.messageId]).forEach(i=>covered.add(i)));
   const cands=S.messages.filter(m=>m.channel==='discuss'&&m.name===S.me.name&&!covered.has(m.id)).sort((a,b)=>a.ts-b.ts);
-  if(!cands.length){ showAiErr('你还没有未总结的发言：先在讨论里说说你的观点，再点「总结」来结束你这一轮（只总结自己的发言）。'); return; }
+  if(!cands.length){ showAiErr('你还没有未总结的发言:先在讨论里说说你的观点,再点「总结」来结束你这一轮(只总结自己的发言)。'); return; }
   const sel={};
   $('#sumPickList').innerHTML='';
   cands.forEach(m=>{
@@ -1238,7 +1238,7 @@ function openSumPicker(){
     $('#sumOverlay').classList.add('hidden');
     const ids=cands.filter(m=>sel[m.id]).map(m=>m.id);
     if(ids.length) genSummary(ids, $('#sumEv').checked);
-    else showAiErr('未选择任何发言，未生成总结。');
+    else showAiErr('未选择任何发言,未生成总结。');
   };
   $('#btnSumCancel').onclick=()=>{ $('#sumOverlay').classList.add('hidden'); };
 }
@@ -1262,7 +1262,7 @@ document.addEventListener('click',(e)=>{
 });
 function delMsg(id){
   const m=S.messages.find(x=>x.id===id); if(!m) return;
-  if(!confirm('撤回这条消息？（其 AI 总结/点评也会一并删除）')) return;
+  if(!confirm('撤回这条消息?(其 AI 总结/点评也会一并删除)')) return;
   S.messages=S.messages.filter(x=>x.id!==id);
   S.summaries=S.summaries.filter(sm=>!(sm.ids||[sm.messageId]).includes(id));
   S.comments=S.comments.filter(c=>c.msgId!==id);
@@ -1276,7 +1276,7 @@ async function genMsgEvidence(id){
   finally{ $('#aiBusy').classList.add('hidden'); }
 }
 
-/* ================= 结束流程（双方确认） ================= */
+/* ================= 结束流程(双方确认) ================= */
 function askEnd(){
   if(S.me.confirmed) return;
   $('#endOverlay').classList.remove('hidden');
@@ -1295,9 +1295,9 @@ function renderEndState(){
   const c=[];
   if(S.me.confirmed) c.push('✅ 你已确认');
   if(S.peerConfirmed) c.push('✅ 好友已确认');
-  $('#endState').innerHTML = c.length? c.join('　') : '';
+  $('#endState').innerHTML = c.length? c.join(' ') : '';
   $('#endState').classList.toggle('hidden', !c.length);
-  if(S.me.confirmed && !S.peerConfirmed){ $('#endState').innerHTML += '<br><span style="color:#999">等待好友确认…</span>'; }
+  if(S.me.confirmed && !S.peerConfirmed){ $('#endState').innerHTML += '<br><span style="color:#999">等待好友确认...</span>'; }
   else if(!S.me.confirmed){ $('#endState').innerHTML = '你尚未确认'; }
 }
 function checkEnd(){
@@ -1308,9 +1308,9 @@ function checkEnd(){
   }
 }
 
-/* ================= 复盘：对话式回放 ================= */
+/* ================= 复盘:对话式回放 ================= */
 let rvTab='playback';
-// 复盘回放：当前筛选节点列表 + 时间轴边界 + 拖拽状态
+// 复盘回放:当前筛选节点列表 + 时间轴边界 + 拖拽状态
 const R={nodes:[],min:0,max:0};
 let dragging=false;
 $('#btnExport').onclick=exportReview;
@@ -1320,17 +1320,17 @@ async function enterReview(){
   $('#room').classList.add('hidden');
   $('#reviewView').classList.remove('hidden');
   $('#topSub').textContent='复盘 · 讨论已结束';
-  archiveCurrent();  // 结束讨论自动存档（按会话 session 去重，不重复）
-  clearActive();     // 已结束，不再显示“进行中”恢复入口
+  archiveCurrent();  // 结束讨论自动存档(按会话 session 去重,不重复)
+  clearActive();     // 已结束,不再显示"进行中"恢复入口
   $('#aiBusy').classList.remove('hidden');
-  await ensureComments();  // 对话期间不点评，点评统一在复盘回顾阶段生成
+  await ensureComments();  // 对话期间不点评,点评统一在复盘回顾阶段生成
   await ensureVerdict();
   $('#aiBusy').classList.add('hidden');
   buildTimeline();
   renderPlayback();
   renderEvaluate();
 }
-/* 复盘阶段：为每一段（有总结的消息）生成一条 AI 点评 */
+/* 复盘阶段:为每一段(有总结的消息)生成一条 AI 点评 */
 async function ensureComments(){
   if(S.comments.length) return;
   for(const sm of S.summaries){
@@ -1347,14 +1347,14 @@ async function ensureComments(){
 async function ensureVerdict(){
   if(S.verdict!==null) return;
   if(!AI._hasKey()){ S.verdict=null; return; }
-  const msgs=S.messages.filter(m=>m.channel==='discuss').map(m=>m.name+'：'+m.content);
+  const msgs=S.messages.filter(m=>m.channel==='discuss').map(m=>m.name+':'+m.content);
   try{
     const out=await AI._chat(
-      '你是两人讨论结束后的复盘者。请基于完整对话写一段综合点评（200字内、中文）：概括讨论主题、双方观点、共识与分歧、值得继续深挖的方向。',
-      '讨论主题：'+(S.topic||'未命名')+'\n\n对话记录：\n'+(msgs.join('\n')||'（无讨论消息）'));
+      '你是两人讨论结束后的复盘者。请基于完整对话写一段综合点评(200字内、中文):概括讨论主题、双方观点、共识与分歧、值得继续深挖的方向。',
+      '讨论主题:'+(S.topic||'未命名')+'\n\n对话记录:\n'+(msgs.join('\n')||'(无讨论消息)'));
     S.verdict=out.trim();
     persistState();
-  }catch(e){ console.warn('deepseek verdict fail',e); showAiErr('总评：'+(e&&e.message||e)); S.verdict=null; }
+  }catch(e){ console.warn('deepseek verdict fail',e); showAiErr('总评:'+(e&&e.message||e)); S.verdict=null; }
 }
 document.querySelectorAll('.rnav-btn').forEach(b=>b.onclick=()=>{
   rvTab=b.dataset.rv;
@@ -1366,7 +1366,7 @@ document.querySelectorAll('.rnav-btn').forEach(b=>b.onclick=()=>{
 function allNodes(){
   const nodes=[];
   S.messages.slice().sort((a,b)=>a.ts-b.ts).forEach(m=>{
-    if(m.channel==='danmaku') nodes.push({ts:m.ts,kind:'danmaku',content:m.name+'：'+m.content});
+    if(m.channel==='danmaku') nodes.push({ts:m.ts,kind:'danmaku',content:m.name+':'+m.content});
     else nodes.push({ts:m.ts,kind:'discuss',content:m.content,msg:m});
     if(S.summaries.find(x=>x.messageId===m.id)) nodes.push({ts:m.ts,kind:'summary',content:'AI 总结'});
   });
@@ -1390,7 +1390,7 @@ function buildTimeline(){
     d.onclick=()=>{ S.review.currentTs=n.ts; syncPlayback(); };
     tl.appendChild(d);
   });
-  // 拖动进度条（视频式：消息随进度出现/消失）
+  // 拖动进度条(视频式:消息随进度出现/消失)
   tl.style.cursor='pointer';
   tl.addEventListener('pointerdown',e=>{ dragging=true; if(tl.setPointerCapture) try{tl.setPointerCapture(e.pointerId);}catch(_){ } scrubTL(e.clientX); });
   tl.addEventListener('pointermove',e=>{ if(dragging) scrubTL(e.clientX); });
@@ -1404,7 +1404,7 @@ function scrubTL(cx){
   syncPlayback();
 }
 const kindRank={danmaku:0,discuss:0,summary:1,comment:2};
-/* 回放节点列表（按当前筛选） */
+/* 回放节点列表(按当前筛选) */
 function buildPlayNodes(filter){
   const list=[];
   S.messages.slice().sort((a,b)=>a.ts-b.ts).forEach(m=>{
@@ -1427,7 +1427,7 @@ function makeNodeEl(n){
   if(n.kind==='danmaku'){
     const m=n.msg;
     d.className='msg echo'; d.dataset.ts=m.ts;
-    d.innerHTML='<div class="bubble">🎤 '+esc(m.name)+'：'+esc(m.content)+'</div>';
+    d.innerHTML='<div class="bubble">🎤 '+esc(m.name)+':'+esc(m.content)+'</div>';
   }else if(n.kind==='discuss'){
     const m=n.msg;
     d.className='msg discuss '+(m.name===S.me.name?'me':'peer'); d.dataset.ts=m.ts;
@@ -1448,7 +1448,7 @@ function makeNodeEl(n){
   }
   return d;
 }
-/* 渲染到前 count 个节点：增量追加，形成视频式出现/消失 */
+/* 渲染到前 count 个节点:增量追加,形成视频式出现/消失 */
 function renderPlaybackTo(count){
   const stream=$('#reviewStream');
   const cur=stream.children.length;
@@ -1473,7 +1473,7 @@ function syncPlayback(){
   $('#tlFill').style.width=pct+'%';
   $('#tlKnob').style.left=pct+'%';
   $('#tlTime').textContent=fmtTL(S.review.currentTs)+' / '+fmtTL(R.max);
-  // 计算当前应显示的节点数（ts 不超过当前进度）
+  // 计算当前应显示的节点数(ts 不超过当前进度)
   let vis=0;
   for(let i=0;i<R.nodes.length;i++){ if(R.nodes[i].ts<=S.review.currentTs) vis=i+1; else break; }
   renderPlaybackTo(vis);
@@ -1507,7 +1507,7 @@ $('#pFwd').onclick=()=>{ const n=allNodes(); S.review.currentTs=n.length?n[n.len
 $('#pRewind').onclick=()=>{ const n=allNodes(); const i=n.findIndex(x=>x.ts>=S.review.currentTs); S.review.currentTs=i>0?n[Math.max(0,i-3)].ts:S.review.currentTs; syncPlayback(); };
 $('#pFast').onclick=()=>{ const n=allNodes(); const i=n.findIndex(x=>x.ts>=S.review.currentTs); S.review.currentTs=i>=0?n[Math.min(n.length-1,i+3)].ts:S.review.currentTs; syncPlayback(); };
 
-/* ================= 复盘：AI 评价 ================= */
+/* ================= 复盘:AI 评价 ================= */
 function renderEvaluate(){
   const pane=$('#evalPane');
   const msgs=S.messages.filter(m=>m.channel==='discuss');
@@ -1515,20 +1515,20 @@ function renderEvaluate(){
   const mine=msgs.filter(m=>m.name===S.me.name);
   const peers=msgs.filter(m=>m.name!==S.me.name);
   const du=[];
-  function cols(arr,name){ return arr.slice(0,3).map(m=>m.content.length>24?m.content.slice(0,24)+'…':m.content); }
+  function cols(arr,name){ return arr.slice(0,3).map(m=>m.content.length>24?m.content.slice(0,24)+'...':m.content); }
   const total=msgs.length+dan.length;
-  const verdict = S.verdict || ('这场「'+esc(S.topic||'未命名')+'」的讨论双方共发言 '+msgs.length+' 条、弹幕 '+dan.length+' 条。整体围绕主线展开，双方观点逐步清晰，是一次有效的交流。');
+  const verdict = S.verdict || ('这场「'+esc(S.topic||'未命名')+'」的讨论双方共发言 '+msgs.length+' 条、弹幕 '+dan.length+' 条。整体围绕主线展开,双方观点逐步清晰,是一次有效的交流。');
   pane.innerHTML=
-    '<div class="verdict">🧭 <b>AI 总评：</b>'+esc(verdict)+'</div>'+
+    '<div class="verdict">🧭 <b>AI 总评:</b>'+esc(verdict)+'</div>'+
     '<div class="kpi-grid">'+
       kpi(msgs.length,'讨论条数')+kpi(dan.length,'吐槽条数')+kpi(S.summaries.length,'AI 段落')+kpi(Math.max(1,Math.round((msgs.reduce((a,m)=>a+(m.appendTo?0:1),0)))),'观点段')+
     '</div>'+
     '<div class="panel"><h4>👥 双方观点对比</h4><div class="duo"><div class="duo-col"><div class="nm">'+esc(S.me.name||'我')+'</div><ul>'+cols(mine).map(x=>'<li>'+esc(x)+'</li>').join('')+'<li style="list-style:none;color:#22c55e">✅ 上述观点构成你的核心立场</li></ul></div>'+
     '<div class="duo-col g"><div class="nm">'+esc(S.peerName||'好友')+'</div><ul>'+cols(peers).map(x=>'<li>'+esc(x)+'</li>').join('')+'<li style="list-style:none;color:#22c55e">✅ 上述观点构成对方的思路</li></ul></div></div></div>'+
-    '<div class="panel"><h4>🕰 讨论脉络（时间线）</h4>'+ S.summaries.map((sm,i)=>{
+    '<div class="panel"><h4>🕰 讨论脉络(时间线)</h4>'+ S.summaries.map((sm,i)=>{
       const m=S.messages.find(x=>x.id===sm.messageId);
       const v=sm.versions[sm.rev]||sm.versions[0];
-      return '<div class="tl-item"><span class="t">第'+(i+1)+'段</span><span class="tag">AI</span><span>'+esc(v.core.slice(0,28))+(v.core.length>28?'…':'')+'</span></div>';
+      return '<div class="tl-item"><span class="t">第'+(i+1)+'段</span><span class="tag">AI</span><span>'+esc(v.core.slice(0,28))+(v.core.length>28?'...':'')+'</span></div>';
     }).join('') +'</div>'+
     '<div class="panel"><h4>🎯 逐段 AI 点评</h4>'+
       (S.comments.length? S.comments.map(c=>{
@@ -1536,9 +1536,9 @@ function renderEvaluate(){
         return '<div class="tl-item"><span class="t">'+fmtTime(c.atTs)+'</span><span class="tag">AI</span><span>'+(c.style==='good'?'✅':'🟡')+' '+esc(c.text)+'</span></div>';
       }).join('') : '<div class="tl-item"><span>暂无点评</span></div>')+
     '</div>'+
-    '<div class="panel"><h4>📌 可深挖方向（AI 建议）</h4>'+
-      '<div class="tl-item"><span class="t">方向1</span><span>双方观点中仍有未对齐之处，可进一步澄清分歧根源。</span></div>'+
-      '<div class="tl-item"><span class="t">方向2</span><span>将讨论中的好问题整理成清单，作为下次讨论的起点。</span></div>'+
+    '<div class="panel"><h4>📌 可深挖方向(AI 建议)</h4>'+
+      '<div class="tl-item"><span class="t">方向1</span><span>双方观点中仍有未对齐之处,可进一步澄清分歧根源。</span></div>'+
+      '<div class="tl-item"><span class="t">方向2</span><span>将讨论中的好问题整理成清单,作为下次讨论的起点。</span></div>'+
     '</div>';
 }
 function kpi(v,k){ return '<div class="kpi"><div class="v">'+v+'</div><div class="k">'+k+'</div></div>'; }
@@ -1552,21 +1552,21 @@ function buildReviewHTML(data){
   const exportedAt=data.exportedAt?new Date(data.exportedAt).toLocaleString():new Date().toLocaleString();
   let body='';
   msgs.forEach(m=>{
-    if(m.channel==='danmaku'){ body+='<div class="dm">🎤 '+esc(m.name)+'：'+esc(m.content)+'</div>'; return; }
+    if(m.channel==='danmaku'){ body+='<div class="dm">🎤 '+esc(m.name)+':'+esc(m.content)+'</div>'; return; }
     const sm=summs.find(x=>(x.ids||[x.messageId]).includes(m.id));
-    const append=m.appendTo?'（补充）':'';
+    const append=m.appendTo?'(补充)':'';
     body+='<div class="m '+(m.name===me?'me':'peer')+'"><div class="mb"><div class="mh">'+esc(m.name||'')+' · '+fmtTime(m.ts)+' '+append+'</div><div class="mt">'+esc(m.content)+'</div></div></div>';
     if(sm){ const v=sm.versions[sm.rev]||sm.versions[sm.versions.length-1]||{};
-      body+='<div class="s"><b>🤖 AI 总结</b>'+(sm.ids&&sm.ids.length>1?'（涵盖 '+sm.ids.length+' 条）':'')+'<br>'+
+      body+='<div class="s"><b>🤖 AI 总结</b>'+(sm.ids&&sm.ids.length>1?'(涵盖 '+sm.ids.length+' 条)':'')+'<br>'+
         '<span class="f">【核心观点】</span>'+esc(v.core||'')+
-        (v.topic?'<br><span class="f">🧭 讨论意图：</span>'+esc(v.topic):'')+
-        (v.points&&v.points.length?'<br><span class="f">【论据】</span>'+v.points.map(p=>esc(p)).join('；'):'')+
-        (v.focus?'<br><span class="f">🎯 在回应：</span>'+esc(v.focus):'')+
-        (v.offtopic?'<br><span class="f">↔️ 是否跑题：</span>'+esc(v.offtopic):'')+
-        (v.clarify?'<br><span class="f">💬 建议补充：</span>'+esc(v.clarify):'')+
-        (v.issue?'<br><span class="f">⚠️ 论据支撑：</span>'+esc(v.issue):'')+
-        (v.evidence&&v.evidence.sourceTypes&&v.evidence.sourceTypes.length?'<br><span class="f">🔍 证据·渠道：</span>'+v.evidence.sourceTypes.map(esc).join('、'):'')+
-        (v.evidence&&v.evidence.keywords&&v.evidence.keywords.length?'<br><span class="f">🔍 证据·关键词：</span>'+v.evidence.keywords.map(esc).join('、'):'')+
+        (v.topic?'<br><span class="f">🧭 讨论意图:</span>'+esc(v.topic):'')+
+        (v.points&&v.points.length?'<br><span class="f">【论据】</span>'+v.points.map(p=>esc(p)).join(';'):'')+
+        (v.focus?'<br><span class="f">🎯 在回应:</span>'+esc(v.focus):'')+
+        (v.offtopic?'<br><span class="f">↔️ 是否跑题:</span>'+esc(v.offtopic):'')+
+        (v.clarify?'<br><span class="f">💬 建议补充:</span>'+esc(v.clarify):'')+
+        (v.issue?'<br><span class="f">⚠️ 论据支撑:</span>'+esc(v.issue):'')+
+        (v.evidence&&v.evidence.sourceTypes&&v.evidence.sourceTypes.length?'<br><span class="f">🔍 证据·渠道:</span>'+v.evidence.sourceTypes.map(esc).join('、'):'')+
+        (v.evidence&&v.evidence.keywords&&v.evidence.keywords.length?'<br><span class="f">🔍 证据·关键词:</span>'+v.evidence.keywords.map(esc).join('、'):'')+
       '</div>';
     }
   });
@@ -1586,24 +1586,24 @@ function buildReviewHTML(data){
     '.cm.good{background:#e8f8ee;border:1.5px solid #bfe8cf;border-left:4px solid #22c55e}.cm.off{background:#fff7e0;border:1.5px solid #f5e2a8;border-left:4px solid #eab308}'+
     '.v{margin-top:22px;font-size:15px;font-weight:700;color:#6d28d9}.vbox{background:#f7f3ff;border:1.5px solid #ddcffc;border-radius:12px;padding:12px 14px;margin-top:6px;font-size:14px;line-height:1.8;white-space:pre-wrap}'+
     '.foot{color:#999;font-size:12px;margin-top:30px}.dl{font-size:13px;color:#6d28d9;background:#ede5ff;border:none;border-radius:8px;padding:7px 16px;cursor:pointer;margin-top:12px}'+
-    '</style></head><body><h1>🗂 讨论复盘 · '+esc(title)+'</h1><div class="sub">导出于 '+exportedAt+(me?' · 本人：'+esc(me):'')+'</div>'+body+
-    '<div class="foot">本页由「二人讨论间」自动生成 · 内容由 AI 整理，仅供参考。<br>想分享给别人？按 Ctrl/Cmd+S 保存为网页文件发送，对方无需任何配置即可打开。</div>'+
+    '</style></head><body><h1>🗂 讨论复盘 · '+esc(title)+'</h1><div class="sub">导出于 '+exportedAt+(me?' · 本人:'+esc(me):'')+'</div>'+body+
+    '<div class="foot">本页由「论证点评间」自动生成 · 内容由 AI 整理，仅供参考。<br>想分享给别人？按 Ctrl/Cmd+S 保存为网页文件发送，对方无需任何配置即可打开。</div>'+
     '<button class="dl" onclick="window.print()">🖨 打印 / 另存为 PDF</button></body></html>';
   return html;
 }
 function b64ToUtf8(b64){ try{ const bin=atob(b64); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }catch(e){ return decodeURIComponent(escape(atob(b64))); } }
 function loadDemo(){
   const btn=document.getElementById('btnDemo');
-  if(btn){ btn.textContent='⏳ 加载中…'; btn.disabled=true; }
+  if(btn){ btn.textContent='⏳ 加载中...'; btn.disabled=true; }
   fetch('https://api.github.com/repos/moxiaoren/discu/contents/history')
     .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(list=>{ if(!list||!list.length) throw new Error('暂无可用的演示存档'); return fetch(list[0].url).then(r=>r.json()); })
     .then(meta=>{ const demo=JSON.parse(b64ToUtf8(meta.content)); openReviewArchive(demo); })
-    .catch(e=>{ alert('加载演示存档失败：'+e.message); })
+    .catch(e=>{ alert('加载演示存档失败:'+e.message); })
     .finally(()=>{ if(btn){ btn.textContent='👁 查看演示'; btn.disabled=false; } });
 }
 document.getElementById('btnDemo').onclick=loadDemo;
-var histView=false, histBackup=null; // 历史复盘（只读复刻）状态
+var histView=false, histBackup=null; // 历史复盘(只读复刻)状态
 function snapshotS(){
   return {me:Object.assign({},S.me), peerConfirmed:S.peerConfirmed, inRoom:S.inRoom, messages:S.messages, summaries:S.summaries, arenas:S.arenas, comments:S.comments, verdict:S.verdict, danmakuActive:S.danmakuActive, review:Object.assign({},S.review), topic:S.topic};
 }
@@ -1651,7 +1651,7 @@ function exportReview(){
 
 /* ================= BroadcastChannel 接收 ================= */
 bc.onmessage=(e)=>{
-  if(histView) return; // 历史复盘视图期间忽略广播，避免污染
+  if(histView) return; // 历史复盘视图期间忽略广播,避免污染
   const d=e.data; if(!d) return;
   switch(d.type){
     case 'hello':
@@ -1701,7 +1701,7 @@ const APP_VERSION='1.0.0';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
-// 后端自动更新：由服务器(relay)从 GitHub 仓库拉最新 index.html 覆盖本机后刷新
+// 后端自动更新:由服务器(relay)从 GitHub 仓库拉最新 index.html 覆盖本机后刷新
 async function updateFromBackend(){
   try{
     const r=await fetch('/api/update',{method:'GET'});
@@ -1709,12 +1709,12 @@ async function updateFromBackend(){
     if(j && j.ok){
       if(j.updated){
         $('#verBadge').textContent='v'+j.remote;
-        $('#updateText').textContent='已自动更新到 v'+j.remote+'（原 v'+j.local+'），3 秒后刷新…';
+        $('#updateText').textContent='已自动更新到 v'+j.remote+'(原 v'+j.local+'),3 秒后刷新...';
         $('#updateBanner').classList.remove('hidden');
         setTimeout(()=>location.reload(true), 2000);
         return true;
       }
-      $('#verBadge').textContent='v'+APP_VERSION+'（最新）';
+      $('#verBadge').textContent='v'+APP_VERSION+'(最新)';
       return true;
     }
     return false;
@@ -1724,20 +1724,20 @@ function checkVersion(){  // 非服务器环境退化为 version.json 对比
   fetch('version.json?cb='+Date.now()).then(r=>r.json()).then(j=>{
     if(j && j.version && j.version!==APP_VERSION){
       $('#verBadge').textContent='v'+APP_VERSION;
-      $('#updateText').textContent='发现新版本 v'+j.version+'（当前 v'+APP_VERSION+'）'+(j.note?' · '+j.note:'');
+      $('#updateText').textContent='发现新版本 v'+j.version+'(当前 v'+APP_VERSION+')'+(j.note?' · '+j.note:'');
       $('#updateBanner').classList.remove('hidden');
-    }else{ $('#verBadge').textContent='v'+APP_VERSION+'（最新）'; }
+    }else{ $('#verBadge').textContent='v'+APP_VERSION+'(最新)'; }
   }).catch(()=>{ $('#verBadge').textContent='v'+APP_VERSION; });
 }
 $('#verBadge').onclick=()=>{ updateFromBackend().then(ok=>{ if(!ok) checkVersion(); }); };
 $('#btnUpdate').onclick=()=>{ updateFromBackend().then(ok=>{ if(!ok) location.reload(true); }); };
 updateFromBackend().then(ok=>{ if(!ok) checkVersion(); });
 
-/* 论证点评玩法切换（整理 / 点评） */
+/* 论证点评玩法切换(整理 / 点评) */
 function updateArenaBtn(){
   const on=isArenaMode();
   const b=document.getElementById('btnArena');
-  if(b){ b.classList.toggle('on',on); b.textContent=on?'⚖️ 点评中':'⚖️ 整理'; b.title=on?'当前「论证点评」：总结时做多维度评估与质询，点此切回整理':'当前「整理」：总结时做中立整理，点此切换到论证点评'; }
+  if(b){ b.classList.toggle('on',on); b.textContent=on?'⚖️ 点评中':'⚖️ 整理'; b.title=on?'当前「论证点评」:总结时做多维度评估与质询,点此切回整理':'当前「整理」:总结时做中立整理,点此切换到论证点评'; }
   const st=document.getElementById('roomTopic');
   if(st) st.textContent=on?'⚖️ 论证点评进行中':'💬 讨论进行中';
 }
@@ -1767,7 +1767,7 @@ $('#btnCopyPwd').onclick=()=>{
   }else{ legacyCopyPwd(p); done(); }
 };
 
-// 初始化：加载 AI Key 状态
+// 初始化:加载 AI Key 状态
 function showAiErr(msg){
   let el=document.getElementById('aiErr');
   if(!el){
@@ -1777,19 +1777,19 @@ function showAiErr(msg){
     const ref=bar.parentNode? bar.nextSibling : null;
     (bar.parentNode?bar.parentNode:document.body).insertBefore(el, ref);
   }
-  el.textContent='⚠️ 真实 AI 调用失败：'+(msg||'未知错误')+'\n（当前已回退到内置模拟 AI）';
+  el.textContent='⚠️ 真实 AI 调用失败:'+(msg||'未知错误')+'\n(当前已回退到内置模拟 AI)';
 }
 function loadAiKeyUI(){
   const k=localStorage.getItem('discuss_dskey')||'';
   $('#aiKey').value='';
   $('#aiKeyState').textContent = k
-    ? '✅ 已配置 DeepSeek Key（仅存在当前浏览器 localStorage，双标签共用；调用按你账号计费）'
-    : '未配置时使用内置模拟 AI。Key 只保存在你自己的浏览器，不发送到任何服务器，也不泄露给他人。';
+    ? '✅ 已配置 DeepSeek Key(仅存在当前浏览器 localStorage,双标签共用;调用按你账号计费)'
+    : '未配置时使用内置模拟 AI。Key 只保存在你自己的浏览器,不发送到任何服务器,也不泄露给他人。';
 }
 $('#btnSaveKey').onclick=()=>{
   const k=$('#aiKey').value.trim();
-  if(k){ localStorage.setItem('discuss_dskey',k); $('#aiKeyState').textContent='✅ 已保存并启用真实 AI（DeepSeek）。'; }
-  else{ localStorage.removeItem('discuss_dskey'); $('#aiKeyState').textContent='已清除，改用内置模拟 AI。'; }
+  if(k){ localStorage.setItem('discuss_dskey',k); $('#aiKeyState').textContent='✅ 已保存并启用真实 AI(DeepSeek)。'; }
+  else{ localStorage.removeItem('discuss_dskey'); $('#aiKeyState').textContent='已清除,改用内置模拟 AI。'; }
   $('#aiKey').value='';
 };
 const GITHUB_SAVED_KEY='github_saved';
@@ -1803,18 +1803,18 @@ async function ghEnsureRepo(){
   const res=await fetch('https://api.github.com/repos/'+o+'/'+r,{headers:ghAuth()});
   if(res.ok) return;
   if(res.status===404){
-    const cr=await fetch('https://api.github.com/user/repos',{method:'POST',headers:ghAuth(),body:JSON.stringify({name:r,private:false,description:'论证点评间 · 历史存档（public，打开即可查看）'})});
+    const cr=await fetch('https://api.github.com/user/repos',{method:'POST',headers:ghAuth(),body:JSON.stringify({name:r,private:false,description:'论证点评间 · 历史存档(public,打开即可查看)'})});
     if(cr.status===201||cr.status===200) return;
-    throw new Error('仓库不存在且自动创建失败（'+cr.status+'）：请确认 Token 有 repo 权限、仓库名合法');
+    throw new Error('仓库不存在且自动创建失败('+cr.status+'):请确认 Token 有 repo 权限、仓库名合法');
   }
-  throw new Error('无法访问仓库（'+res.status+'）：'+((await res.json().catch(()=>({}))).message||res.statusText));
+  throw new Error('无法访问仓库('+res.status+'):'+((await res.json().catch(()=>({}))).message||res.statusText));
 }
 async function ghSaveToCloud(h){
   await ghEnsureRepo();
   const path='history/'+h.id+'.json';
   const obj={exportedAt:new Date().toISOString(), id:h.id, title:h.title, me:h.me, startTs:h.startTs, endTs:h.endTs, msgCount:h.msgCount, messages:h.messages, summaries:h.summaries, comments:h.comments, verdict:h.verdict};
   const b64=btoa(unescape(encodeURIComponent(JSON.stringify(obj,null,2))));
-  const res=await fetch('https://api.github.com/repos/'+ghOwner()+'/'+ghRepoName()+'/contents/'+path,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},ghAuth()),body:JSON.stringify({message:'讨论间存档：'+(h.title||''),content:b64,branch:'main'})});
+  const res=await fetch('https://api.github.com/repos/'+ghOwner()+'/'+ghRepoName()+'/contents/'+path,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},ghAuth()),body:JSON.stringify({message:'讨论间存档:'+(h.title||''),content:b64,branch:'main'})});
   if(!res.ok) throw new Error((await res.json().catch(()=>({}))).message||('推送失败 '+res.status));
   return 'https://github.com/'+ghOwner()+'/'+ghRepoName()+'/blob/main/'+path;
 }
@@ -1837,37 +1837,37 @@ async function ghReadCloud(path){
   return JSON.parse(decodeURIComponent(escape(atob(j.content))));
 }
 async function renderCloudList(){
-  const el=$('#cloudList'); el.innerHTML='<div style="color:#999;font-size:12px">读取中…</div>';
+  const el=$('#cloudList'); el.innerHTML='<div style="color:#999;font-size:12px">读取中...</div>';
   let list;
   try{ list=await ghListCloud(); }
-  catch(e){ el.innerHTML='<div style="color:#be2346;font-size:12px">云端读取失败：'+esc(e.message)+'</div>'; return; }
-  if(list===null){ el.innerHTML='<div style="color:#999;font-size:12px">未配置云端仓库——到大厅「☁️ GitHub 存档」填 Token 与仓库地址；公开仓库无需 Token 即可查看。</div>'; return; }
-  if(!list.length){ el.innerHTML='<div style="color:#999;font-size:12px">该仓库云端暂无存档（本机历史请见上方）。</div>'; return; }
+  catch(e){ el.innerHTML='<div style="color:#be2346;font-size:12px">云端读取失败:'+esc(e.message)+'</div>'; return; }
+  if(list===null){ el.innerHTML='<div style="color:#999;font-size:12px">未配置云端仓库--到大厅「☁️ GitHub 存档」填 Token 与仓库地址;公开仓库无需 Token 即可查看。</div>'; return; }
+  if(!list.length){ el.innerHTML='<div style="color:#999;font-size:12px">该仓库云端暂无存档(本机历史请见上方)。</div>'; return; }
   el.innerHTML='';
   list.forEach(f=>{
     const d=document.createElement('div'); d.className='hist-item';
     const name=(f.name||'').replace(/\.json$/i,'');
     d.innerHTML='<div class="hist-tt"><span>'+esc(name.slice(0,22))+'</span><span class="ts">☁️ 云端</span></div>'+
       '<div class="hist-btns"><button class="mini-btn2" data-cv>👁 查看复盘</button></div>';
-    d.querySelector('[data-cv]').onclick=async()=>{ try{ const h=await ghReadCloud(f.path||f.name); openReviewArchive(h); }catch(e){ alert('云端读取失败：'+e.message); } };
+    d.querySelector('[data-cv]').onclick=async()=>{ try{ const h=await ghReadCloud(f.path||f.name); openReviewArchive(h); }catch(e){ alert('云端读取失败:'+e.message); } };
     el.appendChild(d);
   });
 }
 $('#btnCloudList').onclick=()=>renderCloudList();
 async function cmdGhSave(h, btn){
-  if(!ghToken()||!ghOwner()||!ghRepoName()){ alert('请先在大厅「☁️ GitHub 存档」区填入 Token 与目标仓库（owner/repo）。'); return; }
-  if(btn){ btn.textContent='存储中…'; btn.disabled=true; }
-  try{ const url=await ghSaveToCloud(h); ghMarkSaved(h.id); if(btn){ btn.textContent='✅ 已存'; btn.disabled=false; btn.classList.add('saved'); } alert('已存档到 GitHub：'+(h.title||'')+'\n'+url); }
-  catch(e){ if(btn){ btn.textContent='☁️ 存到GitHub'; btn.disabled=false; } alert('GitHub 存档失败：'+e.message); }
+  if(!ghToken()||!ghOwner()||!ghRepoName()){ alert('请先在大厅「☁️ GitHub 存档」区填入 Token 与目标仓库(owner/repo)。'); return; }
+  if(btn){ btn.textContent='存储中...'; btn.disabled=true; }
+  try{ const url=await ghSaveToCloud(h); ghMarkSaved(h.id); if(btn){ btn.textContent='✅ 已存'; btn.disabled=false; btn.classList.add('saved'); } alert('已存档到 GitHub:'+(h.title||'')+'\n'+url); }
+  catch(e){ if(btn){ btn.textContent='☁️ 存到GitHub'; btn.disabled=false; } alert('GitHub 存档失败:'+e.message); }
 }
 function loadGhUI(){ $('#ghToken').value=localStorage.getItem('github_token')||''; $('#ghRepo').value=localStorage.getItem('github_repo')||''; }
-$('#btnSaveGh').onclick=()=>{ localStorage.setItem('github_token',$('#ghToken').value.trim()); localStorage.setItem('github_repo',$('#ghRepo').value.trim()); $('#ghState').textContent=$('#ghRepo').value.trim() ? '✅ 已保存 · 历史将存到：'+$('#ghRepo').value.trim() : '✅ 已保存（Token 已存本地）。'; };
+$('#btnSaveGh').onclick=()=>{ localStorage.setItem('github_token',$('#ghToken').value.trim()); localStorage.setItem('github_repo',$('#ghRepo').value.trim()); $('#ghState').textContent=$('#ghRepo').value.trim() ? '✅ 已保存 · 历史将存到:'+$('#ghRepo').value.trim() : '✅ 已保存(Token 已存本地)。'; };
 loadAiKeyUI();
 loadState();
 loadGhUI();
 renderResumeCard();
 
-// 初始化（若此前已在 localStorage 有口令则提示）
+// 初始化(若此前已在 localStorage 有口令则提示)
 </script>
 </body>
 </html>

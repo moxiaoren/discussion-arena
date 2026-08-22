@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ============================================================
-   二人讨论间 · 服务器版 · 中继 + 服务端能力
+   论证点评间 · 服务器版 · 中继 + 服务端能力
    ------------------------------------------------------------
    在极简中继(create/join/relay)基础上，新增服务端能力：
      - 静态页面(index.html)
@@ -220,7 +220,7 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log('✅ 二人讨论间 · 服务器版已启动: ws://<host>:' + PORT);
+  console.log('✅ 论证点评间 · 服务器版已启动: ws://<host>:' + PORT);
   console.log('   AI 托管: ' + (deepseekKey() ? '已配置(服务端) ✓' : '未配置(前端将回退 BYOK/模拟)'));
   console.log('   私密备份: ' + (ghToken() ? '已配置 ✓ -> ' + backupRepo() : '未配置 GitHub token，存档仅保存本地'));
   console.log('   房间数: ' + rooms.size);
