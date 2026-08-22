@@ -68,6 +68,9 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.0.11', notes: [
+    '修复版本徽标误报“发现新版本 v1.0.5”——前端版本自检改为语义比较并禁止降级（本地 version.json 落后于 index 时不再误报）；同时把 version.json 纳入在线更新范围，下次自动对齐'
+  ] },
   { version: 'v1.0.10', notes: [
     '修复撤回的消息刷新后又出现——撤回现在同步从服务端删除，并本地持久化“已删集合”，刷新/重连不再回放已撤回的消息',
     '「怎么玩」提示条右上角新增 ✕，一键关闭并记住（不再反复占对话框空间）；顺带压缩顶栏/对话流/房间栏内边距，给对话让出更多空间'
@@ -237,7 +240,7 @@ async function checkUpdate(silent) {
     return false;
   }
   if (!token) { if (!silent) log('（未配置 github.token，跳过在线更新；请在 ⚙️设置 →「GitHub 在线更新」填写 Token）'); return false; }
-  const files = ['index.html', 'relay.js', 'launch.js', 'server-config.json.example'];
+  const files = ['index.html', 'relay.js', 'launch.js', 'version.json', 'server-config.json.example'];
   let changed = false, needRestart = false, launchChanged = false;
   for (const f of files) {
     try {

@@ -1829,7 +1829,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.10';
+const APP_VERSION='1.0.11';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -1857,13 +1857,16 @@ async function updateFromBackend(manual){
     return false;
   }catch(e){ return false; }
 }
-function checkVersion(){  // 非服务器环境退化为 version.json 对比
+function verGt(a,b){const pa=String(a||'').split('.').map(x=>parseInt(x,10)||0),pb=String(b||'').split('.').map(x=>parseInt(x,10)||0);const n=Math.max(pa.length,pb.length);for(let i=0;i<n;i++){const x=pa[i]||0,y=pb[i]||0;if(x!==y)return x>y;}return false;}
+function checkVersion(){  // 兜底:对比 version.json;仅当远端版本高于本地才提示(防本地 version.json 落后误报旧版本)
   fetch('version.json?cb='+Date.now()).then(r=>r.json()).then(j=>{
-    if(j && j.version && j.version!==APP_VERSION){
-      $('#verBadge').textContent='v'+APP_VERSION;
-      $('#updateText').textContent='发现新版本 v'+j.version+'(当前 v'+APP_VERSION+')'+(j.note?' · '+j.note:'');
-      $('#updateBanner').classList.remove('hidden');
-    }else{ $('#verBadge').textContent='v'+APP_VERSION+'(最新)'; }
+    if(j && j.version){
+      if(verGt(j.version, APP_VERSION)){
+        $('#verBadge').textContent='v'+APP_VERSION;
+        $('#updateText').textContent='发现新版本 v'+j.version+'(当前 v'+APP_VERSION+')'+(j.note?' · '+j.note:'');
+        $('#updateBanner').classList.remove('hidden');
+      }else{ $('#verBadge').textContent='v'+APP_VERSION+'(最新)'; }
+    }else{ $('#verBadge').textContent='v'+APP_VERSION; }
   }).catch(()=>{ $('#verBadge').textContent='v'+APP_VERSION; });
 }
 $('#verBadge').onclick=()=>{ updateFromBackend(true).then(ok=>{ if(!ok) checkVersion(); }); };

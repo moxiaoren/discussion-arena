@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.10';
+const APP_VERSION = '1.0.11';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -372,6 +372,13 @@ const server = http.createServer((req, res) => {
         if (!remoteHtml) remoteHtml = await httpGetText('https://raw.githubusercontent.com/' + uiRepo() + '/' + uiBranch() + '/index.html');
         const m = remoteHtml.match(/APP_VERSION\s*=\s*'([\d.]+)'/);
         const remote = m ? m[1] : '';
+        // 同步本地 version.json,避免其落后于 index 导致前端版本自检误报
+        try{
+          let vjson='';
+          if(tk){ const vres=await fetch('https://api.github.com/repos/' + uiRepo() + '/contents/version.json?ref=' + uiBranch(), { headers: { Authorization: '***' + tk, 'User-Agent': 'openclaw-note', 'Accept': 'application/vnd.github+json' } }); if(vres.ok){ const vj=await vres.json(); vjson=b64d(vj.content || ''); } }
+          if(!vjson) vjson = await httpGetText('https://raw.githubusercontent.com/' + uiRepo() + '/' + uiBranch() + '/version.json');
+          if(vjson){ let vr=''; try{ vr=JSON.parse(vjson).version||''; }catch(e){} let vl=''; try{ vl=(JSON.parse(fs.readFileSync(path.join(ROOT,'version.json'),'utf8')||'{}').version)||''; }catch(e){} if(vr && verGt(vr, vl||'0.0.0')){ fs.writeFileSync(path.join(ROOT,'version.json'), vjson, 'utf8'); } }
+        }catch(e){}
         const newer = !!remote && verGt(remote, local);
         if (newer && remoteHtml.indexOf('<html') !== -1) {
           fs.writeFileSync(path.join(ROOT, 'index.html'), remoteHtml, 'utf8');
