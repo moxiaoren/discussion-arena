@@ -68,6 +68,9 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.0.9', notes: [
+    '修复版本更新推送问题：①不再把仓库旧版本(如缓存返回的低版本号)当成新版本提示升级或回退，只有远端版本确实高于本地才更新；②修正更新守护对行尾差异误判导致高频覆盖、反复重启刷新；③限制前端自动更新检查频率，避免页面反复刷新'
+  ] },
   { version: 'v1.0.8', notes: [
     '手机/窄屏适配优化：修复整体页面出现滚动条的问题——body 改用动态视口高度(100dvh)并禁止横向溢出；登录/大厅容器(lobby)改为可收缩 + 内容超高时内部滚动，不再把整个页面撑出滚动条'
   ] },
@@ -242,7 +245,8 @@ async function checkUpdate(silent) {
       const remote = Buffer.from(j.content, 'base64').toString('utf8');
       const lp = path.join(ROOT, f);
       const local = fs.existsSync(lp) ? fs.readFileSync(lp, 'utf8') : '';
-      if (remote !== local) {
+      const norm = (s) => String(s || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      if (norm(remote) !== norm(local)) {
         fs.writeFileSync(lp, remote);
         log('⬇️ ' + (silent ? '[自动] ' : '') + '已更新: ' + f);
         changed = true;

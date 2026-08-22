@@ -1824,15 +1824,20 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.8';
+const APP_VERSION='1.0.9';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
 // 后端自动更新:由服务器(relay)从 GitHub 仓库拉最新 index.html 覆盖本机后刷新
-async function updateFromBackend(){
+async function updateFromBackend(manual){
+  if(!manual){
+    const _t=(+localStorage.getItem('arena_upcheck')||0);
+    if(Date.now()-_t < 60000){ $('#verBadge').textContent='v'+APP_VERSION+'(最新)'; return false; }
+  }
   try{
     const r=await fetch('/api/update',{method:'GET'});
     const j=await r.json();
+    if(j){ localStorage.setItem('arena_upcheck', String(Date.now())); }
     if(j && j.ok){
       if(j.updated){
         $('#verBadge').textContent='v'+j.remote;
@@ -1856,9 +1861,9 @@ function checkVersion(){  // 非服务器环境退化为 version.json 对比
     }else{ $('#verBadge').textContent='v'+APP_VERSION+'(最新)'; }
   }).catch(()=>{ $('#verBadge').textContent='v'+APP_VERSION; });
 }
-$('#verBadge').onclick=()=>{ updateFromBackend().then(ok=>{ if(!ok) checkVersion(); }); };
-$('#btnUpdate').onclick=()=>{ updateFromBackend().then(ok=>{ if(!ok) location.reload(true); }); };
-updateFromBackend().then(ok=>{ if(!ok) checkVersion(); });
+$('#verBadge').onclick=()=>{ updateFromBackend(true).then(ok=>{ if(!ok) checkVersion(); }); };
+$('#btnUpdate').onclick=()=>{ updateFromBackend(true).then(ok=>{ if(!ok) location.reload(true); }); };
+updateFromBackend(false).then(ok=>{ if(!ok) checkVersion(); });
 
 /* 论证点评玩法切换(整理 / 点评) */
 function updateArenaBtn(){

@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.8';
+const APP_VERSION = '1.0.9';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -109,6 +109,8 @@ function httpGetText(url) {
 
 /* ---------------- 网页「设置」：管理密码 + 配置读写（密码保护） ---------------- */
 function hashPwd(pwd, salt) { return crypto.createHash('sha256').update(String(salt) + '__arena__' + String(pwd)).digest('hex'); }
+function verGt(a, b){ const pa=String(a||'').split('.').map(x=>parseInt(x,10)||0), pb=String(b||'').split('.').map(x=>parseInt(x,10)||0); const n=Math.max(pa.length,pb.length); for(let i=0;i<n;i++){ const x=pa[i]||0,y=pb[i]||0; if(x!==y) return x>y; } return false; }
+function b64d(b){ try{ return Buffer.from(b,'base64').toString('utf8'); }catch(e){ return ''; } }
 function mask(v) { if (v == null || v === '') return ''; v = String(v); if (v.length <= 4) return '••••'; return v.slice(0, 2) + '…' + v.slice(-4); }
 function authInfo() { const c = loadSettings(); return (c.auth) || {}; }
 function jsonRes(res, obj) { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); }
@@ -347,19 +349,27 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (p === '/api/update' || p === '/api/update/') {
-    // 前端触发：对比远端 GitHub 仓库 index.html 的版本，有新则覆盖本地
+    // 前端触发：对比远端 GitHub 仓库 index.html 版本，仅当远端版本 > 本地才覆盖；不高于本地一律跳过（禁止回退）
     (async () => {
       const local = currentAppVersion();
       try {
-        const remoteHtml = await httpGetText('https://raw.githubusercontent.com/' + uiRepo() + '/' + uiBranch() + '/index.html');
+        let remoteHtml = '';
+        const tk = ghToken();
+        if (tk) {
+          const rres = await fetch('https://api.github.com/repos/' + uiRepo() + '/contents/index.html?ref=' + uiBranch(), { headers: { Authorization: 'Bearer ' + tk, 'User-Agent': 'openclaw-note', 'Accept': 'application/vnd.github+json' } });
+          if (rres.ok) { const rj = await rres.json(); remoteHtml = b64d(rj.content || ''); }
+        }
+        if (!remoteHtml) remoteHtml = await httpGetText('https://raw.githubusercontent.com/' + uiRepo() + '/' + uiBranch() + '/index.html');
         const m = remoteHtml.match(/APP_VERSION\s*=\s*'([\d.]+)'/);
         const remote = m ? m[1] : '';
-        if (remote && remote !== local && remoteHtml.indexOf('<html') !== -1) {
+        const newer = !!remote && verGt(remote, local);
+        if (newer && remoteHtml.indexOf('<html') !== -1) {
           fs.writeFileSync(path.join(ROOT, 'index.html'), remoteHtml, 'utf8');
           console.log('🔄 已从仓库 ' + uiRepo() + '@' + uiBranch() + ' 更新 index.html: ' + local + ' -> ' + remote);
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({ ok: true, updated: true, local, remote }));
         } else {
+          if (remote && local && remote !== local) console.log('（仓库 index 版本 ' + remote + ' 不高于本地 ' + local + '，跳过更新，避免回退）');
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           res.end(JSON.stringify({ ok: true, updated: false, local, remote }));
         }
