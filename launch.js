@@ -80,6 +80,18 @@ async function ensureDeps() {
 }
 
 /* ---------------- cloudflared 自动下载（国内镜像 > GitHub 官方） ---------------- */
+// 校验 cloudflared 可执行文件有效性：Windows 下必须是 PE 格式（前两字节 'MZ'）且大小足够；否则视为损坏
+function validCloudflared(p) {
+  try {
+    const s = fs.statSync(p);
+    if (!s.isFile() || s.size < 2 * 1024 * 1024) return false; // 至少 2MB（真实约 15~50MB）
+    if (process.platform === 'win32') {
+      const b = fs.readFileSync(p).subarray(0, 2);
+      return b.length >= 2 && b[0] === 0x4D && b[1] === 0x5A; // 'MZ'
+    }
+    return s.size > 1024 * 1024;
+  } catch (e) { return false; }
+}
 function downloadFile(url, out) {
   return new Promise((resolve) => {
     const mod = url.startsWith('https:') ? https : http;
@@ -99,7 +111,12 @@ async function ensureCloudflared() {
   const exe = IS_WIN ? 'cloudflared.exe' : 'cloudflared';
   const local = path.join(ROOT, exe);
   if (USER_CF) { if (fs.existsSync(USER_CF)) { CF_BIN = USER_CF; return true; } }
-  if (fs.existsSync(local)) { CF_BIN = local; return true; }
+  // 存在但可能是坏文件（下载中断/镜像返回错误内容/被杀软改坏）→ 校验有效性，无效则删除重下
+  if (fs.existsSync(local)) {
+    if (validCloudflared(local)) { CF_BIN = local; return true; }
+    log('⚠ 检测到 ' + exe + ' 损坏（文件头/大小校验失败），自动删除并重新下载...');
+    try { fs.unlinkSync(local); } catch (e) {}
+  }
   const base = IS_WIN
     ? 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe'
     : 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64';
@@ -287,6 +304,7 @@ async function main() {
 
   log('[2/3] 启动 Cloudflare 隧道 ...');
   const cf = spawn(CF_BIN, ['tunnel', '--url', 'http://localhost:' + PORT + '/', '--no-autoupdate'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  cf.on('error', (e) => { log('⚠ 启动 Cloudflare 隧道失败: ' + ((e && e.code) || (e && e.message)) + '（cloudflared.exe 可能损坏或被杀软拦截。请删除后重跑 install-menu 选 1 重新下载，或手动放置新版）'); });
   cf.stdout.on('data', (d) => tryPush(String(d)));
   cf.stderr.on('data', (d) => tryPush(String(d)));
   cf.on('exit', (c) => log('⚠ 隧道已退出 (code=' + c + ')，后端仍在运行'));
