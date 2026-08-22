@@ -253,6 +253,7 @@ input{font-family:inherit}
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button id="btnHelp" class="tb-btn" title="使用说明">❓</button>
+    <button id="btnSettings" class="tb-btn" title="服务器设置（API Key / 邮箱，密码保护）">⚙️</button>
     <span id="verBadge" class="ver-badge" title="当前版本 · 点击可重新检查更新">v?</span>
     <span id="topMembers"></span>
   </div>
@@ -290,6 +291,45 @@ input{font-family:inherit}
     </div>
     <div class="confirm-row"><button class="btn" id="btnHelpClose" style="margin:0;margin-left:auto">我知道了</button></div>
   </div>
+</div>
+
+<!-- 服务器设置（密码保护）：API Key / 发信邮箱+授权 / 接收邮箱 -->
+<div id="setOverlay" class="hidden">
+  <div id="setBox">
+    <div style="display:flex;align-items:center;justify-content:space-between"><h3>⚙️ 服务器设置</h3><button class="btn secondary" id="setClose" style="padding:4px 12px">✕</button></div>
+    <div class="hint" style="margin:6px 0 10px">配置 DeepSeek Key 与推送邮箱（仅服务器版可用，密码保护；敏感项留空=不修改）。</div>
+    <!-- 锁定/解锁区 -->
+    <div id="setLock">
+      <div id="setLockMode" style="margin-bottom:6px"></div>
+      <input id="setUnPwd" class="inp" type="password" placeholder="管理密码" style="margin-bottom:8px">
+      <div class="confirm-row"><button class="btn" id="setUnlock" style="margin-right:8px">🔓 解锁</button><button class="btn secondary hidden" id="setFirstPwd">首次设置密码</button></div>
+      <div id="setLockMsg" class="hint" style="color:#d03050;margin-top:6px"></div>
+    </div>
+    <!-- 已解锁表单 -->
+    <div id="setForm" class="hidden">
+      <div class="set-sec">🔑 修改管理密码</div>
+      <div class="set-row"><input id="setOldPwd" class="inp" type="password" placeholder="原密码" style="flex:1"><input id="setNewPwd" class="inp" type="password" placeholder="新密码（≥4 位）" style="flex:1"><button class="btn secondary" id="setDoPwd">修改</button></div>
+      <div class="set-sec">🤖 DeepSeek API Key<span id="setDsState" style="font-size:12px;color:#888;font-weight:400"></span></div>
+      <div class="set-row"><input id="setDsKey" class="inp" placeholder="粘贴新 Key（留空 = 不修改）" style="flex:1"></div>
+      <div class="set-sec">📤 发信邮箱（SMTP，推送新网址用）</div>
+      <div class="set-row"><input id="setSmtpHost" class="inp" placeholder="smtp 服务器，如 smtp.qq.com" style="flex:2"><input id="setSmtpPort" class="inp" type="number" placeholder="465" style="flex:1"></div>
+      <div class="set-row"><input id="setSmtpUser" class="inp" placeholder="发送邮箱地址" style="flex:1"><input id="setSmtpPass" class="inp" type="password" placeholder="授权码（留空=不改）" style="flex:1"></div>
+      <div class="set-row"><input id="setSmtpFrom" class="inp" placeholder="发件显示 from（留空同发送邮箱）" style="flex:1"></div>
+      <div class="set-sec">📬 接收邮箱（每行一个，软件把新网址发到这些邮箱）</div>
+      <textarea id="setMailTo" class="inp" rows="4" style="width:100%;box-sizing:border-box;resize:vertical" placeholder="收件邮箱，每行一个"></textarea>
+      <div id="setMsg" class="hint" style="margin-top:6px"></div>
+      <div class="confirm-row"><button class="btn" id="setSave">💾 保存</button></div>
+    </div>
+  </div>
+  <style>
+    #setOverlay{position:fixed;inset:0;background:rgba(20,10,40,.45);display:flex;align-items:center;justify-content:center;z-index:70}
+    #setOverlay.hidden{display:none}
+    #setBox{background:#fff;border-radius:16px;padding:18px 22px;width:520px;max-width:92vw;max-height:86vh;overflow-y:auto;box-sizing:border-box}
+    #setBox h3{margin:0}
+    .set-sec{font-weight:700;color:#5b21b6;margin:12px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}
+    .set-row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+    .set-row .inp{margin:0}
+  </style>
 </div>
 
 <!-- 大厅 -->
@@ -1747,6 +1787,78 @@ document.getElementById('btnArena').onclick=()=>{
   updateArenaBtn();
 };
 updateArenaBtn();
+
+/* ================= 服务器设置（⚙️，密码保护） ================= */
+let SET={ pwd:'', data:null };
+function set$(id){ return document.getElementById(id); }
+function hideSet(){ set$('setOverlay').classList.add('hidden'); }
+function fillSetForm(s){
+  set$('setLock').classList.add('hidden'); set$('setForm').classList.remove('hidden');
+  set$('setDsState').textContent = (s.deepseek&&s.deepseek.apiKey)?(' · 当前 '+s.deepseek.apiKey):' · 未配置';
+  set$('setSmtpHost').value = (s.mail&&s.mail.host)||'';
+  set$('setSmtpPort').value = (s.mail&&s.mail.port)||465;
+  set$('setSmtpUser').value = (s.mail&&s.mail.user)||'';
+  set$('setSmtpFrom').value = (s.mail&&s.mail.from)||'';
+  set$('setMailTo').value = ((s.mail&&s.mail.to)||[]).join('\n');
+  set$('setDsKey').value=''; set$('setSmtpPass').value='';
+  set$('setSmtpPass').placeholder = (s.mail&&s.mail.pass)?('已配置 '+s.mail.pass+'，留空不修改'):'授权码（留空=不改）';
+}
+function setLockMode(mode){
+  set$('setLock').classList.remove('hidden'); set$('setForm').classList.add('hidden');
+  set$('setLockMsg').textContent=''; set$('setLockMsg').style.color='#d03050';
+  const fp=set$('setFirstPwd');
+  if(mode==='need'){ set$('setLockMode').textContent='输入管理密码以查看和修改设置：'; fp.classList.add('hidden'); }
+  else if(mode==='first'){ set$('setLockMode').textContent='尚未设置管理密码，请先设置（此后查看 / 修改都需密码）：'; fp.classList.remove('hidden'); }
+  else{ set$('setLockMode').textContent='该功能仅「服务器版」可用（当前非服务器环境，无法线上设置）。'; fp.classList.add('hidden'); set$('setUnPwd').disabled=true; set$('setUnlock').disabled=true; }
+}
+function openSet(){
+  set$('setUnPwd').value=''; set$('setUnPwd').disabled=false; set$('setUnlock').disabled=false;
+  const fp=set$('setFirstPwd'); if(fp) fp.disabled=false;
+  set$('setOverlay').classList.remove('hidden'); set$('setMsg').textContent='';
+  fetch('/api/admin/needpwd').then(r=>r.json()).then(j=>{ setLockMode((j&&j.ok)?(j.managePwdSet?'need':'first'):'off'); }).catch(()=>setLockMode('off'));
+}
+document.getElementById('btnSettings').onclick=openSet;
+document.getElementById('setClose').onclick=hideSet;
+document.getElementById('setUnlock').onclick=()=>{
+  const pwd=set$('setUnPwd').value.trim();
+  if(!pwd){ set$('setLockMsg').textContent='请输入管理密码'; return; }
+  fetch('/api/admin/settings?pwd='+encodeURIComponent(pwd)).then(r=>r.json()).then(j=>{
+    if(j&&j.ok){ SET.pwd=pwd; SET.data=j.settings; fillSetForm(j.settings); }
+    else set$('setLockMsg').textContent=(j&&j.message)||'密码错误';
+  });
+};
+document.getElementById('setFirstPwd').onclick=()=>{
+  const pwd=set$('setUnPwd').value.trim();
+  if(pwd.length<4){ set$('setLockMsg').textContent='管理密码至少 4 位'; return; }
+  fetch('/api/admin/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd})}).then(r=>r.json()).then(j=>{
+    if(j&&j.ok){ set$('setLockMsg').style.color='#059669'; set$('setLockMsg').textContent=j.message+'，请用新密码解锁。'; setLockMode('need'); }
+    else set$('setLockMsg').textContent=(j&&j.message)||'失败';
+  });
+};
+document.getElementById('setDoPwd').onclick=()=>{
+  const oldPwd=set$('setOldPwd').value.trim(), newPwd=set$('setNewPwd').value.trim();
+  if(newPwd.length<4){ set$('setMsg').textContent='新密码至少 4 位'; return; }
+  fetch('/api/admin/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({oldPwd,pwd:newPwd})}).then(r=>r.json()).then(j=>{
+    if(j&&j.ok){ SET.pwd=newPwd; set$('setMsg').style.color='#059669'; set$('setMsg').textContent=j.message; set$('setOldPwd').value=''; set$('setNewPwd').value=''; }
+    else{ set$('setMsg').style.color=''; set$('setMsg').textContent=(j&&j.message)||'失败'; }
+  });
+};
+document.getElementById('setSave').onclick=()=>{
+  const data={
+    deepseek:{ apiKey: set$('setDsKey').value.trim() },
+    mail:{
+      host: set$('setSmtpHost').value.trim(), port: parseInt(set$('setSmtpPort').value,10)||465,
+      user: set$('setSmtpUser').value.trim(), from: set$('setSmtpFrom').value.trim(),
+      pass: set$('setSmtpPass').value.trim(),
+      to: set$('setMailTo').value.split('\n').map(x=>x.trim()).filter(Boolean)
+    }
+  };
+  fetch('/api/admin/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd:SET.pwd,data})}).then(r=>r.json()).then(j=>{
+    set$('setMsg').style.color = (j&&j.ok)?'#059669':'';
+    set$('setMsg').textContent = (j&&j.message)||'保存失败';
+    if(j&&j.ok&&j.settings){ SET.data=j.settings; fillSetForm(j.settings); }
+  });
+};
 
 /* 历史 / 新话题 绑定 */
 $('#btnNew').onclick=startNewTopic;

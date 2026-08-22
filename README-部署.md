@@ -30,8 +30,10 @@
 
 1. 把整个文件夹拷贝到迷你电脑（如 `D:\discussion-room`）。
 2. 双击 **`install-menu.bat`**，选 **`1` 一键初始化**（会自动：设 npm 国内镜像、装依赖、下载 cloudflared、生成邮箱配置模板）。
-3. 编辑邮箱配置：选 **`5`** 打开 `push-config.json`，填 `host/user/pass(from)/to`，保存。
-   > **`to` 是「收件人数组」，支持同时填多个邮箱**（如双方各自的邮箱）：把新网址**同时推送给每一位**，一方电脑启动后两人都能直接收到最新地址，无需互相转发。格式：`"to": ["邮箱A@xx.com", "邮箱B@yy.com"]`。
+3. 邮箱与 DeepSeek Key：**不用再手动编辑文件**，启动后在网页右上角「⚙️ 设置」里配置（首次需先设一个管理密码，之后查看/修改都要密码）：
+   - 🤖 **DeepSeek API Key**、📤 **发信邮箱**（SMTP host/port/账号/授权码/from）、📬 **接收邮箱**（每行一个，可填多个）
+   - 敏感项（Key / 授权码）**留空 = 不修改**，避免覆盖；保存后即时生效（SMTP 改动下次推送即用）
+   - 也可用菜单 `5` 直接打开 `settings.json` 编辑（高级）
 4. 选 **`4` 发一封测试邮件**：能收到就说明邮箱配置 OK。
 5. （可选）想用真实 AI，启动后进页面，在「🤖 真实 AI·DeepSeek」粘贴你的 Key 并保存。
 
@@ -74,10 +76,11 @@
 ## 文件说明
 
 ```
-index.html        完整前端（含全部功能 + 中继桥，自包含单文件）
-relay.js          中继服务器（提供页面 + WebSocket 转发，业务/AI 均在前端）
+index.html        完整前端（含全部功能 + 中继桥 + ⚙️ 设置面板，自包含单文件）
+relay.js          中继服务器（提供页面 + WebSocket 转发 + 网页设置/自动更新接口，业务/AI 均在前端）
 launch.js         一键编排：起 relay + cloudflared 隧道 + 抓新网址 + 发邮件
-push-config.json.example  邮箱推送配置模板 → 复制为 push-config.json 后填
+settings.json     统一配置源（由网页「⚙️ 设置」写，含管理密码 hash）；默认不存在，首次由程序生成
+push-config.json.example  旧版邮箱配置模板（兼容迁移用，新装无需再填，网页设置替代）
 start.bat         一键启动
 install-menu.bat  安装 / 开机自启 / 测试邮件 菜单
 run-autostart.bat 开机自启后台启动用

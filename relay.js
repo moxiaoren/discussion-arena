@@ -14,6 +14,7 @@
 'use strict';
 const http = require('http');
 const https = require('https');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
@@ -23,23 +24,34 @@ const PORT = parseInt(process.env.PORT || '8788', 10);
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
-/* ---------------- 配置（server-config.json 优先，其次 .example） ---------------- */
-function loadConfig() {
-  const p = path.join(ROOT, 'server-config.json');
-  const p2 = path.join(ROOT, 'server-config.json.example');
-  const f = fs.existsSync(p) ? p : (fs.existsSync(p2) ? p2 : null);
-  if (!f) return {};
-  try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return {}; }
+/* ---------------- 配置（统一 settings.json 优先，旧配置自动迁移） ---------------- */
+const SETTINGS_PATH = path.join(ROOT, 'settings.json');
+function loadSettings() {
+  if (fs.existsSync(SETTINGS_PATH)) { try { return JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')); } catch (e) {} }
+  // 迁移：首次从旧配置文件合并生成 settings.json
+  let s = {};
+  try {
+    const old = JSON.parse(fs.readFileSync(path.join(ROOT, 'server-config.json'), 'utf8'));
+    s.deepseek = old.deepseek || {}; s.github = old.github || {}; if (old.mail) s.mail = old.mail;
+    if (old.updater) s.updater = old.updater;
+  } catch (e) {}
+  try {
+    const push = JSON.parse(fs.readFileSync(path.join(ROOT, 'push-config.json'), 'utf8'));
+    if (push.smtp) s.mail = Object.assign({}, push.smtp, { to: Array.isArray(push.to) ? push.to : [push.to].filter(Boolean) });
+  } catch (e) {}
+  try { fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2), 'utf8'); console.log('📎 已生成 settings.json（网页「设置」的新配置源，旧配置已迁移）'); } catch (e) {}
+  return s;
 }
-let cfg = loadConfig();
-function deepseekKey() { return (cfg.deepseek && cfg.deepseek.apiKey) || ''; }
-function ghToken() { return (cfg.github && cfg.github.token) || ''; }
-function backupRepo() { return (cfg.github && cfg.github.backupRepo) || 'moxiaoren/discussion-room-server'; }
+function writeSettings(s) { try { fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2), 'utf8'); return true; } catch (e) { return false; } }
+function deepseekKey() { const c = loadSettings(); return (c.deepseek && c.deepseek.apiKey) || ''; }
+function deepseekModel() { const c = loadSettings(); return (c.deepseek && c.deepseek.model) || 'deepseek-chat'; }
+function ghToken() { const c = loadSettings(); return (c.github && c.github.token) || ''; }
+function backupRepo() { const c = loadSettings(); return (c.github && c.github.backupRepo) || 'moxiaoren/discussion-room-server'; }
+function uiRepo() { const c = loadSettings(); return (c.updater && c.updater.repo) || 'moxiaoren/discussion-arena'; }
+function uiBranch() { const c = loadSettings(); return (c.updater && c.updater.branch) || 'main'; }
 const DEEPSEEK_BASE = process.env.DEEPSEEK_BASE || 'https://api.deepseek.com';
 
 /* ---------------- 前端在线更新（从 GitHub 仓库拉最新 index.html 覆盖本机） ---------------- */
-function uiRepo() { return (cfg.updater && cfg.updater.repo) || 'moxiaoren/discussion-arena'; }
-function uiBranch() { return (cfg.updater && cfg.updater.branch) || 'main'; }
 function currentAppVersion() {
   const f = path.join(ROOT, 'index.html');
   try { const s = fs.readFileSync(f, 'utf8'); const m = s.match(/APP_VERSION\s*=\s*'([\d.]+)'/); return m ? m[1] : ''; } catch (e) { return ''; }
@@ -52,6 +64,70 @@ function httpGetText(url) {
     });
     req.on('error', reject);
   });
+}
+
+/* ---------------- 网页「设置」：管理密码 + 配置读写（密码保护） ---------------- */
+function hashPwd(pwd, salt) { return crypto.createHash('sha256').update(String(salt) + '__arena__' + String(pwd)).digest('hex'); }
+function mask(v) { if (v == null || v === '') return ''; v = String(v); if (v.length <= 4) return '••••'; return v.slice(0, 2) + '…' + v.slice(-4); }
+function authInfo() { const c = loadSettings(); return (c.auth) || {}; }
+function jsonRes(res, obj) { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); }
+function maskedSettings() {
+  const c = loadSettings();
+  return {
+    managePwdSet: !!authInfo().pwdHash,
+    deepseek: { apiKey: mask(c.deepseek && c.deepseek.apiKey), model: (c.deepseek && c.deepseek.model) || 'deepseek-chat' },
+    github: { token: mask(c.github && c.github.token), backupRepo: (c.github && c.github.backupRepo) || 'moxiaoren/discussion-room-server' },
+    mail: {
+      host: (c.mail && c.mail.host) || '', port: (c.mail && c.mail.port) || 465,
+      user: (c.mail && c.mail.user) || '', pass: mask(c.mail && c.mail.pass), from: (c.mail && c.mail.from) || '',
+      to: Array.isArray(c.mail && c.mail.to) ? c.mail.to : []
+    }
+  };
+}
+function checkPwd(pwd) { const a = authInfo(); return !!(a.pwdHash && a.salt && hashPwd(String(pwd || ''), a.salt) === a.pwdHash); }
+function handleAdmin(path, data, res) {
+  if (path === '/api/admin/password') {
+    const newPwd = String(data.pwd || '');
+    if (newPwd.length < 4) { jsonRes(res, { ok: false, message: '管理密码至少 4 位' }); return; }
+    const has = !!authInfo().pwdHash;
+    if (has && !checkPwd(data.oldPwd)) { jsonRes(res, { ok: false, message: '原密码错误' }); return; }
+    const salt = crypto.randomBytes(8).toString('hex');
+    const c = loadSettings(); c.auth = { salt, pwdHash: hashPwd(newPwd, salt) };
+    if (writeSettings(c)) jsonRes(res, { ok: true, message: has ? '管理密码已修改' : '管理密码已设置' });
+    else jsonRes(res, { ok: false, message: '写入配置失败' });
+    return;
+  }
+  // /api/admin/settings —— 需密码；敏感字段留空=不修改
+  if (!authInfo().pwdHash) { jsonRes(res, { ok: false, needPassword: true, message: '请先在「设置」中设置管理密码' }); return; }
+  if (!checkPwd(data.pwd)) { jsonRes(res, { ok: false, message: '管理密码错误' }); return; }
+  const c = loadSettings();
+  const d = data.data || {};
+  if (d.deepseek) {
+    c.deepseek = c.deepseek || {};
+    if (d.deepseek.apiKey != null && String(d.deepseek.apiKey).trim()) c.deepseek.apiKey = String(d.deepseek.apiKey).trim();
+    if (d.deepseek.model != null && String(d.deepseek.model).trim()) c.deepseek.model = String(d.deepseek.model).trim();
+  }
+  if (d.github) {
+    c.github = c.github || {};
+    if (d.github.token != null && String(d.github.token).trim()) c.github.token = String(d.github.token).trim();
+    if (d.github.backupRepo != null && String(d.github.backupRepo).trim()) c.github.backupRepo = String(d.github.backupRepo).trim();
+  }
+  if (d.mail) {
+    const m = c.mail || {};
+    const nm = {
+      host: (d.mail.host != null ? String(d.mail.host).trim() : (m.host || '')),
+      port: d.mail.port != null ? (parseInt(d.mail.port, 10) || 465) : (m.port || 465),
+      user: (d.mail.user != null ? String(d.mail.user).trim() : (m.user || '')),
+      from: (d.mail.from != null ? String(d.mail.from).trim() : (m.from || '')),
+      to: Array.isArray(d.mail.to) ? d.mail.to.map(x => String(x).trim()).filter(Boolean) : (Array.isArray(m.to) ? m.to : [])
+    };
+    // pass 留空 = 不修改
+    if (d.mail.pass != null && String(d.mail.pass).trim()) nm.pass = String(d.mail.pass).trim();
+    else if (m.pass) nm.pass = m.pass;
+    c.mail = nm;
+  }
+  if (writeSettings(c)) jsonRes(res, { ok: true, message: '已保存（SMTP/DeepSeek 改动即时生效；如不推送可稍后重启）', settings: maskedSettings() });
+  else jsonRes(res, { ok: false, message: '写入配置失败' });
 }
 
 /* ---------------- DeepSeek 调用（服务端 AI 托管） ---------------- */
@@ -118,6 +194,23 @@ function broadcast(roomId, obj, except) {
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.ico': 'image/x-icon' };
 const server = http.createServer((req, res) => {
   let p = (req.url || '/').split('?')[0];
+  // ===== 网页「设置」管理接口（密码保护）=====
+  if (p === '/api/admin/needpwd') {
+    jsonRes(res, { ok: true, managePwdSet: !!authInfo().pwdHash }); return;
+  }
+  if (p === '/api/admin/settings' && req.method === 'GET') {
+    const qs = new URL(req.url, 'http://x').searchParams;
+    if (!authInfo().pwdHash) { jsonRes(res, { ok: false, needPassword: true, message: '请先设置管理密码' }); return; }
+    if (!checkPwd(qs.get('pwd'))) { jsonRes(res, { ok: false, message: '管理密码错误' }); return; }
+    jsonRes(res, { ok: true, settings: maskedSettings() }); return;
+  }
+  if (p === '/api/admin/password' || p === '/api/admin/settings') {
+    if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
+    let body = '';
+    req.on('data', (c) => { body += c; if (body.length > 2e6) req.destroy(); });
+    req.on('end', () => { let data = {}; try { data = JSON.parse(body); } catch (e) {} handleAdmin(p, data, res); });
+    return;
+  }
   if (p === '/api/update' || p === '/api/update/') {
     // 前端触发：对比远端 GitHub 仓库 index.html 的版本，有新则覆盖本地
     (async () => {

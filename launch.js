@@ -47,11 +47,17 @@ if (!fs.existsSync(path.join(ROOT, 'server-config.json')) && fs.existsSync(path.
   try { fs.copyFileSync(path.join(ROOT, 'server-config.json.example'), path.join(ROOT, 'server-config.json')); log('📎 检测到 server-config.json.example，已自动采用为 server-config.json'); }
   catch (e) { log('⚠ 无法复制 server-config.json.example: ' + e.message); }
 }
-let mailCfg = loadJson('push-config.json');
-const serverCfg = loadJson('server-config.json');
-// 若没有 push-config.json，则复用 server-config.json 里的 mail 配置
-if (!mailCfg && serverCfg && serverCfg.mail) {
-  mailCfg = { smtp: serverCfg.mail, to: Array.isArray(serverCfg.mail.to) ? serverCfg.mail.to : [serverCfg.mail.to].filter(Boolean) };
+// 邮箱配置统一从 settings.json（网页「设置」写入）读取；无则兼容旧 push-config.json / server-config.json
+function loadMailCfg() {
+  const s = loadJson('settings.json');
+  if (s && s.mail && s.mail.host && s.mail.user) {
+    return { smtp: s.mail, to: Array.isArray(s.mail.to) ? s.mail.to : [s.mail.to].filter(Boolean) };
+  }
+  const push = loadJson('push-config.json');
+  if (push && push.smtp) return { smtp: push.smtp, to: Array.isArray(push.to) ? push.to : [push.to].filter(Boolean) };
+  const sc = loadJson('server-config.json');
+  if (sc && sc.mail) return { smtp: sc.mail, to: Array.isArray(sc.mail.to) ? sc.mail.to : [sc.mail.to].filter(Boolean) };
+  return null;
 }
 let nodemailer = null;
 try { nodemailer = require('nodemailer'); } catch (e) { nodemailer = null; }
@@ -118,20 +124,25 @@ async function ensureCloudflared() {
 
 /* ---------------- 邮箱模板 ---------------- */
 function ensurePushConfig() {
-  const p = path.join(ROOT, 'push-config.json');
-  if (fs.existsSync(p)) return;
-  const e = path.join(ROOT, 'push-config.json.example');
-  if (fs.existsSync(e)) {
-    fs.copyFileSync(e, p);
-    log('📝 已生成 push-config.json（用菜单 5 编辑填邮箱）');
-  } else {
-    fs.writeFileSync(p, JSON.stringify({
-      smtp: { host: 'smtp.qq.com', port: 465, user: 'yourQQ@qq.com', pass: 'your-auth-code', from: 'yourQQ@qq.com' },
-      to: ['receiver@example.com']
-    }, null, 2));
-    log('📝 已生成 push-config.json（请编辑填邮箱）');
+  // 现在统一用 settings.json（网页「⚙️设置」写）。无则生成模板，优先从旧配置迁移
+  const sp = path.join(ROOT, 'settings.json');
+  if (fs.existsSync(sp)) return;
+  let s = {};
+  const push = loadJson('push-config.json');
+  const sc = loadJson('server-config.json');
+  if (push && push.smtp) s.mail = Object.assign({}, push.smtp, { to: Array.isArray(push.to) ? push.to : [push.to].filter(Boolean) });
+  else if (sc && sc.mail) s.mail = sc.mail;
+  else {
+    s.mail = { host: 'smtp.qq.com', port: 465, user: 'yourQQ@qq.com', pass: 'your-auth-code', from: 'yourQQ@qq.com', to: ['receiver@example.com'] };
   }
-  mailCfg = loadJson('push-config.json');
+  try { fs.writeFileSync(sp, JSON.stringify(s, null, 2), 'utf8'); log('📝 已生成 settings.json（API Key / 邮箱请在网页「⚙️ 设置」里填，密码保护；不再需要手动编辑本文件）'); }
+  catch (e) { log('⚠ 无法写 settings.json: ' + e.message); }
+}
+
+function openSettingsFile() {
+  if (process.platform === 'win32') { spawn('notepad', [path.join(ROOT, 'settings.json')], { stdio: 'ignore' }); }
+  else { log('settings.json 路径: ' + path.join(ROOT, 'settings.json')); }
+  log('（推荐：直接在网页右上角「⚙️ 设置」里配置邮箱与 API Key，密码保护更安全）');
 }
 
 /* ---------------- 邮件发送 ---------------- */
@@ -157,8 +168,10 @@ function spawnRelay() {
 }
 const UPDATE_INTERVAL = 8 * 60 * 1000; // 自动更新守护：每 8 分钟检查一次远程更新
 async function checkUpdate(silent) {
-  const gh = serverCfg && serverCfg.github;
-  const repo = gh && gh.updateRepo;
+  const s = loadJson('settings.json') || {};
+  const gh = s.github || {};
+  const upd = s.updater || {};
+  const repo = (gh && gh.updateRepo) || (upd && upd.repo);
   const token = gh && gh.token;
   if (!repo || !token) { if (!silent) log('（未配置 server-config.json 的 github.token，跳过在线更新）'); return false; }
   const files = ['index.html', 'relay.js', 'launch.js', 'server-config.json.example'];
@@ -201,10 +214,7 @@ async function autoUpdateLoop() {
 }
 
 /* ---------------- 菜单（node 交互，替代 cmd 菜单） ---------------- */
-function openPushConfig() {
-  if (process.platform === 'win32') { spawn('notepad', [path.join(ROOT, 'push-config.json')], { stdio: 'ignore' }); }
-  else { log('请用编辑器打开 ' + path.join(ROOT, 'push-config.json')); }
-}
+
 async function doAutostart(enable) {
   if (process.platform !== 'win32') { log('仅 Windows 支持开机自启'); return; }
   const runBat = path.join(ROOT, 'run-autostart.bat');
@@ -232,7 +242,7 @@ function runMenu() {
       if (a === '2') { ensureDeps().then(() => doAutostart(true)).then(() => waitThen(rl, loop)); return; }
       if (a === '3') { doAutostart(false).then(() => waitThen(rl, loop)); return; }
       if (a === '4') { sendTest().then(() => waitThen(rl, loop)); return; }
-      if (a === '5') { ensurePushConfig(); openPushConfig(); waitThen(rl, loop); return; }
+      if (a === '5') { ensurePushConfig(); openSettingsFile(); waitThen(rl, loop); return; }
       if (a === '0') { log('再见'); rl.close(); return; }
       log('无效输入'); loop();
     });
@@ -251,7 +261,8 @@ async function initThen(rl, fn) {
 /* ---------------- 测试邮件 ---------------- */
 async function sendTest() {
   log('== 测试邮件发送 ==');
-  if (!mailCfg) { log('✗ 未找到 push-config.json，请先在菜单选 5 配置邮箱'); return 1; }
+  const mailCfg = loadMailCfg();
+  if (!mailCfg) { log('✗ 未配置邮箱，请在网页「⚙️设置」里填写发信邮箱'); return 1; }
   try { await sendMail(mailCfg, '论证点评间 · SMTP 配置测试', '收到这封邮件说明邮箱推送配置正确。'); log('✅ 测试邮件发送成功，请查收邮箱。'); return 0; }
   catch (e) { log('✗ 发送失败: ' + e.message); return 1; }
 }
@@ -290,7 +301,8 @@ async function main() {
     try { fs.writeFileSync(path.join(ROOT, 'last-url.txt'), url + '\n'); } catch (e) {}
     log('（已保存到 last-url.txt）');
     if (DRY) { log('（--dryrun：不发送邮件）'); return; }
-    if (!mailCfg) { log('⚠ 未配置 push-config.json，跳过推送。\n   （用 install-menu 选 5 填邮箱后会自动推送）'); return; }
+    const mailCfg = loadMailCfg();
+    if (!mailCfg) { log('⚠ 未配置邮箱，跳过推送。\n   （在网页「⚙️ 设置」里填写发信邮箱后会自动推送）'); return; }
     log('[3/3] 正在把新网址发往邮箱 ' + (mailCfg.to || []).join(',') + ' ...');
     sendMail(mailCfg, '论证点评间 · 新地址',
       '你的聊天室已启动，新网址：\n\n' + url + '\n\n把这个发给好友即可开始异地聊天。\n（隧道或电脑重启后地址会变化，届时会再次收到新地址）')
@@ -303,7 +315,8 @@ async function main() {
 
 async function sendTestEntry() {
   log('== 测试邮件发送（--send-test）==');
-  if (!mailCfg) { log('✗ 未找到 push-config.json'); process.exitCode = 1; return; }
+  const mailCfg = loadMailCfg();
+  if (!mailCfg) { log('✗ 未配置邮箱，请在网页「⚙️设置」里填写发信邮箱'); process.exitCode = 1; return; }
   try { await sendMail(mailCfg, '论证点评间 · SMTP 配置测试', '如果你收到这封邮件，说明邮箱推送配置正确。'); log('✅ 测试邮件发送成功，请去邮箱确认。'); }
   catch (e) { log('✗ 发送失败: ' + e.message); process.exitCode = 1; }
 }
