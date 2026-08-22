@@ -155,6 +155,13 @@ input{font-family:inherit}
 .ao-advice{margin-top:5px;font-size:12.5px;background:rgba(255,255,255,.15);border-radius:6px;padding:5px 8px}
 .arena-rebuttal{background:#fffbeb;border:1px solid #fde68a;border-radius:8px}
 .arena-qa{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px}
+.dr-dim{background:#f4f0ff;border:1px solid #e0d6fb;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.dr-head{font-weight:700;color:#6d28d9;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dr-sub{font-size:11px;color:#9a87d6;font-weight:500}
+.dr-score{margin-left:auto;background:linear-gradient(135deg,#6c5ce7,#a855f7);color:#fff;border-radius:12px;padding:1px 8px;font-size:11px}
+.dr-sum{font-size:13px;color:#3b2b5a;margin:6px 0}
+.dr-points{font-size:12.5px;color:#4a3f7a;line-height:1.7}
+.dr-concl{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;font-size:13px;color:#7c2d12;margin-top:4px}
 .arena-query{background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:8px 10px;margin-top:6px}
 .arena-query .q{margin:3px 0;line-height:1.6;color:#1d4ed8}
 .comment-card{border-radius:12px;padding:10px 13px;margin:4px 0 14px;font-size:13px;display:flex;align-items:flex-start;gap:8px;animation:appear .3s ease}
@@ -755,6 +762,7 @@ const S = {
   arenas:[],     // 论证点评:{id, ids[], messageId, judge, questions, rev, versions[]}
   comments:[],   // {id,msgId,atTs,style,text,source}
   verdict:null,  // 复盘 AI 总评文本
+  deepReview:null, // 复盘四维深度梳理:{logic,language,structure,value,conclusion}
   danmakuActive:[],
   review:{currentTs:0,playing:false,spd:1,filter:'all',playingStart:0},
 };
@@ -772,13 +780,13 @@ function persistState(){
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       messages:S.messages, summaries:S.summaries, arenas:S.arenas,
-      comments:S.comments, verdict:S.verdict, deleted:S.deleted||[], savedAt:Date.now()
+      comments:S.comments, verdict:S.verdict, deepReview:S.deepReview, deleted:S.deleted||[], savedAt:Date.now()
     }));
   }catch(e){ console.warn('persist fail',e); }
   try{
     const _sv=(typeof NetBridge!=='undefined')?NetBridge:null;
     if(_sv && _sv.connected && _sv.save){
-      _sv.save({messages:S.messages, summaries:S.summaries, arenas:S.arenas, comments:S.comments, verdict:S.verdict, savedAt:Date.now()});
+      _sv.save({messages:S.messages, summaries:S.summaries, arenas:S.arenas, comments:S.comments, verdict:S.verdict, deepReview:S.deepReview, savedAt:Date.now()});
     }
   }catch(e){}
 }
@@ -792,6 +800,7 @@ function loadState(){
     if(Array.isArray(d.arenas)) S.arenas=d.arenas;
     if(Array.isArray(d.comments)) S.comments=d.comments;
     if(d.verdict!=null) S.verdict=d.verdict;
+    if(d.deepReview!=null) S.deepReview=d.deepReview;
     if(Array.isArray(d.deleted)) S.deleted=d.deleted;
   }catch(e){ console.warn('load fail',e); }
 }
@@ -858,7 +867,7 @@ $('#btnResumeConfirm').onclick=()=>{
   } else { go(); }
 };
 
-function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=[]; S.verdict=null; try{localStorage.removeItem(STATE_KEY);}catch(e){} }
+function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=[]; S.verdict=null; S.deepReview=null; try{localStorage.removeItem(STATE_KEY);}catch(e){} }
 function leaveToLobby(){ S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
 $('#btnHome').onclick=()=>{ leaveToLobby(); }; // 讨论间→回到主页(大厅)
 function startNewTopic(){
@@ -1451,6 +1460,7 @@ async function enterReview(){
   $('#aiBusy').classList.remove('hidden');
   await ensureComments();  // 对话期间不点评,点评统一在复盘回顾阶段生成
   await ensureVerdict();
+  await ensureDeepReview(); // 结束后的四维深度梳理(从头完整分析逻辑/语言/体系/价值)
   $('#aiBusy').classList.add('hidden');
   buildTimeline();
   renderPlayback();
@@ -1481,6 +1491,25 @@ async function ensureVerdict(){
     S.verdict=out.trim();
     persistState();
   }catch(e){ console.warn('deepseek verdict fail',e); showAiErr('总评:'+(e&&e.message||e)); S.verdict=null; }
+}
+/* 结束后的四维深度梳理:从完整对话从头梳理 逻辑/语言/体系/价值 */
+async function ensureDeepReview(){
+  if(S.deepReview!==null) return;
+  if(!AI._hasKey()){ S.deepReview=null; return; }
+  const msgs=S.messages.filter(m=>m.channel==='discuss').map(m=>m.name+':'+m.content);
+  const DIM='{"score":0,"summary":"一句概括","points":["要点1","要点2"]}';
+  try{
+    const out=await AI._chat(
+      '你是两人讨论结束后的复盘者。请对整场讨论做一次从头到尾的深入、完整梳理与复盘，覆盖四维：①逻辑（推理是否准确、论证是否严谨）②语言（表述是否准确、清晰）③体系（框架是否结构完整、逻辑自洽、覆盖全面）④价值（话题内涵与讨论的深度）。每维给出 0-10 评分 + 一句概括 + 2-3 条结合对话实际的具体要点；最后给一段 150 字内的总体结论。只返回严格 JSON：{"logic":'+DIM+',"language":'+DIM+',"structure":'+DIM+',"value":'+DIM+',"conclusion":"总体结论"}',
+      '讨论主题:'+(S.topic||'未命名')+'\n\n完整对话记录:\n'+(msgs.join('\n')||'(无讨论消息)'));
+    const mm=out.match(/\{[\s\S]*\}/);
+    if(mm){
+      const j=JSON.parse(mm[0]);
+      const pick=o=>{ o=o||{}; return {score:Math.max(0,Math.min(10,parseInt(o.score,10)||0)), summary:sanitize(o.summary||''), points:(Array.isArray(o.points)?o.points.slice(0,3).map(s=>sanitize(String(s))):[])}; };
+      S.deepReview={logic:pick(j.logic),language:pick(j.language),structure:pick(j.structure),value:pick(j.value),conclusion:sanitize(j.conclusion||'')};
+      persistState();
+    } else S.deepReview=null;
+  }catch(e){ console.warn('deepseek deepReview fail',e); showAiErr('四维深度梳理:'+(e&&e.message||e)); S.deepReview=null; }
 }
 document.querySelectorAll('.rnav-btn').forEach(b=>b.onclick=()=>{
   rvTab=b.dataset.rv;
@@ -1670,7 +1699,16 @@ function renderEvaluate(){
   function cols(arr,name){ return arr.slice(0,3).map(m=>m.content.length>24?m.content.slice(0,24)+'...':m.content); }
   const total=msgs.length+dan.length;
   const verdict = S.verdict || ('这场「'+esc(S.topic||'未命名')+'」的讨论双方共发言 '+msgs.length+' 条、弹幕 '+dan.length+' 条。整体围绕主线展开,双方观点逐步清晰,是一次有效的交流。');
+  let drHtml='<div class="panel"><h4>🧭 四维深度梳理（从整场讨论从头完整复盘）</h4>';
+  if(!S.deepReview){ drHtml+='<div class="tl-item"><span>（需配置 AI Key 生成完整四维梳理：逻辑 / 语言 / 体系 / 价值）</span></div>'; }
+  else {
+    const dims=[['logic','① 逻辑','推理准确性 · 严谨性'],['language','② 语言','表述准确性 · 清晰度'],['structure','③ 体系','框架结构 · 自洽 · 全面'],['value','④ 价值','话题内涵 · 深度']];
+    drHtml+=dims.map(d=>{ const dr=S.deepReview[d[0]]||{}; return '<div class="dr-dim"><div class="dr-head">'+d[1]+'<span class="dr-sub">'+d[2]+'</span><span class="dr-score">'+((dr.score==null)?'-':dr.score)+' / 10</span></div>'+(dr.summary?'<div class="dr-sum">'+esc(dr.summary)+'</div>':'')+((dr.points&&dr.points.length)?'<div class="dr-points">'+dr.points.map(p=>'<div>· '+esc(p)+'</div>').join('')+'</div>':'')+'</div>'; }).join('');
+    if(S.deepReview.conclusion) drHtml+='<div class="dr-concl">📌 总体结论：'+esc(S.deepReview.conclusion)+'</div>';
+  }
+  drHtml+='</div>';
   pane.innerHTML=
+    drHtml+
     '<div class="verdict">🧭 <b>AI 总评:</b>'+esc(verdict)+'</div>'+
     '<div class="kpi-grid">'+
       kpi(msgs.length,'讨论条数')+kpi(dan.length,'吐槽条数')+kpi(S.summaries.length,'AI 段落')+kpi(Math.max(1,Math.round((msgs.reduce((a,m)=>a+(m.appendTo?0:1),0)))),'观点段')+
@@ -1703,7 +1741,7 @@ function buildReviewHTML(data){
   const title=data.title||('复盘 · '+fmtTL(now()));
   const me=data.me||'';
   const msgs=(data.messages||[]).slice().sort((a,b)=>a.ts-b.ts);
-  const summs=data.summaries||[], comments=data.comments||[], verdict=data.verdict||'';
+  const summs=data.summaries||[], comments=data.comments||[], verdict=data.verdict||'', dr=data.deepReview;
   const exportedAt=data.exportedAt?new Date(data.exportedAt).toLocaleString():new Date().toLocaleString();
   let body='';
   msgs.forEach(m=>{
@@ -1727,6 +1765,7 @@ function buildReviewHTML(data){
   });
   if(comments&&comments.length){ body+='<h2>🤖 逐段 AI 点评</h2>'; comments.forEach(c=>{ body+='<div class="cm '+(c.good===false?'off':'good')+'"><b>'+(c.good===false?'🤨 待商榷':'👍 亮点')+'</b> · '+esc(c.text||'')+'</div>'; }); }
   if(verdict) body+='<div class="v">🏁 复盘总评</div><div class="vbox">'+esc(verdict)+'</div>';
+  if(dr){ body+='<h2>🧭 四维深度梳理</h2>'; const dims=[['logic','① 逻辑'],['language','② 语言'],['structure','③ 体系'],['value','④ 价值']]; dims.forEach(d=>{ const x=dr[d[0]]||{}; body+='<div class="v">'+d[1]+' · '+((x.score==null)?'-':x.score)+'/10</div><div class="vbox">'+esc(x.summary||'')+(x.points&&x.points.length?'<br>'+x.points.map(p=>'· '+esc(p)).join('<br>'):'')+'</div>'; }); if(dr.conclusion) body+='<div class="v">📌 总体结论</div><div class="vbox">'+esc(dr.conclusion)+'</div>'; }
   const html='<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>'+title+'</title><style>'+
     'body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;max-width:760px;margin:28px auto;padding:0 18px 60px;color:#222;background:#f6f5fb}'+
     'h1{font-size:20px;color:#6d28d9}.sub{color:#888;font-size:13px;margin:4px 0 22px}'+
@@ -1760,7 +1799,7 @@ function loadDemo(){
 document.getElementById('btnDemo').onclick=loadDemo;
 var histView=false, histBackup=null; // 历史复盘(只读复刻)状态
 function snapshotS(){
-  return {me:Object.assign({},S.me), peerConfirmed:S.peerConfirmed, inRoom:S.inRoom, messages:S.messages, summaries:S.summaries, arenas:S.arenas, comments:S.comments, verdict:S.verdict, danmakuActive:S.danmakuActive, review:Object.assign({},S.review), topic:S.topic};
+  return {me:Object.assign({},S.me), peerConfirmed:S.peerConfirmed, inRoom:S.inRoom, messages:S.messages, summaries:S.summaries, arenas:S.arenas, comments:S.comments, verdict:S.verdict, deepReview:S.deepReview, danmakuActive:S.danmakuActive, review:Object.assign({},S.review), topic:S.topic};
 }
 function loadReviewData(h){
   S.messages=(h.messages||[]).slice();
@@ -1768,6 +1807,7 @@ function loadReviewData(h){
   S.arenas=(h.arenas||[]).slice();
   S.comments=(h.comments||[]).slice();
   S.verdict=(h.verdict===undefined||h.verdict===null)?null:h.verdict;
+  S.deepReview=(h.deepReview===undefined||h.deepReview===null)?null:h.deepReview;
   S.topic=h.title||'';
   S.review=Object.assign({currentTs:0,playing:false,spd:1,filter:'all',playingStart:0}, S.review);
   buildTimeline(); renderPlayback(); renderEvaluate();
@@ -1790,7 +1830,7 @@ function openReviewArchive(h){
 function closeReviewArchive(){
   if(!histBackup) return;
   const b=histBackup;
-  S.me=b.me; S.peerConfirmed=b.peerConfirmed; S.inRoom=b.inRoom; S.messages=b.messages; S.summaries=b.summaries; S.arenas=b.arenas||[]; S.comments=b.comments; S.verdict=b.verdict; S.danmakuActive=b.danmakuActive; S.review=b.review; S.topic=b.topic;
+  S.me=b.me; S.peerConfirmed=b.peerConfirmed; S.inRoom=b.inRoom; S.messages=b.messages; S.summaries=b.summaries; S.arenas=b.arenas||[]; S.comments=b.comments; S.verdict=b.verdict; S.deepReview=b.deepReview; S.danmakuActive=b.danmakuActive; S.review=b.review; S.topic=b.topic;
   histBackup=null; histView=false;
   $('#btnReviewBack').classList.add('hidden');
   $('#btnExport').textContent='📄 导出复盘网页';
@@ -1801,7 +1841,7 @@ function closeReviewArchive(){
 $('#btnReviewBack').onclick=closeReviewArchive;
 $('#btnHomeReview').onclick=()=>{ leaveToLobby(); }; // 复盘→回到主页(大厅)
 function exportReview(){
-  const html=buildReviewHTML({title:'复盘 · '+fmtTL(now()), me:S.me.name, messages:S.messages, summaries:S.summaries, comments:S.comments, verdict:S.verdict, exportedAt:Date.now()});
+  const html=buildReviewHTML({title:'复盘 · '+fmtTL(now()), me:S.me.name, messages:S.messages, summaries:S.summaries, comments:S.comments, verdict:S.verdict, deepReview:S.deepReview, exportedAt:Date.now()});
   const w=window.open(); if(w){ w.document.write(html); w.document.close(); }
 }
 
@@ -1864,7 +1904,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.16';
+const APP_VERSION='1.0.17';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
