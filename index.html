@@ -154,6 +154,7 @@ input{font-family:inherit}
 .ao-verdict{margin-top:6px;line-height:1.65;font-size:12.5px}
 .ao-advice{margin-top:5px;font-size:12.5px;background:rgba(255,255,255,.15);border-radius:6px;padding:5px 8px}
 .arena-rebuttal{background:#fffbeb;border:1px solid #fde68a;border-radius:8px}
+.arena-qa{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px}
 .arena-query{background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:8px 10px;margin-top:6px}
 .arena-query .q{margin:3px 0;line-height:1.6;color:#1d4ed8}
 .comment-card{border-radius:12px;padding:10px 13px;margin:4px 0 14px;font-size:13px;display:flex;align-items:flex-start;gap:8px;animation:appear .3s ease}
@@ -215,6 +216,8 @@ input{font-family:inherit}
 .tl-node.comment-good{background:#22c55e}
 .tl-node.comment-off{background:#eab308}
 .tl-node.summary{background:#a855f7}
+.tl-node.arena{background:#d946ef;border-color:#f5d0fe}
+.tl-node.qa{background:#f59e0b;border-color:#fde68a}
 #pControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pbtn{background:rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:6px 12px;font-size:13px}
 .pbtn:hover{background:rgba(255,255,255,.28)}
@@ -483,6 +486,7 @@ input{font-family:inherit}
     <div style="flex:1"></div>
     <button class="btn secondary hidden" id="btnReviewBack" style="width:auto;margin:0;padding:7px 14px">← 返回</button>
     <button class="btn secondary" id="btnExport" style="width:auto;margin:0;padding:7px 14px">📄 导出复盘网页</button>
+    <button class="btn secondary" id="btnHomeReview" style="width:auto;margin:0;padding:7px 14px" title="回到主页(大厅)">🏠 主页</button>
   </div>
   <div id="playerPane">
     <div id="reviewStream"></div>
@@ -1493,6 +1497,12 @@ function allNodes(){
     if(S.summaries.find(x=>x.messageId===m.id)) nodes.push({ts:m.ts,kind:'summary',content:'AI 总结'});
   });
   S.comments.forEach(c=>nodes.push({ts:c.atTs,kind:c.style==='good'?'comment-good':'comment-off',content:c.text}));
+  S.arenas.forEach(ar=>{
+    const anchor=S.messages.find(m=>m.id===ar.messageId);
+    const at=anchor?anchor.ts:0;
+    nodes.push({ts:at, kind:'arena', content:'⚖️ 论证点评'});
+    if(ar.questions&&ar.questions.length) ar.questions.forEach(q=>nodes.push({ts:at+1, kind:'qa', content:'❓ '+q}));
+  });
   return nodes.sort((a,b)=>a.ts-b.ts);
 }
 function buildTimeline(){
@@ -1580,7 +1590,8 @@ function makeNodeEl(n){
       '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+((v&&(v.score!=null))?v.score:'-')+'</span><span class="ao-total">/ 10</span></div>'+
       (v&&v.verdict?'<div class="ao-verdict">'+esc(v.verdict)+'</div>':'')+
       '</div>'+
-      (v&&v.rebuttal?'<div class="body arena-rebuttal"><span class="field">🔁 反方会怎么反驳</span>'+esc(v.rebuttal)+'</div>':'');
+      (v&&v.rebuttal?'<div class="body arena-rebuttal"><span class="field">🔁 反方会怎么反驳</span>'+esc(v.rebuttal)+'</div>':'')+
+      ((n.ar&&n.ar.questions&&n.ar.questions.length)?'<div class="body arena-qa"><span class="field">❓ 质询反问</span>'+n.ar.questions.map(q=>'<div>· '+esc(q)+'</div>').join('')+'</div>':'');
   }
   return d;
 }
@@ -1677,7 +1688,7 @@ function renderEvaluate(){
         return '<div class="tl-item"><span class="t">'+fmtTime(c.atTs)+'</span><span class="tag">AI</span><span>'+(c.style==='good'?'✅':'🟡')+' '+esc(c.text)+'</span></div>';
       }).join('') : '<div class="tl-item"><span>暂无点评</span></div>')+
     '</div>'+
-    '<div class="panel"><h4>⚖️ 论证点评</h4>'+(S.arenas.length? S.arenas.map(ar=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">AI</span><span>评分 '+((_v.score==null)?'-':_v.score)+'/10</span><span>'+esc(_v.verdict||'')+'</span></div>'; }).join('') : '<div class="tl-item"><span>暂无论证点评</span></div>')+'</div>'+
+    '<div class="panel"><h4>⚖️ 论证点评</h4>'+(S.arenas.length? S.arenas.map(ar=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">AI</span><span>评分 '+((_v.score==null)?'-':_v.score)+'/10</span><span>'+esc(_v.verdict||'')+'</span></div>'+(ar.questions&&ar.questions.length?'<div class="tl-item"><span class="t" style="color:#b47809">❓ 质询</span><span>'+ar.questions.map(q=>esc(q)).join('；')+'</span></div>':''); }).join('') : '<div class="tl-item"><span>暂无论证点评</span></div>')+'</div>'+
     '<div class="panel"><h4>📌 可深挖方向(AI 建议)</h4>'+
       '<div class="tl-item"><span class="t">方向1</span><span>双方观点中仍有未对齐之处,可进一步澄清分歧根源。</span></div>'+
       '<div class="tl-item"><span class="t">方向2</span><span>将讨论中的好问题整理成清单,作为下次讨论的起点。</span></div>'+
@@ -1786,6 +1797,7 @@ function closeReviewArchive(){
   else $('#lobby').classList.remove('hidden');
 }
 $('#btnReviewBack').onclick=closeReviewArchive;
+$('#btnHomeReview').onclick=()=>{ leaveToLobby(); }; // 复盘→回到主页(大厅)
 function exportReview(){
   const html=buildReviewHTML({title:'复盘 · '+fmtTL(now()), me:S.me.name, messages:S.messages, summaries:S.summaries, comments:S.comments, verdict:S.verdict, exportedAt:Date.now()});
   const w=window.open(); if(w){ w.document.write(html); w.document.close(); }
@@ -1850,7 +1862,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.14';
+const APP_VERSION='1.0.15';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
