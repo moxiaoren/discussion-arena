@@ -309,7 +309,7 @@ input{font-family:inherit}
     <div class="set-sec">修改密码（可选）</div>
     <div class="set-row"><input id="profOldPwd" class="inp" type="password" placeholder="原密码（必填）" style="flex:1"><input id="profNewPwd" class="inp" type="password" placeholder="新密码（≥4 位，留空不改）" style="flex:1"></div>
     <div id="profMsg" class="hint"></div>
-    <div class="confirm-row"><button class="btn" id="profSave">💾 保存</button></div>
+    <div class="confirm-row"><button class="btn" id="profSave">💾 保存</button><button class="btn secondary" id="profLogout" style="color:#d03050;border-color:#f3c2c2">🚪 退出登录</button></div>
   </div>
   <style>
     #profOverlay{position:fixed;inset:0;background:rgba(20,10,40,.45);display:flex;align-items:center;justify-content:center;z-index:71}
@@ -639,39 +639,29 @@ const AI = {
     const noName=text.replace(/^[^::]+[::]\s*/,'');
     return {
       claim: noName.slice(0,40)||'(未明确表达主张,建议先亮明核心观点)',
-      dims:{
-        logic:{score:6, point:'论证有基本推理线索,但严谨性一般,需避免绝对化表述与以偏概全。'},
-        language:{score:7, point:'表述总体清晰,个别用词可更精确,避免歧义。'},
-        system:{score:6, point:'结构上能成一段论证,但层次与论据组织可更完整。'},
-        value:{score:7, point:'话题有一定探讨价值,可往更深层追问。'},
-        hole:{score:5, point:'论据偏少,以观点陈述为主,缺少具体证据支撑。', weakpoints:['缺乏具体数据/事例支撑','前提假设未交代','可能的反例未回应']}
-      },
-      overall:{score:6, verdict:'这段表达了自己的立场,观点方向合理,但总体以陈述为主、论据支撑不足,说服力有限。若补充具体证据、厘清推理链条,论证会更扎实。', advice:'建议:先明确一句话主张;每条观点配一个具体论据(数据/事例/出处);主动回应可能反例。'},
-      rebuttal:'对方可从「你的结论缺乏数据支撑、只是个人判断」切入反驳,并质疑前提的普遍性。'
+      score:6,
+      hl:['观点方向合理,有一定探讨价值','表述总体清晰'],
+      weak:['论据偏少,以观点陈述为主,缺少具体证据支撑'],
+      verdict:'表达了自己的立场,方向合理,但以陈述为主、论据支撑不足,说服力有限。',
+      rebuttal:'对方可从「结论缺乏数据支撑、只是个人判断」切入反驳,并质疑前提的普遍性。'
     };
   },
   async arenaJudge(text, bg){
     if(!this._hasKey()) return this._mockArenaJudge(text,bg);
     const hasBg=!!(bg&&String(bg).trim());
-    const sys='你是「论证质量评委」。对发言者的这段论证做一次**详尽、公正、有说服力的综合点评**。请从以下五个维度分别评估并打分(各 0-10 分):'+
-      '1) **逻辑**:推理是否准确、严谨,有无逻辑谬误(以偏概全、滑坡、偷换概念、循环论证等)、前提是否成立;'+
-      '2) **语言**:表述是否准确、清晰、无歧义,用词是否恰当;'+
-      '3) **体系**:论证的框架结构是否完整、内在是否自洽、是否全面(覆盖主要方面);'+
-      '4) **价值**:话题的内涵与深度,讨论是否有意义、是否触及本质;'+
-      '5) **漏洞把控**:指出论证的薄弱点、证据缺口、可被攻破之处。'+
-      '最后给出:**总体评分**(0-10)、一段**详尽的总体评价**(公正、客观、有说服力;先肯定可取,再指出不足)、以及**改进建议**;再补充**反方可能如何反驳**(简要)。'+
-      '点评要具体、克制、专业,避免空话套话;打分要有理由。返回严格 JSON:'+
-      '{"claim":"这段的核心主张(一句话)","dims":{"logic":{"score":0,"point":"..."},"language":{"score":0,"point":"..."},"system":{"score":0,"point":"..."},"value":{"score":0,"point":"..."},"hole":{"score":0,"point":"...","weakpoints":["..."]}},"overall":{"score":0,"verdict":"总体评价","advice":"改进建议"},"rebuttal":"反方如何反驳"}'+
-      (hasBg?' 同时参考此前的对话背景,判断本段与前文的衔接与一致性(计入体系维度)。':'');
+    const sys='你是「论证质量评委」。对这段论证做一次**简短、克制**的点评,目的是帮双方继续讨论,而不是长篇评估。只抓最突出的 1-2 个亮点和最明显的 1-2 个不足;给一个简洁总分(0-10)和一句总评;再补一句简短的反方反驳。**不要**逐维度展开、**不要**列多条改进建议、**不要**写长篇分析——详细深入的分析留到讨论结束后的复盘。返回严格 JSON:'+
+      '{"claim":"核心主张(一句话)","score":0,"hl":["亮点1","亮点2"],"weak":["不足1","不足2"],"verdict":"一句总评","rebuttal":"一两句简短反方"}'+
+      (hasBg?' 参考此前对话背景判断衔接。':'');
     try{
       const out=await this._chat(sys, hasBg?('此前对话背景:\n'+(bg||'')+'\n\n本次要点评的发言:\n'+text):'本次要点评的发言:\n'+text);
       const m=out.match(/\{[\s\S]*\}/);
       if(m){ const j=JSON.parse(m[0]);
-        const dim=(x)=>({score:Math.max(0,Math.min(10,parseInt(x&&x.score,10)||0)), point:sanitize((x&&x.point)||''), weakpoints:Array.isArray(x&&x.weakpoints)?x.weakpoints.map(s=>sanitize(s)).slice(0,5):[]});
         return {
           claim:sanitize(j.claim||((text||'').slice(0,40))),
-          dims:{logic:dim(j.dims&&j.dims.logic), language:dim(j.dims&&j.dims.language), system:dim(j.dims&&j.dims.system), value:dim(j.dims&&j.dims.value), hole:dim(j.dims&&j.dims.hole)},
-          overall:{score:Math.max(0,Math.min(10,parseInt(j.overall&&j.overall.score,10)||0)), verdict:sanitize((j.overall&&j.overall.verdict)||''), advice:sanitize((j.overall&&j.overall.advice)||'')},
+          score:Math.max(0,Math.min(10,parseInt(j.score,10)||0)),
+          hl:(Array.isArray(j.hl)?j.hl:[]).map(s=>sanitize(s)).filter(Boolean).slice(0,2),
+          weak:(Array.isArray(j.weak)?j.weak:[]).map(s=>sanitize(s)).filter(Boolean).slice(0,2),
+          verdict:sanitize((j.verdict)||''),
           rebuttal:sanitize((j.rebuttal)||'')
         };
       }
@@ -1023,6 +1013,7 @@ function openProfile(){
 }
 $('#btnProfile').onclick=openProfile;
 $('#profClose').onclick=()=>$('#profOverlay').classList.add('hidden');
+$('#profLogout').onclick=()=>{ localStorage.removeItem('arena_session'); location.reload(); };
 $('#profSave').onclick=()=>{
   const oldPwd=$('#profOldPwd').value.trim();
   if(!oldPwd){ $('#profMsg').textContent='请输入原密码（用于身份校验）'; return; }
@@ -1157,14 +1148,16 @@ function renderArenaCard(ar, msg){
   const ownerName=ownerMsg?ownerMsg.name:'';
   const n=(ar.ids||[ar.messageId]).length;
   const qs=(ar.questions||[]).filter(Boolean);
+  const hl=v.hl||[], wk=v.weak||[];
+  const sc=(v.score==null?0:Number(v.score));
   card.innerHTML=
     '<div class="head"><span class="arena-badge">⚖️ 论证点评</span>· '+esc(msg.name||'')+(n>1?'(涵盖 '+n+' 条发言)':'')+'<span class="badge">v'+(ar.rev+1)+'</span></div>'+
     (v.claim?'<div class="body arena-claim"><span class="field">🎯 核心主张</span>'+esc(v.claim)+'</div>':'')+
-    dimRow('logic','逻辑','🔬')+dimRow('language','语言','🗣')+dimRow('system','体系','🏛')+dimRow('value','价值','🌟')+dimRow('hole','漏洞把控','🕳')+
-    '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+(o.score==null?'-':o.score)+'</span><span class="ao-total">/ 10</span></div>'+
-    '<div class="ab-bar ao-bar"><div class="ab-fill" style="width:'+Math.max(0,Math.min(100,(o.score==null?0:o.score)*10))+'%"></div></div>'+
-    (o.verdict?'<div class="ao-verdict">'+esc(o.verdict)+'</div>':'')+
-    (o.advice?'<div class="ao-advice">💡 改进建议:'+esc(o.advice)+'</div>':'')+
+    (hl.length?'<div class="arena-dim"><div class="ad-head"><span class="ad-label">✅ 亮点</span></div><div class="ad-body">'+hl.map(h=>'<div>· '+esc(h)+'</div>').join('')+'</div></div>':'')+
+    (wk.length?'<div class="arena-dim"><div class="ad-head"><span class="ad-label">⚠️ 主要不足</span></div><div class="ad-body">'+wk.map(w=>'<div>· '+esc(w)+'</div>').join('')+'</div></div>':'')+
+    '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+(v.score==null?'-':v.score)+'</span><span class="ao-total">/ 10</span></div>'+
+    '<div class="ab-bar ao-bar"><div class="ab-fill" style="width:'+Math.max(0,Math.min(100,sc*10))+'%"></div></div>'+
+    (v.verdict?'<div class="ao-verdict">'+esc(v.verdict)+'</div>':'')+
     '</div>'+
     (v.rebuttal?'<div class="body arena-rebuttal"><span class="field">🔁 反方会怎么反驳</span>'+esc(v.rebuttal)+'</div>':'')+
     (qs.length?'<div class="arena-query"><div class="field">❓ AI 质询反问(帮你补强论证)</div>'+qs.map(q=>'<div class="q">· '+esc(q)+'</div>').join('')+'</div>':'')+
@@ -1831,7 +1824,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.6';
+const APP_VERSION='1.0.7';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -2064,6 +2057,10 @@ async function cmdGhSave(h, btn){
 }
 loadState();
 loadLoginAccounts();
+// 恢复本地登录会话：刷新后自动认领上次身份(直到清理浏览器缓存)；在个人资料弹层可「退出登录」
+(function(){
+  try{ const _s=localStorage.getItem('arena_session'); if(_s){ const _u=JSON.parse(_s); if(_u && _u.account) enterRoomFor(_u); } }catch(e){}
+})();
 
 // 初始化(若此前已在 localStorage 有口令则提示)
 </script>
