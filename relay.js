@@ -21,6 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
+const APP_VERSION = '1.0.5';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -116,7 +117,7 @@ function maskedSettings() {
   return {
     managePwdSet: !!authInfo().pwdHash,
     deepseek: { apiKey: mask(c.deepseek && c.deepseek.apiKey), model: (c.deepseek && c.deepseek.model) || 'deepseek-chat' },
-    github: { token: mask(c.github && c.github.token), backupRepo: (c.github && c.github.backupRepo) || 'moxiaoren/discussion-room-server' },
+    github: { token: mask(c.github && c.github.token), updateRepo: (c.github && c.github.updateRepo) || '', backupRepo: (c.github && c.github.backupRepo) || 'moxiaoren/discussion-room-server' },
     mail: {
       host: (c.mail && c.mail.host) || '', port: (c.mail && c.mail.port) || 465,
       user: (c.mail && c.mail.user) || '', pass: mask(c.mail && c.mail.pass), from: (c.mail && c.mail.from) || '',
@@ -151,6 +152,7 @@ function handleAdmin(path, data, res) {
     c.github = c.github || {};
     if (d.github.token != null && String(d.github.token).trim()) c.github.token = String(d.github.token).trim();
     if (d.github.backupRepo != null && String(d.github.backupRepo).trim()) c.github.backupRepo = String(d.github.backupRepo).trim();
+    if (d.github.updateRepo != null && String(d.github.updateRepo).trim()) c.github.updateRepo = String(d.github.updateRepo).trim();
   }
   if (d.mail) {
     const m = c.mail || {};

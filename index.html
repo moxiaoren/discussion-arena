@@ -345,6 +345,10 @@ input{font-family:inherit}
       <div class="set-row"><input id="setSmtpFrom" class="inp" placeholder="发件显示 from（留空同发送邮箱）" style="flex:1"></div>
       <div class="set-sec">📬 接收邮箱（每行一个，软件把新网址发到这些邮箱）</div>
       <textarea id="setMailTo" class="inp" rows="4" style="width:100%;box-sizing:border-box;resize:vertical" placeholder="收件邮箱，每行一个"></textarea>
+      <div class="set-sec">☁️ GitHub 在线更新<span id="setGhState" style="font-size:12px;color:#888;font-weight:400"></span></div>
+      <div class="set-row"><input id="setGhUpRepo" class="inp" placeholder="更新仓库，如 moxiaoren/discussion-arena" style="flex:2"><input id="setGhToken" class="inp" type="password" placeholder="GitHub Token（留空=不改）" style="flex:1"></div>
+      <div class="set-row"><input id="setGhBackupRepo" class="inp" placeholder="存档备份仓库（可选）如 moxiaoren/discussion-room-server" style="flex:1"></div>
+      <div class="hint" style="margin:4px 0 8px;font-size:12px;color:#999">配好 Token 后，后端（relay.js / launch.js）更新由服务器每 8 分钟自动拉取覆盖并重启，无需再手动整包安装。</div>
       <div id="setMsg" class="hint" style="margin-top:6px"></div>
       <div class="confirm-row"><button class="btn" id="setSave">💾 保存</button></div>
     </div>
@@ -366,12 +370,12 @@ input{font-family:inherit}
     <div id="resumeCard" class="hidden"></div>
     <h2>👋 登录「论证点评间」</h2>
     <div class="tip">账号制登录：选择身份账号 + 输入密码（默认 000000）。登录后直接进入 / 新建当前讨论房间（房号仅作展示，无需记忆）。</div>
-    <div class="lbl">选择身份账号</div>
-    <div id="loginAccounts" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
-    <div class="lbl">密码</div>
-    <input id="loginPwd" class="inp" type="password" placeholder="登录密码">
-    <button class="btn" id="btnLogin" style="margin-top:10px;width:100%">🔓 登录</button>
-    <div id="loginMsg" class="hint" style="color:#d03050"></div>
+    <div class="lbl login-only">选择身份账号</div>
+    <div id="loginAccounts" class="login-only" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+    <div class="lbl login-only">密码</div>
+    <input id="loginPwd" class="inp login-only" type="password" placeholder="登录密码">
+    <button class="btn login-only" id="btnLogin" style="margin-top:10px;width:100%">🔓 登录</button>
+    <div id="loginMsg" class="hint login-only" style="color:#d03050"></div>
     <hr style="margin:14px 0 8px;border:none;border-top:1px solid #eceaf7">
     <div style="display:flex;gap:6px">
       <button class="btn secondary hidden" id="btnEnterRoom">🆕 新建房间/进入</button>
@@ -965,9 +969,15 @@ $('#btnLogin').onclick=()=>{
       enterRoomFor(j.user);
     }).catch(()=>{ $('#btnLogin').disabled=false; $('#loginMsg').textContent='登录请求失败'; });
 };
+function showLoggedIn(user){
+  document.querySelectorAll('.login-only').forEach(function(el){ el.classList.add('hidden'); });
+  const h=document.querySelector('#lobby h2'); if(h) h.textContent='👋 已登录 · '+(user.nick||user.name);
+  const t=document.querySelector('#lobby .tip'); if(t) t.textContent='登录成功，正在进入当前讨论房间（若提示「新建房间」则点击创建新话题）...';
+}
 function enterRoomFor(user){
   S.me.name=user.nick||user.name; S.me.account=user.account; S.me.avatar=user.avatar; S.me.isCreator=false;
   $('#topSub').textContent='已登录 '+S.me.name;
+  showLoggedIn(user);
   fetch('/api/room/active').then(r=>r.json()).then(j=>{
     if(j&&j.ok&&j.room&&j.room.roomId){
       ROOMINFO=j.room;
@@ -1811,7 +1821,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.4';
+const APP_VERSION='1.0.5';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -1874,8 +1884,13 @@ function fillSetForm(s){
   set$('setSmtpUser').value = (s.mail&&s.mail.user)||'';
   set$('setSmtpFrom').value = (s.mail&&s.mail.from)||'';
   set$('setMailTo').value = ((s.mail&&s.mail.to)||[]).join('\n');
-  set$('setDsKey').value=''; set$('setSmtpPass').value='';
+  set$('setSmtpPass').value='';
   set$('setSmtpPass').placeholder = (s.mail&&s.mail.pass)?('已配置 '+s.mail.pass+'，留空不修改'):'授权码（留空=不改）';
+  const gs=(s.github)||{};
+  set$('setGhState').textContent = gs.token?(' · 已配置 '+gs.token):' · 未配置';
+  set$('setGhUpRepo').value = gs.updateRepo||'';
+  set$('setGhBackupRepo').value = gs.backupRepo||'';
+  set$('setGhToken').value='';
 }
 function setLockMode(mode){
   set$('setLock').classList.remove('hidden'); set$('setForm').classList.add('hidden');
@@ -1925,6 +1940,11 @@ document.getElementById('setSave').onclick=()=>{
       user: set$('setSmtpUser').value.trim(), from: set$('setSmtpFrom').value.trim(),
       pass: set$('setSmtpPass').value.trim(),
       to: set$('setMailTo').value.split('\n').map(x=>x.trim()).filter(Boolean)
+    },
+    github:{
+      token: set$('setGhToken').value.trim(),
+      updateRepo: set$('setGhUpRepo').value.trim(),
+      backupRepo: set$('setGhBackupRepo').value.trim()
     }
   };
   fetch('/api/admin/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd:SET.pwd,data})}).then(r=>r.json()).then(j=>{
