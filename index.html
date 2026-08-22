@@ -399,6 +399,7 @@ input{font-family:inherit}
     </div>
     <div style="flex:1"></div>
     <button id="btnArena" class="arena-chip" title="切换「论证点评」玩法:总结时做多维度论证评估与质询反问">⚖️ 整理</button>
+    <button id="btnHome" title="回到主页(大厅,保留登录)">🏠 主页</button>
     <button id="btnNewRoom" title="开启全新空白的新话题">🆕 新话题</button>
     <button id="btnEnd" title="双方都确认后进入复盘">🛑 结束讨论</button>
   </div>
@@ -865,6 +866,7 @@ $('#btnResumeConfirm').onclick=()=>{
 
 function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=[]; S.verdict=null; try{localStorage.removeItem(STATE_KEY);}catch(e){} }
 function leaveToLobby(){ S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
+$('#btnHome').onclick=()=>{ leaveToLobby(); }; // 讨论间→回到主页(大厅)
 function startNewTopic(){
   const has=S.messages.length>0;
   const m=has ? '将把当前讨论存为存档(本地 + 服务器 + GitHub 三层备份),然后开启一个全新空白的新话题。确定吗?' : '将开启一个全新空白的新话题。确定吗?';
@@ -904,8 +906,9 @@ async function renderHistory(){
   archives.forEach(a=>{
     const d=document.createElement('div'); d.className='hist-item';
     d.innerHTML='<div class="hist-tt"><span>'+esc(a.title||'未命名')+'</span><span class="ts">'+fmtHistTime(a.endTs)+' · '+(a.msgCount||0)+' 条 · 🔑 '+esc(a.roomId)+'</span></div>'+
-      '<div class="hist-btns"><button class="mini-btn2" data-cv>👁 完整复盘</button></div>';
+      '<div class="hist-btns"><button class="mini-btn2" data-cv>👁 完整复盘</button><button class="mini-btn2" data-del style="color:#d03050">🗑 删除</button></div>';
     d.querySelector('[data-cv]').onclick=async()=>{ try{ const lr=await (await fetch('/api/room/load?id='+a.roomId)).json(); if(lr&&lr.ok&&lr.data) openReviewArchive(lr.data); else alert('存档读取失败'); }catch(e){ alert('读取失败:'+e.message); } };
+    d.querySelector('[data-del]').onclick=async()=>{ if(!confirm('确定删除这段历史存档?(本地+服务器存档将删除)')) return; try{ const rj=await (await fetch('/api/room/delete?id='+a.roomId)).json(); renderHistory(); }catch(e){ alert('删除失败:'+e.message); } };
     el.appendChild(d);
   });
 }
@@ -1212,7 +1215,7 @@ function spawnDanmaku(text){
   setTimeout(()=>d.remove(), 7000);
 }
 /* ================= 论证点评模式(⚖️):总结时进行多维度论证评估 + 质询反问 ================= */
-function isArenaMode(){ try{ return localStorage.getItem('arena_on')==='1'; }catch(e){ return false; } }
+function isArenaMode(){ try{ return localStorage.getItem('arena_on')!=='0'; }catch(e){ return true; } } // 默认论证点评模式
 async function genArena(ids, ev){
   const arr = S.messages.filter(m=>ids.includes(m.id)).sort((a,b)=>a.ts-b.ts);
   if(!arr.length) return;
@@ -1449,6 +1452,8 @@ async function enterReview(){
   $('#topSub').textContent='复盘 · 讨论已结束';
   archiveCurrent();  // 结束讨论自动存档(按会话 session 去重,不重复)
   clearActive();     // 已结束,不再显示"进行中"恢复入口
+  try{ fetch('/api/room/active',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clear:true})}).catch(()=>{}); }catch(e){} // 清服务端活跃房间→刷新回到主页
+  try{ localStorage.removeItem('arena_active_room'); }catch(e){}
   $('#aiBusy').classList.remove('hidden');
   await ensureComments();  // 对话期间不点评,点评统一在复盘回顾阶段生成
   await ensureVerdict();
@@ -1514,7 +1519,7 @@ function buildTimeline(){
     const d=document.createElement('div');
     d.className='tl-node '+n.kind; d.style.left=pct+'%';
     d.title=n.content.slice(0,30);
-    d.onclick=()=>{ S.review.currentTs=n.ts; syncPlayback(); };
+    d.onclick=()=>{ S.review.currentTs=n.ts; RVIS=R.nodes.filter(x=>x.ts<=n.ts).length; syncPlayback(); };
     tl.appendChild(d);
   });
   // 拖动进度条(视频式:消息随进度出现/消失)
@@ -1527,10 +1532,11 @@ function buildTimeline(){
 function scrubTL(cx){
   const r=$('#timeline').getBoundingClientRect();
   const p=(cx-r.left)/r.width;
-  S.review.currentTs=R.min+(R.max-R.min)*Math.min(Math.max(p,0),1);
+  RVIS=Math.round(Math.min(Math.max(p,0),1)*R.nodes.length);
+  RVIS=Math.max(0,Math.min(RVIS,R.nodes.length));
   syncPlayback();
 }
-const kindRank={danmaku:0,discuss:0,summary:1,comment:2};
+const kindRank={danmaku:0,discuss:0,summary:1,comment:2,arena:1};
 /* 回放节点列表(按当前筛选) */
 function buildPlayNodes(filter){
   const list=[];
@@ -1541,6 +1547,8 @@ function buildPlayNodes(filter){
       if(filter==='all'||filter==='danmaku') list.push({ts:m.ts,kind:'danmaku',msg:m});
     }else{
       if(filter==='all'||filter==='discuss') list.push({ts:m.ts,kind:'discuss',msg:m});
+      const ar=S.arenas.find(x=>x.messageId===m.id);
+      if(ar && (filter==='all'||filter==='key')) list.push({ts:m.ts,kind:'arena',msg:m,ar});
       if(hasSum && (filter==='all'||filter==='key')) list.push({ts:m.ts,kind:'summary',msg:m});
       if(com && (filter==='all'||filter==='key'||filter==='comment')) list.push({ts:m.ts,kind:'comment',msg:m,comment:com});
     }
@@ -1572,10 +1580,22 @@ function makeNodeEl(n){
     d.className='comment-card '+(c.style==='good'?'good':'off'); d.dataset.ts=n.ts;
     d.innerHTML='<span>'+(c.style==='good'?'✅':'🟡')+'</span><span>'+esc(c.text)+'</span>'+
       '<span style="font-size:11px;opacity:.6;margin-left:6px">· 复盘点评</span>';
+  }else if(n.kind==='arena'){
+    const v=n.ar&&(n.ar.judge||((n.ar.versions&&n.ar.versions[n.ar.rev])||{}));
+    d.className='arena-card review'; d.dataset.ts=n.ts;
+    d.innerHTML='<div class="head"><span class="arena-badge">⚖️ 论证点评</span></div>'+
+      (v&&v.claim?'<div class="body arena-claim"><span class="field">🎯 核心主张</span>'+esc(v.claim)+'</div>':'')+
+      (v&&v.hl&&v.hl.length?'<div class="arena-dim"><div class="ad-head"><span class="ad-label">✅ 亮点</span></div><div class="ad-body">'+v.hl.map(h=>'<div>· '+esc(h)+'</div>').join('')+'</div></div>':'')+
+      (v&&v.weak&&v.weak.length?'<div class="arena-dim"><div class="ad-head"><span class="ad-label">⚠️ 主要不足</span></div><div class="ad-body">'+v.weak.map(w=>'<div>· '+esc(w)+'</div>').join('')+'</div></div>':'')+
+      '<div class="arena-overall"><div class="ao-head">🏅 总体评分 <span class="ao-score">'+((v&&(v.score!=null))?v.score:'-')+'</span><span class="ao-total">/ 10</span></div>'+
+      (v&&v.verdict?'<div class="ao-verdict">'+esc(v.verdict)+'</div>':'')+
+      '</div>'+
+      (v&&v.rebuttal?'<div class="body arena-rebuttal"><span class="field">🔁 反方会怎么反驳</span>'+esc(v.rebuttal)+'</div>':'');
   }
   return d;
 }
 /* 渲染到前 count 个节点:增量追加,形成视频式出现/消失 */
+let RVIS=0; let PB_T=null; // 复盘回放:当前显示到第 RVIS 个节点
 function renderPlaybackTo(count){
   const stream=$('#reviewStream');
   const cur=stream.children.length;
@@ -1592,33 +1612,39 @@ function renderPlaybackTo(count){
 function renderPlayback(){
   R.nodes=buildPlayNodes(S.review.filter);
   $('#reviewStream').innerHTML='';
-  S.review.currentTs = R.nodes.length? R.nodes[R.nodes.length-1].ts : (R.min||0);
+  RVIS=R.nodes.length; // 进入复盘默认展示全部节点
   syncPlayback();
 }
-function syncPlayback(){
-  const pct=((S.review.currentTs-R.min)/(R.max-R.min||1))*100;
-  $('#tlFill').style.width=pct+'%';
-  $('#tlKnob').style.left=pct+'%';
-  $('#tlTime').textContent=fmtTL(S.review.currentTs)+' / '+fmtTL(R.max);
-  // 计算当前应显示的节点数(ts 不超过当前进度)
-  let vis=0;
-  for(let i=0;i<R.nodes.length;i++){ if(R.nodes[i].ts<=S.review.currentTs) vis=i+1; else break; }
-  renderPlaybackTo(vis);
+function syncBar(){
+  const len=R.nodes.length||1, f=len?RVIS/len:0;
+  $('#tlFill').style.width=(f*100)+'%';
+  $('#tlKnob').style.left=(f*100)+'%';
+  const curN=RVIS>0?(R.nodes[RVIS-1]||null):null;
+  $('#tlTime').textContent=fmtTL(curN?curN.ts:(R.min||0))+' / '+fmtTL(R.max);
 }
-/* 播放控制 */
+function syncPlayback(){ syncBar(); renderPlaybackTo(RVIS); }
+/* 播放控制:固定间隔逐条展现(每条留足够时间看完消息+AI点评),不按真实时间间隔 */
+function pbDur(n){
+  if(!n) return 2400;
+  if(n.kind==='discuss'||n.kind==='danmaku') return 2700;
+  if(n.kind==='arena'||n.kind==='summary'||n.kind==='comment') return 4400;
+  return 2700;
+}
 $('#pPlay').onclick=()=>{
-  S.review.playing=!S.review.playing;
-  $('#pPlay').textContent=S.review.playing?'⏸':'▶';
-  if(S.review.playing){ S.review.playingStart=now(); S.review.lastTs=S.review.currentTs; tick(); }
+  if(S.review.playing){ S.review.playing=false; if(PB_T){clearTimeout(PB_T); PB_T=null;} $('#pPlay').textContent='▶'; return; }
+  if(RVIS>=R.nodes.length) RVIS=0; // 已看完则从头
+  renderPlaybackTo(RVIS);
+  S.review.playing=true; $('#pPlay').textContent='⏸';
+  pbStep();
 };
-function tick(){
+function pbStep(){
   if(!S.review.playing) return;
-  if(!R.nodes.length) return;
-  const dt=(now()-S.review.playingStart)*S.review.spd;
-  S.review.currentTs=Math.min(S.review.lastTs+dt, R.max);
-  syncPlayback();
-  if(S.review.currentTs>=R.max){ S.review.playing=false; $('#pPlay').textContent='▶'; }
-  requestAnimationFrame(tick);
+  if(RVIS>=R.nodes.length){ S.review.playing=false; $('#pPlay').textContent='▶'; PB_T=null; return; }
+  const shown=R.nodes[RVIS]; // 本次要展示的节点
+  RVIS=RVIS+1;
+  renderPlaybackTo(RVIS);
+  syncBar();
+  PB_T=setTimeout(pbStep, pbDur(shown)); // 停留当前节点,给足时间看消息和AI点评
 }
 document.querySelectorAll('.speed').forEach(s=>s.onclick=()=>{
   S.review.spd=parseInt(s.dataset.s);
@@ -1629,10 +1655,10 @@ document.querySelectorAll('.fchip').forEach(c=>c.onclick=()=>{
   document.querySelectorAll('.fchip').forEach(x=>x.classList.toggle('on',x===c));
   renderPlayback();
 });
-$('#pBack').onclick=()=>{ const n=allNodes(); S.review.currentTs=n.length?n[0].ts:0; syncPlayback(); };
-$('#pFwd').onclick=()=>{ const n=allNodes(); S.review.currentTs=n.length?n[n.length-1].ts:0; syncPlayback(); };
-$('#pRewind').onclick=()=>{ const n=allNodes(); const i=n.findIndex(x=>x.ts>=S.review.currentTs); S.review.currentTs=i>0?n[Math.max(0,i-3)].ts:S.review.currentTs; syncPlayback(); };
-$('#pFast').onclick=()=>{ const n=allNodes(); const i=n.findIndex(x=>x.ts>=S.review.currentTs); S.review.currentTs=i>=0?n[Math.min(n.length-1,i+3)].ts:S.review.currentTs; syncPlayback(); };
+$('#pBack').onclick=()=>{ RVIS=0; syncPlayback(); };
+$('#pFwd').onclick=()=>{ RVIS=R.nodes.length; syncPlayback(); };
+$('#pRewind').onclick=()=>{ RVIS=Math.max(0,RVIS-3); syncPlayback(); };
+$('#pFast').onclick=()=>{ RVIS=Math.min(R.nodes.length,RVIS+3); syncPlayback(); };
 
 /* ================= 复盘:AI 评价 ================= */
 function renderEvaluate(){
@@ -1663,6 +1689,7 @@ function renderEvaluate(){
         return '<div class="tl-item"><span class="t">'+fmtTime(c.atTs)+'</span><span class="tag">AI</span><span>'+(c.style==='good'?'✅':'🟡')+' '+esc(c.text)+'</span></div>';
       }).join('') : '<div class="tl-item"><span>暂无点评</span></div>')+
     '</div>'+
+    '<div class="panel"><h4>⚖️ 论证点评</h4>'+(S.arenas.length? S.arenas.map(ar=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">AI</span><span>评分 '+((_v.score==null)?'-':_v.score)+'/10</span><span>'+esc(_v.verdict||'')+'</span></div>'; }).join('') : '<div class="tl-item"><span>暂无论证点评</span></div>')+'</div>'+
     '<div class="panel"><h4>📌 可深挖方向(AI 建议)</h4>'+
       '<div class="tl-item"><span class="t">方向1</span><span>双方观点中仍有未对齐之处,可进一步澄清分歧根源。</span></div>'+
       '<div class="tl-item"><span class="t">方向2</span><span>将讨论中的好问题整理成清单,作为下次讨论的起点。</span></div>'+
@@ -1835,7 +1862,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.12';
+const APP_VERSION='1.0.13';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -1889,7 +1916,7 @@ function updateArenaBtn(){
 }
 document.getElementById('btnArena').onclick=()=>{
   const on=!isArenaMode();
-  try{ on?localStorage.setItem('arena_on','1'):localStorage.removeItem('arena_on'); }catch(e){}
+  try{ localStorage.setItem('arena_on', on?'1':'0'); }catch(e){} // 记住用户选择,默认点评
   updateArenaBtn();
 };
 updateArenaBtn();

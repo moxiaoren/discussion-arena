@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.12';
+const APP_VERSION = '1.0.13';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -306,6 +306,7 @@ const server = http.createServer((req, res) => {
     let body = ''; req.on('data', (c) => { body += c; if (body.length > 2e5) req.destroy(); });
     req.on('end', () => {
       let d = {}; try { d = JSON.parse(body); } catch (e) {}
+      if (d && d.clear) { writeRoomState(null); jsonRes(res, { ok: true, room: null }); return; } // 结束后清活跃房间→刷新回主页
       let id;
       if (d.roomId && /^\d{6}$/.test(d.roomId)) id = d.roomId;
       else { do { id = genId(); } while (fs.existsSync(path.join(DATA_DIR, id + '.json'))); }
@@ -341,6 +342,13 @@ const server = http.createServer((req, res) => {
       try { jsonRes(res, { ok: true, data: JSON.parse(fs.readFileSync(fp, 'utf8')) }); return; } catch (e) {}
     }
     jsonRes(res, { ok: false, message: '存档不存在' }); return;
+  }
+  if (p === '/api/room/delete') {
+    const qs = new URL(req.url, 'http://x').searchParams;
+    const id = qs.get('id') || '';
+    const fp = path.join(DATA_DIR, id + '.json');
+    if (/^\d{6}$/.test(id) && fs.existsSync(fp)) { try { fs.unlinkSync(fp); jsonRes(res, { ok: true }); return; } catch (e) {} }
+    jsonRes(res, { ok: false, message: '删除失败或不存在' }); return;
   }
   if (p === '/api/admin/needpwd') {
     jsonRes(res, { ok: true, managePwdSet: !!authInfo().pwdHash }); return;
