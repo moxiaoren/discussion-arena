@@ -12,7 +12,7 @@ input{font-family:inherit}
 .hidden{display:none!important}
 
 /* ---------- 顶部标题栏 ---------- */
-#topbar{background:linear-gradient(135deg,#6c5ce7,#a855f7);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;z-index:5}
+#topbar{background:linear-gradient(135deg,#6c5ce7,#a855f7);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;z-index:5}
 #topbar .brand{font-weight:700;font-size:16px}
 #topbar .sub{font-size:12px;opacity:.85;margin-top:2px}
 #topMembers{font-size:12px;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px}
@@ -30,11 +30,11 @@ input{font-family:inherit}
 #helpBody ol,#helpBody ul{margin:4px 0 4px 20px}
 #helpBody li{margin:3px 0}
 #helpBody p{margin:4px 0}
-#guideBar{margin:0;background:#fff7e0;border-bottom:1px solid #f5e2a8;color:#8a6d0a;font-size:12px;padding:8px 14px;line-height:1.7}
+#guideBar{margin:0;background:#fff7e0;border-bottom:1px solid #f5e2a8;color:#8a6d0a;font-size:12px;padding:6px 30px 6px 14px;line-height:1.7;position:relative}
 #guideBar.hidden{display:none}
 #btnNewRoom{background:#f3f0ff;color:#6d28d9;border:1px solid #d8cdf7;padding:3px 10px;border-radius:8px;font-size:12px;cursor:pointer}
 #btnNewRoom:hover{background:#e9e3ff}
-#roomBar{background:#fff;border-bottom:1px solid #eceaf7;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#roomBar{background:#fff;border-bottom:1px solid #eceaf7;padding:6px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .room-pwd{display:flex;align-items:center;gap:8px;background:#f3efff;border:1px solid #ddd6fe;border-radius:10px;padding:4px 8px 4px 12px}
 .room-pwd .rm-label{font-size:12px;color:#7c5cd6;font-weight:600}
 .room-pwd .rm-code{font-family:Consolas,"Courier New",monospace;font-size:17px;font-weight:700;color:#5b21b6;letter-spacing:3px}
@@ -98,7 +98,7 @@ input{font-family:inherit}
 
 /* ---------- 讨论区 ---------- */
 #room{flex:1;display:flex;flex-direction:column;min-height:0}
-#stream{flex:1;overflow-y:auto;padding:16px 14px 8px;position:relative;min-height:0}
+#stream{flex:1;overflow-y:auto;padding:12px 12px 6px;position:relative;min-height:0}
 /* 弹幕浮层 */
 #danmakuLayer{position:fixed;top:14%;left:0;width:100%;pointer-events:none;z-index:30;height:120px;overflow:hidden}
 .danmaku{position:absolute;white-space:nowrap;font-size:16px;font-weight:600;color:#7c6cf0;text-shadow:0 1px 2px rgba(255,255,255,.9);animation:fly linear forwards}
@@ -751,6 +751,7 @@ const S = {
   peerConfirmed:false,
   inRoom:false,
   messages:[],   // {id,name,ts,content,appendTo,channel}
+  deleted:[], // 撤回的消息id集合(持久化,回放/合并时过滤,防刷新后旧消息回显)
   summaries:[],  // {messageId, core, points, rev, versions:[]}
   arenas:[],     // 论证点评:{id, ids[], messageId, judge, questions, rev, versions[]}
   comments:[],   // {id,msgId,atTs,style,text,source}
@@ -772,7 +773,7 @@ function persistState(){
   try{
     localStorage.setItem(STATE_KEY, JSON.stringify({
       messages:S.messages, summaries:S.summaries, arenas:S.arenas,
-      comments:S.comments, verdict:S.verdict, savedAt:Date.now()
+      comments:S.comments, verdict:S.verdict, deleted:S.deleted||[], savedAt:Date.now()
     }));
   }catch(e){ console.warn('persist fail',e); }
   try{
@@ -792,6 +793,7 @@ function loadState(){
     if(Array.isArray(d.arenas)) S.arenas=d.arenas;
     if(Array.isArray(d.comments)) S.comments=d.comments;
     if(d.verdict!=null) S.verdict=d.verdict;
+    if(Array.isArray(d.deleted)) S.deleted=d.deleted;
   }catch(e){ console.warn('load fail',e); }
 }
 
@@ -918,10 +920,10 @@ function enterRoom(name, isCreator, room){
   const rid=ROOMINFO?ROOMINFO.roomId:currentRoomId();
   if(rid && $('#pwdCode')) $('#pwdCode').textContent=rid;
   if(ROOMINFO && ROOMINFO.title && $('#roomTopic')) $('#roomTopic').textContent='💬 '+ROOMINFO.title;
-  if(!sessionStorage.getItem('dr_guide')){
-    $('#guideBar').innerHTML='💡 <b>怎么玩:</b>切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(AI 判断回应与是否跑题) · 切「🆕新话题」自动存档旧房间 · 结束点「🛑」双方确认进复盘 · 右上角「❓」看完整说明';
+  if(!localStorage.getItem('arena_guide')){
+    $('#guideBar').innerHTML='<span id="guideX" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);cursor:pointer;font-weight:700;color:#b18b0a;padding:2px 6px" title="关闭(不再提示)">✕</span>💡 <b>怎么玩:</b>切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(AI 判断回应与是否跑题) · 切「🆕新话题」自动存档旧房间 · 结束点「🛑」双方确认进复盘 · 右上角「❓」看完整说明';
     $('#guideBar').classList.remove('hidden');
-    sessionStorage.setItem('dr_guide','1');
+    $('#guideX').onclick=()=>{ $('#guideBar').classList.add('hidden'); try{localStorage.setItem('arena_guide','1');}catch(e){} };
   }
   renderStatus();
   renderStream();
@@ -1382,6 +1384,7 @@ function delMsg(id){
   const m=S.messages.find(x=>x.id===id); if(!m) return;
   if(!confirm('撤回这条消息?(其 AI 总结/点评也会一并删除)')) return;
   S.messages=S.messages.filter(x=>x.id!==id);
+  (S.deleted||(S.deleted=[])).push(id);
   S.summaries=S.summaries.filter(sm=>!(sm.ids||[sm.messageId]).includes(id));
   S.comments=S.comments.filter(c=>c.msgId!==id);
   persistState(); renderStream(); renderStatus();
@@ -1774,7 +1777,8 @@ NetBridge.onhistory=(arr)=>{
   if(typeof histView!=='undefined'&&histView) return;
   if(!Array.isArray(arr)||!arr.length) return;
   let changed=false;
-  arr.forEach(m=>{ if(m&&m.id&&!S.messages.find(x=>x.id===m.id)){ S.messages.push(m); changed=true; } });
+  const _del=(S.deleted||[]);
+  arr.forEach(m=>{ if(m&&m.id&&!_del.includes(m.id)&&!S.messages.find(x=>x.id===m.id)){ S.messages.push(m); changed=true; } });
   if(changed){ S.messages.sort((a,b)=>(a.ts||0)-(b.ts||0)); persistState(); renderStatus(); renderStream(); }
 };
 bc.onmessage=(e)=>{
@@ -1808,6 +1812,7 @@ bc.onmessage=(e)=>{
       break;
     case 'rmmsg':
       S.messages=S.messages.filter(x=>x.id!==d.id);
+      (S.deleted||(S.deleted=[])).push(d.id);
       S.summaries=S.summaries.filter(sm=>!(sm.ids||[sm.messageId]).includes(d.id));
       S.comments=S.comments.filter(c=>c.msgId!==d.id);
       S.arenas=S.arenas.filter(ar=>!(ar.ids||[ar.messageId]).includes(d.id));
@@ -1824,7 +1829,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.9';
+const APP_VERSION='1.0.10';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');

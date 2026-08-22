@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.9';
+const APP_VERSION = '1.0.10';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -239,6 +239,16 @@ function recordLive(roomId, data){
   arr.push(data.m);
   try { fs.mkdirSync(LIVE_DIR, { recursive: true }); fs.writeFile(path.join(LIVE_DIR, roomId + '.json'), JSON.stringify({ roomId, msgs: arr }), 'utf8', () => {}); } catch (e) {}
 }
+function delLive(roomId, id){
+  if (!roomId || !id || !/^\d{6}$/.test(roomId)) return;
+  let arr = liveMsgs.get(roomId);
+  if (!Array.isArray(arr)) return;
+  const next = arr.filter(x => x.id !== id);
+  if (next.length !== arr.length) {
+    liveMsgs.set(roomId, next);
+    try { fs.mkdirSync(LIVE_DIR, { recursive: true }); fs.writeFile(path.join(LIVE_DIR, roomId + '.json'), JSON.stringify({ roomId, msgs: next }), 'utf8', () => {}); } catch (e) {}
+  }
+}
 function genId() { return String(Math.floor(100000 + Math.random() * 900000)); }
 function send(ws, obj) { try { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); } catch (e) {} }
 function broadcast(roomId, obj, except) {
@@ -419,7 +429,8 @@ wss.on('connection', (ws) => {
       if (hist && hist.length) send(ws, { type: 'room-history', roomId: id, msgs: hist.slice() });
     } else if (m.type === 'relay' && r) {
       broadcast(r, { type: 'relay', data: m.data }, ws);
-      recordLive(r, m.data); // 记录消息供后来者登录后回放
+      if (m.data && m.data.type === 'rmmsg') delLive(r, m.data.id); // 撤回:同步从服务端 live 删除,防止刷新回放旧消息
+      else recordLive(r, m.data); // 记录消息供后来者登录后回放
     } else if (m.type === 'ping') {
       send(ws, { type: 'pong' });
     } else if (m.type === 'ai') {
