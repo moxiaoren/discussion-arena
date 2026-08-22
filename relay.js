@@ -51,6 +51,46 @@ function uiRepo() { const c = loadSettings(); return (c.updater && c.updater.rep
 function uiBranch() { const c = loadSettings(); return (c.updater && c.updater.branch) || 'main'; }
 const DEEPSEEK_BASE = process.env.DEEPSEEK_BASE || 'https://api.deepseek.com';
 
+/* ---------------- 账号体系（data/accounts.json，固定两个成员账号） ---------------- */
+const ACCOUNTS_PATH = path.join(DATA_DIR, 'accounts.json');
+const ROOMSTATE_PATH = path.join(DATA_DIR, 'roomstate.json');
+const DEFAULT_ACCOUNTS = [
+  { account: 'xiaozhang', name: '小张', nick: '小张', avatar: '🟣' },
+  { account: 'xiaozhou', name: '小周', nick: '小周', avatar: '🔵' }
+];
+const AVATARS = ['🟣', '🔵', '🟢', '🟡', '🟠', '🔴', '⚫️', '⚪️'];
+function loadAccounts() {
+  if (fs.existsSync(ACCOUNTS_PATH)) {
+    try { const a = JSON.parse(fs.readFileSync(ACCOUNTS_PATH, 'utf8')); if (a && Array.isArray(a.accounts) && a.accounts.length) return a.accounts; } catch (e) {}
+  }
+  // 首次创建两个账号，默认密码 000000
+  const accounts = DEFAULT_ACCOUNTS.map((acc) => { const salt = crypto.randomBytes(8).toString('hex'); return Object.assign({}, acc, { salt, pwdHash: hashPwd('000000', salt) }); });
+  try { fs.writeFileSync(ACCOUNTS_PATH, JSON.stringify({ accounts }, null, 2), 'utf8'); console.log('👥 已创建账号体系(小张/小周，默认密码 000000)'); } catch (e) {}
+  return accounts;
+}
+function writeAccounts(list) { try { fs.writeFileSync(ACCOUNTS_PATH, JSON.stringify({ accounts: list }, null, 2), 'utf8'); return true; } catch (e) { return false; } }
+function findAccount(acc) { return (loadAccounts().find((x) => x.account === acc)) || null; }
+function publicUser(u) { return { account: u.account, name: u.name, nick: u.nick, avatar: u.avatar }; }
+function checkAccount(acc, pwd) { const u = findAccount(acc); return !!(u && u.salt && u.pwdHash && hashPwd(String(pwd || ''), u.salt) === u.pwdHash); }
+/* ---------------- 房间状态（当前活跃房间，服务端共享） ---------------- */
+function loadRoomState() { if (fs.existsSync(ROOMSTATE_PATH)) { try { return JSON.parse(fs.readFileSync(ROOMSTATE_PATH, 'utf8')); } catch (e) {} } return null; }
+function writeRoomState(s) { try { fs.writeFileSync(ROOMSTATE_PATH, JSON.stringify(s, null, 2), 'utf8'); return true; } catch (e) { return false; } }
+/* 存档元信息列表：data/*.json 排除 accounts/roomstate */
+function roomArchiveList() {
+  let out = [];
+  try {
+    const files = fs.readdirSync(DATA_DIR).filter((f) => /\.json$/i.test(f) && f !== 'accounts.json' && f !== 'roomstate.json');
+    for (const f of files) {
+      try {
+        const j = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
+        out.push({ roomId: j.roomId || path.basename(f, '.json'), title: j.title || '', endTs: j.endTs || j.exportedAt || 0, msgCount: (j.messages && j.messages.length) || 0 });
+      } catch (e) {}
+    }
+  } catch (e) {}
+  out.sort((a, b) => (b.endTs || 0) - (a.endTs || 0));
+  return out;
+}
+
 /* ---------------- 前端在线更新（从 GitHub 仓库拉最新 index.html 覆盖本机） ---------------- */
 function currentAppVersion() {
   const f = path.join(ROOT, 'index.html');
@@ -195,6 +235,86 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascri
 const server = http.createServer((req, res) => {
   let p = (req.url || '/').split('?')[0];
   // ===== 网页「设置」管理接口（密码保护）=====
+  // ===== 账号体系（登录 / 资料 / 房间状态 / 存档列表 / 只读拉取）=====
+  if (p === '/api/auth/status') {
+    jsonRes(res, { ok: true, accounts: loadAccounts().map(publicUser) }); return;
+  }
+  if (p === '/api/auth/login') {
+    if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
+    let body = ''; req.on('data', (c) => { body += c; if (body.length > 2e5) req.destroy(); });
+    req.on('end', () => {
+      let d = {}; try { d = JSON.parse(body); } catch (e) {}
+      const acc = String(d.account || '').trim();
+      if (!checkAccount(acc, d.pwd)) { jsonRes(res, { ok: false, message: '账号或密码错误' }); return; }
+      jsonRes(res, { ok: true, user: publicUser(findAccount(acc)) });
+    });
+    return;
+  }
+  if (p === '/api/account/update') {
+    if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
+    let body = ''; req.on('data', (c) => { body += c; if (body.length > 2e5) req.destroy(); });
+    req.on('end', () => {
+      let d = {}; try { d = JSON.parse(body); } catch (e) {}
+      const acc = String(d.account || '').trim();
+      if (!findAccount(acc)) { jsonRes(res, { ok: false, message: '账号不存在' }); return; }
+      if (!checkAccount(acc, d.oldPwd)) { jsonRes(res, { ok: false, message: '原密码错误' }); return; }
+      const list = loadAccounts();
+      const target = list.find((x) => x.account === acc);
+      if (!target) { jsonRes(res, { ok: false, message: '账号不存在' }); return; }
+      if (d.nick != null && String(d.nick).trim()) target.nick = String(d.nick).trim().slice(0, 20);
+      if (d.avatar != null && AVATARS.includes(String(d.avatar))) target.avatar = String(d.avatar);
+      if (d.newPwd != null && String(d.newPwd).trim()) {
+        if (String(d.newPwd).trim().length < 4) { jsonRes(res, { ok: false, message: '新密码至少 4 位' }); return; }
+        target.salt = crypto.randomBytes(8).toString('hex');
+        target.pwdHash = hashPwd(String(d.newPwd).trim(), target.salt);
+      }
+      if (writeAccounts(list)) jsonRes(res, { ok: true, user: publicUser(target), message: '保存成功' });
+      else jsonRes(res, { ok: false, message: '写入失败' });
+    });
+    return;
+  }
+  if (p === '/api/room/active') {
+    if (req.method === 'GET') { jsonRes(res, { ok: true, room: loadRoomState() }); return; }
+    // POST 创建/设置当前活跃房间（指定 roomId 或由服务器生成 6 位房号）
+    let body = ''; req.on('data', (c) => { body += c; if (body.length > 2e5) req.destroy(); });
+    req.on('end', () => {
+      let d = {}; try { d = JSON.parse(body); } catch (e) {}
+      let id;
+      if (d.roomId && /^\d{6}$/.test(d.roomId)) id = d.roomId;
+      else { do { id = genId(); } while (fs.existsSync(path.join(DATA_DIR, id + '.json'))); }
+      const rs = { roomId: id, title: String(d.title || '').slice(0, 40), creator: String(d.creator || ''), createdAt: Date.now(), updatedAt: Date.now() };
+      writeRoomState(rs);
+      jsonRes(res, { ok: true, room: rs });
+    });
+    return;
+  }
+  if (p === '/api/room/list') {
+    jsonRes(res, { ok: true, archives: roomArchiveList() }); return;
+  }
+  if (p === '/api/archive') {
+    // 切话题/结束时的完整存档:写 data/{roomId}.json + 自动推 GitHub 兜底
+    if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
+    let body = ''; req.on('data', (c) => { body += c; if (body.length > 2e6) req.destroy(); });
+    req.on('end', () => {
+      let d = {}; try { d = JSON.parse(body); } catch (e) {}
+      const id = d.roomId, data = d.data;
+      if (!id || !/^\d{6}$/.test(id) || !data) { jsonRes(res, { ok: false, message: '缺少 roomId/data' }); return; }
+      const fp = path.join(DATA_DIR, id + '.json');
+      try { fs.writeFileSync(fp, JSON.stringify(data), 'utf8'); } catch (e) { jsonRes(res, { ok: false, message: '写入失败' }); return; }
+      ghPush('history/' + id + '.json', JSON.stringify(data), '备份房间 ' + id).catch(() => {});
+      jsonRes(res, { ok: true, message: '已存档(含 GitHub 备份)' });
+    });
+    return;
+  }
+  if (p === '/api/room/load') {
+    const qs = new URL(req.url, 'http://x').searchParams;
+    const id = qs.get('id') || '';
+    const fp = path.join(DATA_DIR, id + '.json');
+    if (/^\d{6}$/.test(id) && fs.existsSync(fp)) {
+      try { jsonRes(res, { ok: true, data: JSON.parse(fs.readFileSync(fp, 'utf8')) }); return; } catch (e) {}
+    }
+    jsonRes(res, { ok: false, message: '存档不存在' }); return;
+  }
   if (p === '/api/admin/needpwd') {
     jsonRes(res, { ok: true, managePwdSet: !!authInfo().pwdHash }); return;
   }
@@ -264,7 +384,8 @@ wss.on('connection', (ws) => {
       send(ws, { type: 'created', roomId: id });
     } else if (m.type === 'join' || m.type === 'rejoin') {
       const id = m.roomId;
-      if (!id || !rooms.has(id)) { send(ws, { type: 'join-failed', reason: '房间不存在或已销毁' }); return; }
+      if (!id || !/^\d{6}$/.test(id)) { send(ws, { type: 'join-failed', reason: '房间号不正确' }); return; }
+      if (!rooms.has(id)) rooms.set(id, new Set()); // 账号制:房号来自服务器 roomstate,缺失时自动建转发组
       ws.roomId = id;
       rooms.get(id).add(ws);
       broadcast(id, { type: 'peer-joined' }, ws);

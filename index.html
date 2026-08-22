@@ -47,6 +47,10 @@ input{font-family:inherit}
 #histOverlay{position:fixed;inset:0;background:rgba(20,10,40,.45);display:flex;align-items:center;justify-content:center;z-index:66}
 #resumeCard{background:#eef2ff;border:1px solid #d3dcff;border-radius:12px;padding:10px 14px;margin-bottom:12px;cursor:pointer;font-size:13px;color:#3b4ea3;line-height:1.6}
 #resumeCard:hover{background:#e4ebff}
+.acct-card{display:flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid #e6e0f5;border-radius:12px;background:#fff;cursor:pointer;font-size:14px;transition:.15s}
+.acct-card:hover{border-color:#c7b7ef;background:#faf8ff}
+.acct-card.on{border-color:#7c3aed;background:#f3efff}
+.acct-av{font-size:20px}
 #resumeOverlay{position:fixed;inset:0;background:rgba(20,10,40,.45);display:flex;align-items:center;justify-content:center;z-index:66}
 #resumeBox{width:min(92vw,460px);background:#fff;border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 #histBox{background:#fff;border-radius:16px;padding:20px 24px;width:560px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column}
@@ -254,6 +258,7 @@ input{font-family:inherit}
   <div style="display:flex;align-items:center;gap:8px">
     <button id="btnHelp" class="tb-btn" title="使用说明">❓</button>
     <button id="btnSettings" class="tb-btn" title="服务器设置（API Key / 邮箱，密码保护）">⚙️</button>
+    <button id="btnProfile" class="tb-btn" title="个人资料（改昵称/头像/密码）">👤</button>
     <span id="verBadge" class="ver-badge" title="当前版本 · 点击可重新检查更新">v?</span>
     <span id="topMembers"></span>
   </div>
@@ -267,30 +272,53 @@ input{font-family:inherit}
   <div id="helpBox">
     <h3>📖 使用说明·论证点评间</h3>
     <div id="helpBody">
-      <h4>1 怎么开两个"人"</h4>
+      <h4>1 怎么开始</h4>
       <ol>
-        <li>在 <b>同一个浏览器</b> 开两个标签页打开此页面;</li>
-        <li>一个标签填昵称点 <b>「+创建讨论间」</b> 当甲方,会显示 6 位口令;</li>
-        <li>另一个标签点 <b>「🔑 我有口令」</b> 输入口令当乙方,即可双人实时对话</li>
+        <li>首页选择<b>身份账号</b>(小张 / 小周)并输入密码登录(默认 <b>000000</b>,可随时在右上角「👤」改昵称/头像/密码);</li>
+        <li>登录后<b>直接进入</b>当前讨论房间;若暂无房间,点「🆕 新建房间」创建;</li>
+        <li>两位好友各自用自己的账号登录,即在同一房间<b>异地实时</b>对话。<b>房号仅作展示</b>识别,无需记忆或输入。</li>
       </ol>
       <h4>2 三种表达通道</h4>
       <ul>
         <li><b>💬 讨论</b>:正文对话,会进 AI 总结与复盘;</li>
         <li><b>🎤 弹幕</b>:场外吐槽,飘过展示,<b>永不进</b>总结/复盘,放心说;</li>
-        <li><b>🤖 AI</b>:可配 DeepSeek Key 让 AI 做真实总结与复盘</li>
+        <li><b>🤖 AI</b>:由服务器托管(DeepSeek),无需填 Key,自动做真实整理与点评</li>
       </ul>
       <h4>3 AI 总结怎么用</h4>
       <p>说了一段后点 <b>「总结 ✨」</b> → 选择 <b>你自己的发言</b>(可多条)一起总结,表达「我说完了、请对方理解回复」;<b>开头发言会提炼「🧭 讨论意图」</b>(意图不明会提示补充);卡片会展示「🎯 在回应 / ↔️ 是否跑题 / 💬 建议补充 / ⚠️ 论据支撑问题」;可「🧠重新生成 / 📝补充 / 🕘历史版本」。</p>
       <p style="color:#999;font-size:12px">💡 开头第一段发言没有之前上下文,不做「回应/跑题」判断;「反驳、举反例、质疑」算同一话题的正常交流,不算跑题。</p>
-      <h4>4 复盘怎么进</h4>
-      <p>双方都点 <b>「🛑 结束讨论」</b> 并确认 → 进入复盘:对话式回放(拖动/倍速/筛选)+ AI 总评与逐段点评。</p>
-      <h4>5 配置真实 AI(可选)</h4>
-      <p>大厅下方 <b>「真实 AI · DeepSeek」</b> 粘贴你的 Key 并保存;Key 只存当前浏览器、双标签共用、<b>不会发送给任何服务器</b>;不配则用内置模拟 AI。</p>
+      <h4>4 整理 / 点评双模式</h4>
+      <p>房间栏「⚖️ 整理/点评」随时切换:整理=中立梳理总结;点评=多维度论证评估(逻辑/语言/体系/价值/漏洞 0-10)+总体评分+反方质询,帮你们把观点打磨扎实。</p>
+      <h4>5 切换话题 / 存档</h4>
+      <p>点「🆕 新话题」会<b>强制把当前讨论存为存档</b>(本地 + 服务器 + GitHub 三层备份),然后开始全新话题;「📂 历史存档」可<b>只读查看</b>旧话题复盘回放。结束讨论进复盘同理自动存档。</p>
       <h4>6 数据与隐私</h4>
-      <p>对话与 Key 全在<b>本机浏览器</b>(localStorage),刷新不丢、换设备不共享;页面为纯前端,无后端。</p>
+      <p>账号门禁在服务器校验;讨论数据实时同步并经服务器存档(data/)+GitHub 兜底备份;AI 由服务器调用,你的 Key 不出服务器配置(管理员在「⚙️ 设置」密码保护下管理)。</p>
     </div>
     <div class="confirm-row"><button class="btn" id="btnHelpClose" style="margin:0;margin-left:auto">我知道了</button></div>
   </div>
+</div>
+
+<!-- 个人资料（登录账号：改昵称 / 头像 / 密码） -->
+<div id="profOverlay" class="hidden">
+  <div id="profBox">
+    <div style="display:flex;align-items:center;justify-content:space-between"><h3>👤 个人资料</h3><button class="btn secondary" id="profClose" style="padding:4px 12px">✕</button></div>
+    <div class="set-sec">昵称</div>
+    <input id="profNick" class="inp" placeholder="显示昵称">
+    <div class="set-sec">头像</div>
+    <div id="profAvatars" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div class="set-sec">修改密码（可选）</div>
+    <div class="set-row"><input id="profOldPwd" class="inp" type="password" placeholder="原密码（必填）" style="flex:1"><input id="profNewPwd" class="inp" type="password" placeholder="新密码（≥4 位，留空不改）" style="flex:1"></div>
+    <div id="profMsg" class="hint"></div>
+    <div class="confirm-row"><button class="btn" id="profSave">💾 保存</button></div>
+  </div>
+  <style>
+    #profOverlay{position:fixed;inset:0;background:rgba(20,10,40,.45);display:flex;align-items:center;justify-content:center;z-index:71}
+    #profOverlay.hidden{display:none}
+    #profBox{background:#fff;border-radius:16px;padding:18px 22px;width:460px;max-width:92vw;box-sizing:border-box}
+    #profBox h3{margin:0}
+    .prof-av{padding:4px 10px;border:2px solid #eee;border-radius:10px;cursor:pointer;font-size:22px;transition:.15s}
+    .prof-av.on{border-color:#7c3aed;background:#f3efff}
+  </style>
 </div>
 
 <!-- 服务器设置（密码保护）：API Key / 发信邮箱+授权 / 接收邮箱 -->
@@ -336,22 +364,19 @@ input{font-family:inherit}
 <div id="lobby">
   <div class="card">
     <div id="resumeCard" class="hidden"></div>
-    <h2>👋 进入讨论间</h2>
-    <div class="tip">在线网页(本地对话)· 请在同一浏览器开两个标签页,一个当「我」、一个当「好友」,数据在本地实时同步;可填自己的 DeepSeek Key 让 AI 做真实总结与复盘。</div>
-    <div class="lbl">你的昵称</div>
-    <input id="myName" class="inp" placeholder="例:小林">
-    <div class="lbl">模式</div>
-    <button class="btn" id="btnCreate">+ 创建讨论间(我是发起人)</button>
-    <button class="btn secondary" id="btnJoin">🔑 我有口令,加入好友的讨论间</button>
-    <div id="joinBox" class="hidden">
-      <div class="lbl">输入口令</div>
-      <input id="pwdInput" class="inp" placeholder="6 位口令">
-    </div>
-    <div class="lbl" style="margin-top:16px">管理</div>
+    <h2>👋 登录「论证点评间」</h2>
+    <div class="tip">账号制登录：选择身份账号 + 输入密码（默认 000000）。登录后直接进入 / 新建当前讨论房间（房号仅作展示，无需记忆）。</div>
+    <div class="lbl">选择身份账号</div>
+    <div id="loginAccounts" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+    <div class="lbl">密码</div>
+    <input id="loginPwd" class="inp" type="password" placeholder="登录密码">
+    <button class="btn" id="btnLogin" style="margin-top:10px;width:100%">🔓 登录</button>
+    <div id="loginMsg" class="hint" style="color:#d03050"></div>
+    <hr style="margin:14px 0 8px;border:none;border-top:1px solid #eceaf7">
     <div style="display:flex;gap:6px">
-      <button class="btn" id="btnNew">🆕 开启新话题</button>
+      <button class="btn secondary hidden" id="btnEnterRoom">🆕 新建房间/进入</button>
       <button class="btn secondary" id="btnDemo">👁 查看演示</button>
-      <button class="btn secondary" id="btnHistory">📂 历史讨论</button>
+      <button class="btn secondary" id="btnHistory">📂 历史存档</button>
     </div>
     <div class="hint" id="newHint"></div>
     <div id="serverAiBadge" class="hint" style="margin:12px 0 6px;font-weight:700;color:#0a7">🔒 正在连接服务器...</div>
@@ -363,10 +388,10 @@ input{font-family:inherit}
   <div id="danmakuLayer"></div>
   <div id="guideBar" class="hidden"></div>
   <div id="roomBar">
-    <div class="room-pwd" title="好友在另一标签点「🔑 我有口令」输入此编号即可加入">
-      <span class="rm-label">🔑 房间口令</span>
+    <div class="room-pwd" title="当前房间编号(仅作展示识别,无需记忆或输入)">
+      <span class="rm-label">🔑 房号</span>
       <span id="pwdCode" class="rm-code">------</span>
-      <button id="btnCopyPwd" class="rm-copy">📋 复制</button>
+      <button id="btnCopyPwd" class="rm-copy">📋</button>
     </div>
     <div style="flex:1"></div>
     <button id="btnArena" class="arena-chip" title="切换「论证点评」玩法:总结时做多维度论证评估与质询反问">⚖️ 整理</button>
@@ -437,14 +462,9 @@ input{font-family:inherit}
 <!-- 复盘视图 -->
 <div id="histOverlay" class="hidden">
   <div id="histBox">
-    <h3>📂 历史讨论</h3>
-    <div style="font-size:12px;color:#888">结束讨论或新建话题时,会在这里自动存档(只保存在本机浏览器)。</div>
+    <h3>📂 历史存档</h3>
+    <div style="font-size:12px;color:#888">切换新话题或结束讨论时自动存档（本地 + 服务器 + GitHub 三层备份），点击「👁」可只读复盘回放。</div>
     <div id="histList"></div>
-    <div style="color:#888;font-size:12px;margin:16px 0 4px">☁️ 云端存档(GitHub)--公开仓库打开即可查看,无需 Token</div>
-    <div style="display:flex;gap:6px;margin:2px 0 8px;align-items:center;flex-wrap:wrap">
-      <button class="btn secondary" id="btnCloudList" style="width:auto;margin:0;padding:5px 12px;font-size:12px">🔍 读取云端存档</button>
-    </div>
-    <div id="cloudList"></div>
     <hr style="margin:16px 0 8px;border:none;border-top:1px solid #eceaf7">
     <div class="confirm-row"><button class="btn" id="btnHistClose" style="margin:0;margin-left:auto">关闭</button></div>
   </div>
@@ -732,7 +752,7 @@ NetBridge.onpeerjoined=()=>{ const o=document.querySelector('#others'); if(o) o.
 NetBridge.start();
 const bc = NetBridge;
 const S = {
-  me:{name:'', isCreator:false, confirmed:false},
+  me:{name:'', account:'', avatar:'', isCreator:false, confirmed:false},
   peerConfirmed:false,
   inRoom:false,
   messages:[],   // {id,name,ts,content,appendTo,channel}
@@ -799,24 +819,25 @@ function setActive(){
 function archiveCurrent(){
   if(!S.messages.length) return null;
   const first=S.messages.find(m=>m.channel==='discuss');
-  const session=localStorage.getItem('discuss_session')||uid();
-  const h={id:session||uid(), session, me:S.me.name||'我', startTs:(S.messages[0]||{}).ts||Date.now(), endTs:Date.now(),
+  const rid=currentRoomId();
+  const session=rid||uid();
+  const h={id:rid||session, roomId:rid||'', session, me:S.me.name||'我', startTs:(S.messages[0]||{}).ts||Date.now(), endTs:Date.now(),
     title:(first&&first.content||'未命名').slice(0,16), messages:S.messages, summaries:S.summaries, arenas:S.arenas,
     comments:S.comments, verdict:S.verdict, msgCount:S.messages.filter(m=>m.channel==='discuss').length};
-  const list=histList();
-  const i=list.findIndex(x=>x.session===session);
-  if(i>=0) list[i]=h; else list.unshift(h);
-  localStorage.setItem(HIST_KEY, JSON.stringify(list));
+  // ①本地 localStorage 历史
+  try{
+    const list=histList();
+    const i=list.findIndex(x=>x.session===session||x.roomId===rid);
+    if(i>=0) list[i]=h; else list.unshift(h);
+    localStorage.setItem(HIST_KEY, JSON.stringify(list));
+  }catch(e){}
+  // ②③服务端存档(写 data/ + GitHub 自动兜底)
+  if(rid && /^\d{6}$/.test(rid)){
+    fetch('/api/archive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({roomId:rid, data:h})}).catch(()=>{});
+  }
   return h;
 }
-function renderResumeCard(){
-  const a=loadActive(), card=$('#resumeCard');
-  if(a.active && S.messages.length>0){
-    const roles=[a.creator,a.peer].filter(Boolean).join(' / ');
-    card.innerHTML='📌 <b>继续进行中的讨论:</b>「'+esc(a.title||'未命名')+'」<br><span style="font-size:12px;opacity:.8;color:#667">点击继续 · 原身份:'+esc(roles||'(尚未确定)')+'</span>';
-    card.classList.remove('hidden');
-  }else card.classList.add('hidden');
-}
+function renderResumeCard(){ const card=$('#resumeCard'); if(card) card.classList.add('hidden'); }
 $('#resumeCard').onclick=()=>{
   const a=loadActive();
   const roles=[a.creator,a.peer].filter(Boolean);
@@ -847,21 +868,23 @@ function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=
 function leaveToLobby(){ S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
 function startNewTopic(){
   const has=S.messages.length>0;
-  const m=has ? '将把当前讨论存档到「历史讨论」,然后开启一个全新空白的讨论间开始新话题。确定吗?' : '将开启一个全新空白的讨论间开始新话题。确定吗?';
+  const m=has ? '将把当前讨论存为存档(本地 + 服务器 + GitHub 三层备份),然后开启一个全新空白的新话题。确定吗?' : '将开启一个全新空白的新话题。确定吗?';
   if(!confirm(m)) return;
-  archiveCurrent(); resetCurrent();
-  localStorage.setItem('discuss_session', uid());
-  clearActive();
-  NetBridge.oncreated=()=>{
-    const pwd=NetBridge.roomId;
-    localStorage.setItem('discuss_pwd',pwd);
-    $('#pwdCode').textContent=pwd;
-    $('#newHint').innerHTML='✅ 已完成。新话题口令:<b>'+pwd+'</b> -- 在另一台设备点「🔑 我有口令」输入该口令即可加入。';
-  };
-  NetBridge.create();
-  leaveToLobby();
-  $('#myName').value='';
-  renderStatus();
+  if(has) archiveCurrent(); // 三层存档(本地localStorage + 服务端data/ + GitHub自动兜底)
+  resetCurrent();
+  // 服务器创建新活跃房间
+  fetch('/api/room/active',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'新话题', creator:S.me.account||''})})
+    .then(r=>r.json()).then(j=>{
+      if(!j||!j.ok||!j.room){ alert('创建房间失败'); leaveToLobby(); return; }
+      ROOMINFO=j.room; localStorage.setItem('arena_room', j.room.roomId);
+      const rid=j.room.roomId;
+      if($('#pwdCode')) $('#pwdCode').textContent=rid;
+      if($('#roomTopic')) $('#roomTopic').textContent='💬 '+j.room.title;
+      NetBridge.onjoined=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
+      NetBridge.onjoinfailed=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
+      NetBridge.join(rid);
+      const n=$('#newHint'); if(n) n.textContent='';
+    });
 }
 function fmtHistTime(ts){ const t=new Date(ts); return String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0'); }
 function renderHistBody(el, h){
@@ -871,17 +894,19 @@ function renderHistBody(el, h){
   if(h.verdict) html+='<div class="hist-verdict">🏁 '+esc(h.verdict)+'</div>';
   el.innerHTML=html||'<div style="color:#999">(该存档无内容)</div>';
 }
-function renderHistory(){
-  const list=histList();
-  const el=$('#histList'); el.innerHTML='';
-  if(!list.length){ el.innerHTML='<div style="color:#999;padding:20px;text-align:center">还没有历史讨论。结束讨论或新建话题时,会把当前内容自动存档到这里。</div>'; return; }
-  list.forEach((h,i)=>{
+async function renderHistory(){
+  const el=$('#histList'); if(!el) return;
+  el.innerHTML='<div style="color:#999;padding:20px;text-align:center">读取服务端存档...</div>';
+  let archives=[];
+  try{ const j=await (await fetch('/api/room/list')).json(); archives=(j&&j.archives)||[]; }
+  catch(e){ el.innerHTML='<div style="color:#be2346;padding:20px;text-align:center">读取存档失败:'+esc(e.message)+'</div>'; return; }
+  if(!archives.length){ el.innerHTML='<div style="color:#999;padding:20px;text-align:center">还没有存档。切换新话题或结束讨论时会自动三层存档(本地+服务器+GitHub 兜底)。</div>'; return; }
+  el.innerHTML='';
+  archives.forEach(a=>{
     const d=document.createElement('div'); d.className='hist-item';
-    d.innerHTML='<div class="hist-tt"><span>'+esc(h.title)+'</span><span class="ts">'+fmtHistTime(h.endTs)+' · '+(h.me||'我')+' · '+(h.msgCount||0)+' 条</span></div>'+
-      '<div class="hist-btns"><button class="mini-btn2" data-rv="'+i+'">👁 完整复盘</button><button class="mini-btn2 warn" data-hd="'+i+'">删除</button><button class="mini-btn2 cloud'+(ghSavedIds().includes(h.id)?' saved':'')+'" data-gh="'+i+'">'+(ghSavedIds().includes(h.id)?'✅ 已存':'☁️ 存到GitHub')+'</button></div>';
-    d.querySelector('[data-rv]').onclick=()=>openReviewArchive(h);
-    d.querySelector('[data-hd]').onclick=()=>{ if(!confirm('删除这条历史存档?此操作不可恢复。')) return; const l=histList(); l.splice(i,1); localStorage.setItem(HIST_KEY, JSON.stringify(l)); renderHistory(); };
-    d.querySelector('[data-gh]').onclick=()=>cmdGhSave(h, d.querySelector('[data-gh]'));
+    d.innerHTML='<div class="hist-tt"><span>'+esc(a.title||'未命名')+'</span><span class="ts">'+fmtHistTime(a.endTs)+' · '+(a.msgCount||0)+' 条 · 🔑 '+esc(a.roomId)+'</span></div>'+
+      '<div class="hist-btns"><button class="mini-btn2" data-cv>👁 完整复盘</button></div>';
+    d.querySelector('[data-cv]').onclick=async()=>{ try{ const lr=await (await fetch('/api/room/load?id='+a.roomId)).json(); if(lr&&lr.ok&&lr.data) openReviewArchive(lr.data); else alert('存档读取失败'); }catch(e){ alert('读取失败:'+e.message); } };
     el.appendChild(d);
   });
 }
@@ -889,15 +914,17 @@ function fmtTime(ts){ const d=new Date(ts); return String(d.getHours()).padStart
 function fmtTL(ts){ const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'); }
 
 /* ================= 进入 / 注册 ================= */
-function enterRoom(name, isCreator){
+function enterRoom(name, isCreator, room){
   S.me.name = name; S.me.isCreator = isCreator; S.inRoom = true;
+  if(room) ROOMINFO=room;
   $('#lobby').classList.add('hidden');
   $('#room').classList.remove('hidden');
-  $('#topSub').textContent = '讨论进行中 · 你:'+name+(isCreator?'(发起人)':'');
-  const __curPwd=localStorage.getItem('discuss_pwd')||'';
-  if(__curPwd && $('#pwdCode')) $('#pwdCode').textContent=__curPwd;
+  $('#topSub').textContent = '讨论进行中 · '+S.me.name;
+  const rid=ROOMINFO?ROOMINFO.roomId:currentRoomId();
+  if(rid && $('#pwdCode')) $('#pwdCode').textContent=rid;
+  if(ROOMINFO && ROOMINFO.title && $('#roomTopic')) $('#roomTopic').textContent='💬 '+ROOMINFO.title;
   if(!sessionStorage.getItem('dr_guide')){
-    $('#guideBar').innerHTML='💡 <b>怎么玩:</b>左=你 / 右=好友 · 上方切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(表达说完了,AI 会判断回应与是否跑题) · 结束点「🛑」双方确认进复盘 · 右上角「❓」可看完整说明';
+    $('#guideBar').innerHTML='💡 <b>怎么玩:</b>切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(AI 判断回应与是否跑题) · 切「🆕新话题」自动存档旧房间 · 结束点「🛑」双方确认进复盘 · 右上角「❓」看完整说明';
     $('#guideBar').classList.remove('hidden');
     sessionStorage.setItem('dr_guide','1');
   }
@@ -907,31 +934,96 @@ function enterRoom(name, isCreator){
   broadcast({type:'hello', name, ts:now()});
 }
 
-$('#btnCreate').onclick=()=>{
-  const name=$('#myName').value.trim(); if(!name){alert('请先输入昵称');return;}
-  NetBridge.oncreated=()=>{
-    const pwd=NetBridge.roomId;
-    localStorage.setItem('discuss_pwd', pwd);
-    localStorage.setItem('discuss_session', uid());
-    $('#pwdCode').textContent=pwd;
-    enterRoom(name, true);
-  };
-  NetBridge.create();
+/* ================= 账号登录 ================= */
+let LOGIN={ account:'', accounts:[] };
+let ROOMINFO=null;
+function currentRoomId(){ if(ROOMINFO&&ROOMINFO.roomId) return ROOMINFO.roomId; return (localStorage.getItem('arena_room')||'').trim(); }
+function loadLoginAccounts(){
+  fetch('/api/auth/status').then(r=>r.json()).then(j=>{
+    if(!j||!j.ok) return;
+    const el=$('#loginAccounts'); if(!el) return;
+    el.innerHTML='';
+    (j.accounts||[]).forEach(u=>{
+      const d=document.createElement('button'); d.type='button';
+      d.className='acct-card'+(LOGIN.account===u.account?' on':'');
+      d.innerHTML='<span class="acct-av">'+esc(u.avatar)+'</span><span>'+esc(u.nick||u.name)+'</span>';
+      d.onclick=()=>{ LOGIN.account=u.account; el.querySelectorAll('.acct-card').forEach(x=>x.classList.remove('on')); d.classList.add('on'); };
+      el.appendChild(d);
+    });
+  }).catch(()=>{ const m=$('#loginMsg'); if(m) m.textContent='无法连接服务器(仅服务器版可用)。'; });
+}
+$('#btnLogin').onclick=()=>{
+  if(!LOGIN.account){ $('#loginMsg').textContent='请先选择身份账号'; return; }
+  const pwd=$('#loginPwd').value.trim(); if(!pwd){ $('#loginMsg').textContent='请输入密码'; return; }
+  $('#btnLogin').disabled=true;
+  fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({account:LOGIN.account,pwd})})
+    .then(r=>r.json()).then(j=>{
+      $('#btnLogin').disabled=false;
+      if(!j||!j.ok){ $('#loginMsg').textContent=(j&&j.message)||'登录失败'; return; }
+      $('#loginMsg').textContent='';
+      localStorage.setItem('arena_session', JSON.stringify(j.user));
+      enterRoomFor(j.user);
+    }).catch(()=>{ $('#btnLogin').disabled=false; $('#loginMsg').textContent='登录请求失败'; });
 };
-let joinStage=false;
-$('#btnJoin').onclick=()=>{
-  if(!joinStage){
-    joinStage=true;
-    $('#joinBox').classList.remove('hidden');
-    $('#btnJoin').textContent='🔑 确认加入';
-    return;
-  }
-  const name=$('#myName').value.trim(); if(!name){alert('请先输入昵称');return;}
-  const pwd=$('#pwdInput').value.trim();
-  if(!pwd){ alert('请输入口令'); return; }
-  NetBridge.onjoined=()=>{ localStorage.setItem('discuss_pwd', pwd); enterRoom(name,false); };
-  NetBridge.onjoinfailed=()=>{ alert('房间口令不正确,或房间不存在'); };
-  NetBridge.join(pwd);
+function enterRoomFor(user){
+  S.me.name=user.nick||user.name; S.me.account=user.account; S.me.avatar=user.avatar; S.me.isCreator=false;
+  $('#topSub').textContent='已登录 '+S.me.name;
+  fetch('/api/room/active').then(r=>r.json()).then(j=>{
+    if(j&&j.ok&&j.room&&j.room.roomId){
+      ROOMINFO=j.room;
+      if($('#pwdCode')) $('#pwdCode').textContent=j.room.roomId;
+      NetBridge.onjoined=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
+      NetBridge.onjoinfailed=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
+      NetBridge.join(j.room.roomId);
+    } else {
+      // 无进行中房间:停留大厅,提示新建
+      $('#room').classList.add('hidden'); $('#lobby').classList.remove('hidden');
+      $('#btnEnterRoom').classList.remove('hidden');
+      const n=$('#newHint'); if(n) n.innerHTML='暂无进行中的房间。点击「🆕 新建房间/进入」创建新话题。';
+    }
+  }).catch(()=>{ alert('无法连接服务器'); });
+}
+$('#btnEnterRoom').onclick=()=>{
+  if(!S.me.account){ alert('请先登录'); return; }
+  fetch('/api/room/active',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'新话题', creator:S.me.account})})
+    .then(r=>r.json()).then(j=>{ if(j&&j.ok&&j.room) startNewTopicDirect(j.room); else alert('创建房间失败'); });
+};
+function startNewTopicDirect(room){
+  if(S.messages.length>0) archiveCurrent();
+  resetCurrent();
+  ROOMINFO=room; localStorage.setItem('arena_room', room.roomId);
+  if($('#pwdCode')) $('#pwdCode').textContent=room.roomId;
+  if($('#roomTopic')) $('#roomTopic').textContent='💬 '+room.title;
+  NetBridge.onjoined=()=>enterRoom(S.me.name, true, room);
+  NetBridge.onjoinfailed=()=>enterRoom(S.me.name, true, room);
+  NetBridge.join(room.roomId);
+}
+
+/* ================= 个人资料（改昵称/头像/密码）================= */
+const AVATARS_FRONT=['🟣','🔵','🟢','🟡','🟠','🔴','⚫️','⚪️'];
+let profAvatar='';
+function openProfile(){
+  if(!S.me.account){ alert('请先登录'); return; }
+  $('#profNick').value=S.me.name||'';
+  const av=$('#profAvatars'); av.innerHTML='';
+  AVATARS_FRONT.forEach(a=>{ const d=document.createElement('button'); d.type='button'; d.className='prof-av'+(a===S.me.avatar?' on':''); d.textContent=a; d.onclick=()=>{ profAvatar=a; av.querySelectorAll('.prof-av').forEach(x=>x.classList.remove('on')); d.classList.add('on'); }; av.appendChild(d); });
+  $('#profOldPwd').value=''; $('#profNewPwd').value=''; $('#profMsg').textContent='';
+  $('#profOverlay').classList.remove('hidden');
+}
+$('#btnProfile').onclick=openProfile;
+$('#profClose').onclick=()=>$('#profOverlay').classList.add('hidden');
+$('#profSave').onclick=()=>{
+  const oldPwd=$('#profOldPwd').value.trim();
+  if(!oldPwd){ $('#profMsg').textContent='请输入原密码（用于身份校验）'; return; }
+  const body={account:S.me.account, oldPwd};
+  const nick=$('#profNick').value.trim(); if(nick) body.nick=nick;
+  const newPwd=$('#profNewPwd').value.trim(); if(newPwd){ if(newPwd.length<4){ $('#profMsg').textContent='新密码至少 4 位'; return; } body.newPwd=newPwd; }
+  if(profAvatar) body.avatar=profAvatar;
+  fetch('/api/account/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>r.json()).then(j=>{
+      if(j&&j.ok){ S.me.name=j.user.nick||S.me.name; S.me.avatar=j.user.avatar||S.me.avatar; localStorage.setItem('arena_session',JSON.stringify({account:S.me.account,name:j.user.name,nick:j.user.nick,avatar:j.user.avatar})); $('#profMsg').style.color='#059669'; $('#profMsg').textContent='已保存'; $('#profOldPwd').value=''; $('#profNewPwd').value=''; }
+      else { $('#profMsg').style.color=''; $('#profMsg').textContent=(j&&j.message)||'保存失败'; }
+    });
 };
 
 /* ================= 消息渲染 ================= */
@@ -1719,7 +1811,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.3';
+const APP_VERSION='1.0.4';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -1843,7 +1935,6 @@ document.getElementById('setSave').onclick=()=>{
 };
 
 /* 历史 / 新话题 绑定 */
-$('#btnNew').onclick=startNewTopic;
 $('#btnNewRoom').onclick=startNewTopic;
 $('#btnHistory').onclick=()=>{ renderHistory(); $('#histOverlay').classList.remove('hidden'); };
 $('#btnHistClose').onclick=()=>$('#histOverlay').classList.add('hidden');
@@ -1934,7 +2025,7 @@ async function renderCloudList(){
     el.appendChild(d);
   });
 }
-$('#btnCloudList').onclick=()=>renderCloudList();
+// 前端 GitHub 手推按钮已移除，GitHub 由服务器存档时自动兜底
 async function cmdGhSave(h, btn){
   if(!ghToken()||!ghOwner()||!ghRepoName()){ alert('请先在大厅「☁️ GitHub 存档」区填入 Token 与目标仓库(owner/repo)。'); return; }
   if(btn){ btn.textContent='存储中...'; btn.disabled=true; }
@@ -1942,7 +2033,7 @@ async function cmdGhSave(h, btn){
   catch(e){ if(btn){ btn.textContent='☁️ 存到GitHub'; btn.disabled=false; } alert('GitHub 存档失败:'+e.message); }
 }
 loadState();
-renderResumeCard();
+loadLoginAccounts();
 
 // 初始化(若此前已在 localStorage 有口令则提示)
 </script>

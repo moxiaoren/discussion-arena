@@ -59,6 +59,26 @@ function loadMailCfg() {
   if (sc && sc.mail) return { smtp: sc.mail, to: Array.isArray(sc.mail.to) ? sc.mail.to : [sc.mail.to].filter(Boolean) };
   return null;
 }
+/* ---------------- 版本与功能介绍 / 更新说明（用于邮件推送正文） ---------------- */
+const APP_INTRO = [
+  '论证点评间 · 你和好友的专属异地在线讨论页：',
+  '· 账号登录(小张/小周)，登录后直接进入当前讨论房间(房号仅作标识，无需输入)',
+  '· 整理/点评双模式：AI 中立整理 + 多维度论证点评(逻辑/语言/体系/价值/漏洞) + 反方质询',
+  '· 切换新话题时自动三层存档(本地 + 服务器 + GitHub 兜底)，可只读回看复盘',
+  '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
+].join('\n');
+const RELEASE_NOTES = [
+  { version: 'v1.0.4', notes: [
+    '新增账号体系：登录(小张/小周)、修改昵称/头像/密码',
+    '进入方式改为账号登录后直达当前房间，口令仅作房间号展示',
+    '切换话题强制三层存档(本地+服务器+GitHub 自动兜底)，支持只读回看',
+    '重写使用说明与页面文案(账号制+服务器版)'
+  ] },
+  { version: 'v1.0.3', notes: ['剔除遗留的公开高级设置区块，配置统一收进密码保护的 ⚙️ 设置'] }
+];
+function releaseSummary() {
+  return RELEASE_NOTES.slice(0, 2).map((r) => '【' + r.version + '】' + r.notes.map((n) => '\n  · ' + n).join('')).join('\n\n');
+}
 let nodemailer = null;
 try { nodemailer = require('nodemailer'); } catch (e) { nodemailer = null; }
 
@@ -323,7 +343,7 @@ async function main() {
     if (!mailCfg) { log('⚠ 未配置邮箱，跳过推送。\n   （在网页「⚙️ 设置」里填写发信邮箱后会自动推送）'); return; }
     log('[3/3] 正在把新网址发往邮箱 ' + (mailCfg.to || []).join(',') + ' ...');
     sendMail(mailCfg, '论证点评间 · 新地址',
-      '你的聊天室已启动，新网址：\n\n' + url + '\n\n把这个发给好友即可开始异地聊天。\n（隧道或电脑重启后地址会变化，届时会再次收到新地址）')
+      '你的「论证点评间」新网址：\n\n' + url + '\n\n【功能简介】\n' + APP_INTRO + '\n\n【更新说明】\n' + releaseSummary() + '\n\n把这个网址发给好友即可开始异地讨论。\n（隧道或电脑重启后地址会变化，届时会再次收到新地址）')
       .then(() => log('✅ 已推送成功'))
       .catch((e) => log('✗ 邮件推送失败: ' + e.message + '\n  （不影响聊天，地址在上方 / last-url.txt）'));
   }
