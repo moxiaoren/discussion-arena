@@ -1,0 +1,8 @@
+node_modules/
+data/
+push-config.json
+server-config.json
+cloudflared.exe
+autostart.log
+last-url.txt
+*.log

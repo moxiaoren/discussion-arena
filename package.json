@@ -1,0 +1,14 @@
+{
+  "name": "discussion-room-m2-deploy",
+  "version": "2.1.0",
+  "private": true,
+  "description": "二人讨论间 M2 异地版 · Windows 一键部署（后端 + cloudflared 隧道 + 邮箱推送新地址）",
+  "scripts": {
+    "start": "node launch.js",
+    "send-test": "node launch.js --send-test"
+  },
+  "dependencies": {
+    "ws": "^8.21.3",
+    "nodemailer": "^6.9.13"
+  }
+}
