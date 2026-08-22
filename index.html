@@ -201,7 +201,7 @@ input{font-family:inherit}
 /* ---------- 复盘视图 ---------- */
 #reviewView{flex:1;display:flex;flex-direction:column;min-height:0;background:#f6f5fb}
 #reviewNav{display:flex;gap:10px;padding:12px 14px;background:#fff;border-bottom:1px solid #eceaf7}
-.rnav-btn{padding:8px 18px;border-radius:24px;background:#f0eefb;color:#7c6cf0;font-weight:600;font-size:14px}
+.rnav-btn{padding:6px 12px;border-radius:24px;background:#f0eefb;color:#7c6cf0;font-weight:600;font-size:12px;white-space:nowrap}
 .rnav-btn.on{background:linear-gradient(135deg,#6c5ce7,#a855f7);color:#fff}
 #playerPane{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 #reviewStream{flex:1;overflow-y:auto;padding:16px 14px;min-height:0}
@@ -484,9 +484,9 @@ input{font-family:inherit}
     <button class="rnav-btn on" data-rv="playback">🎬 对话式回放</button>
     <button class="rnav-btn" data-rv="evaluate">🧭 AI 评价性复盘</button>
     <div style="flex:1"></div>
-    <button class="btn secondary hidden" id="btnReviewBack" style="width:auto;margin:0;padding:7px 14px">← 返回</button>
-    <button class="btn secondary" id="btnExport" style="width:auto;margin:0;padding:7px 14px">📄 导出复盘网页</button>
-    <button class="btn secondary" id="btnHomeReview" style="width:auto;margin:0;padding:7px 14px" title="回到主页(大厅)">🏠 主页</button>
+    <button class="btn secondary hidden" id="btnReviewBack" style="width:auto;margin:0;padding:5px 10px;font-size:12px">← 返回</button>
+    <button class="btn secondary" id="btnExport" style="width:auto;margin:0;padding:5px 10px;font-size:12px">📄 导出</button>
+    <button class="btn secondary" id="btnHomeReview" style="width:auto;margin:0;padding:5px 10px;font-size:12px" title="回到主页(大厅)">🏠 主页</button>
   </div>
   <div id="playerPane">
     <div id="reviewStream"></div>
@@ -874,7 +874,7 @@ function startNewTopic(){
       ROOMINFO=j.room; localStorage.setItem('arena_room', j.room.roomId);
       const rid=j.room.roomId;
       if($('#pwdCode')) $('#pwdCode').textContent=rid;
-      if($('#roomTopic')) $('#roomTopic').textContent='💬 '+j.room.title;
+      if($('#roomTopic') && j.room.title && j.room.title!=='新话题') $('#roomTopic').textContent='💬 '+j.room.title;
       NetBridge.onjoined=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
       NetBridge.onjoinfailed=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
       NetBridge.join(rid);
@@ -918,7 +918,7 @@ function enterRoom(name, isCreator, room){
   $('#topSub').textContent = '讨论进行中 · '+S.me.name;
   const rid=ROOMINFO?ROOMINFO.roomId:currentRoomId();
   if(rid && $('#pwdCode')) $('#pwdCode').textContent=rid;
-  if(ROOMINFO && ROOMINFO.title && $('#roomTopic')) $('#roomTopic').textContent='💬 '+ROOMINFO.title;
+  if(ROOMINFO && ROOMINFO.title && ROOMINFO.title!=='新话题' && $('#roomTopic')) $('#roomTopic').textContent='💬 '+ROOMINFO.title;
   if(!localStorage.getItem('arena_guide')){
     $('#guideBar').innerHTML='<span id="guideX" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);cursor:pointer;font-weight:700;color:#b18b0a;padding:2px 6px" title="关闭(不再提示)">✕</span>💡 <b>怎么玩:</b>切「💬讨论 / 🎤弹幕」 · 说一段话后点「总结 ✨」总结<b>自己的发言</b>(AI 判断回应与是否跑题) · 切「🆕新话题」自动存档旧房间 · 结束点「🛑」双方确认进复盘 · 右上角「❓」看完整说明';
     $('#guideBar').classList.remove('hidden');
@@ -995,7 +995,7 @@ function startNewTopicDirect(room){
   resetCurrent();
   ROOMINFO=room; localStorage.setItem('arena_room', room.roomId);
   if($('#pwdCode')) $('#pwdCode').textContent=room.roomId;
-  if($('#roomTopic')) $('#roomTopic').textContent='💬 '+room.title;
+  if($('#roomTopic') && room && room.title && room.title!=='新话题') $('#roomTopic').textContent='💬 '+room.title;
   NetBridge.onjoined=()=>enterRoom(S.me.name, true, room);
   NetBridge.onjoinfailed=()=>enterRoom(S.me.name, true, room);
   NetBridge.join(room.roomId);
@@ -1677,16 +1677,16 @@ function renderEvaluate(){
     '</div>'+
     '<div class="panel"><h4>👥 双方观点对比</h4><div class="duo"><div class="duo-col"><div class="nm">'+esc(S.me.name||'我')+'</div><ul>'+cols(mine).map(x=>'<li>'+esc(x)+'</li>').join('')+'<li style="list-style:none;color:#22c55e">✅ 上述观点构成你的核心立场</li></ul></div>'+
     '<div class="duo-col g"><div class="nm">'+esc(S.peerName||'好友')+'</div><ul>'+cols(peers).map(x=>'<li>'+esc(x)+'</li>').join('')+'<li style="list-style:none;color:#22c55e">✅ 上述观点构成对方的思路</li></ul></div></div></div>'+
-    '<div class="panel"><h4>🕰 讨论脉络(时间线)</h4>'+ S.summaries.map((sm,i)=>{
+    '<div class="panel"><h4>🕰 讨论脉络(时间线)</h4>'+(S.summaries.length? S.summaries.map((sm,i)=>{
       const m=S.messages.find(x=>x.id===sm.messageId);
       const v=sm.versions[sm.rev]||sm.versions[0];
       return '<div class="tl-item"><span class="t">第'+(i+1)+'段</span><span class="tag">AI</span><span>'+esc(v.core.slice(0,28))+(v.core.length>28?'...':'')+'</span></div>';
-    }).join('') +'</div>'+
+    }).join('') : (S.arenas.length? S.arenas.map((ar,i)=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">第'+(i+1)+'段</span><span class="tag">AI</span><span>'+esc((_v.claim||'').slice(0,28))+((_v.claim||'').length>28?'...':'')+'</span></div>'; }).join('') : '<div class="tl-item"><span>暂无</span></div>')) +'</div>'+
     '<div class="panel"><h4>🎯 逐段 AI 点评</h4>'+
       (S.comments.length? S.comments.map(c=>{
         const m=S.messages.find(x=>x.id===c.msgId);
         return '<div class="tl-item"><span class="t">'+fmtTime(c.atTs)+'</span><span class="tag">AI</span><span>'+(c.style==='good'?'✅':'🟡')+' '+esc(c.text)+'</span></div>';
-      }).join('') : '<div class="tl-item"><span>暂无点评</span></div>')+
+      }).join('') : (S.arenas.length? S.arenas.map((ar,i)=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">点评'+(i+1)+'</span><span class="tag">AI</span><span>'+( _v.verdict?esc(_v.verdict):esc(_v.claim||'') )+'</span></div>'; }).join('') : '<div class="tl-item"><span>暂无点评</span></div>'))+
     '</div>'+
     '<div class="panel"><h4>⚖️ 论证点评</h4>'+(S.arenas.length? S.arenas.map(ar=>{ const _v=ar.judge||((ar.versions&&ar.versions[ar.rev])||{}); return '<div class="tl-item"><span class="t">AI</span><span>评分 '+((_v.score==null)?'-':_v.score)+'/10</span><span>'+esc(_v.verdict||'')+'</span></div>'+(ar.questions&&ar.questions.length?'<div class="tl-item"><span class="t" style="color:#b47809">❓ 质询</span><span>'+ar.questions.map(q=>esc(q)).join('；')+'</span></div>':''); }).join('') : '<div class="tl-item"><span>暂无论证点评</span></div>')+'</div>'+
     '<div class="panel"><h4>📌 可深挖方向(AI 建议)</h4>'+
@@ -1695,6 +1695,8 @@ function renderEvaluate(){
     '</div>';
 }
 function kpi(v,k){ return '<div class="kpi"><div class="v">'+v+'</div><div class="k">'+k+'</div></div>'; }
+// 切屏/切后台返回时不自动弹出输入法:页面隐藏时收起当前输入框焦点
+if(document.addEventListener) document.addEventListener('visibilitychange',()=>{ if(document.hidden){ const ae=document.activeElement; if(ae&&ae.blur&&ae.tagName!=='BODY'){ try{ ae.blur(); }catch(z){ } } } });
 
 /* ================= 导出复盘网页 ================= */
 function buildReviewHTML(data){
@@ -1862,7 +1864,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.15';
+const APP_VERSION='1.0.16';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
