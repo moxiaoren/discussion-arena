@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.0.6';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -224,6 +224,19 @@ function ghPush(gitPath, content, commitMsg) {
 
 /* ---------------- 房间表 ---------------- */
 const rooms = new Map();
+/* 房间进行中的消息(供后来者登录后回放)：落盘 data/live/{roomId}.json，启动加载 */
+const LIVE_DIR = path.join(DATA_DIR, 'live');
+const liveMsgs = new Map();
+try { if (fs.existsSync(LIVE_DIR)) { for (const f of fs.readdirSync(LIVE_DIR)) { if (/\.json$/i.test(f)) { try { const d = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, f), 'utf8')); if (d && d.roomId && Array.isArray(d.msgs)) liveMsgs.set(d.roomId, d.msgs); } catch (e) {} } } } } catch (e) {}
+function recordLive(roomId, data){
+  if (!data || data.type !== 'msg' || !data.m || !data.m.id) return;
+  if (!/^\d{6}$/.test(roomId)) return;
+  let arr = liveMsgs.get(roomId);
+  if (!arr) { arr = []; liveMsgs.set(roomId, arr); }
+  if (arr.find(x => x.id === data.m.id)) return;
+  arr.push(data.m);
+  try { fs.mkdirSync(LIVE_DIR, { recursive: true }); fs.writeFile(path.join(LIVE_DIR, roomId + '.json'), JSON.stringify({ roomId, msgs: arr }), 'utf8', () => {}); } catch (e) {}
+}
 function genId() { return String(Math.floor(100000 + Math.random() * 900000)); }
 function send(ws, obj) { try { if (ws.readyState === 1) ws.send(JSON.stringify(obj)); } catch (e) {} }
 function broadcast(roomId, obj, except) {
@@ -392,8 +405,11 @@ wss.on('connection', (ws) => {
       rooms.get(id).add(ws);
       broadcast(id, { type: 'peer-joined' }, ws);
       send(ws, { type: 'joined' });
+      const hist = liveMsgs.get(id);
+      if (hist && hist.length) send(ws, { type: 'room-history', roomId: id, msgs: hist.slice() });
     } else if (m.type === 'relay' && r) {
       broadcast(r, { type: 'relay', data: m.data }, ws);
+      recordLive(r, m.data); // 记录消息供后来者登录后回放
     } else if (m.type === 'ping') {
       send(ws, { type: 'pong' });
     } else if (m.type === 'ai') {

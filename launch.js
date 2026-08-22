@@ -68,6 +68,10 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.0.6', notes: [
+    '修复：后来者登录进入房间时，自动回放该房间此前已发送的消息（讨论+弹幕），不再只看到自己之后的发言',
+    '改进：在线更新日志分别提示缺失项（更新仓库 / Token），不再笼统报“未配置 token”误导排查'
+  ] },
   { version: 'v1.0.5', notes: [
     '新增 GitHub 在线更新配置入口（⚙️设置）：填好更新仓库+Token 后，后端(relay/launch)改动自动在线更新并重启，不再需要手动整包安装',
     '修复：登录成功后收齐「选择身份/输密码」表单，避免误以为未登录'
@@ -214,7 +218,11 @@ async function checkUpdate(silent) {
   const upd = s.updater || {};
   const repo = (gh && gh.updateRepo) || (upd && upd.repo);
   const token = gh && gh.token;
-  if (!repo || !token) { if (!silent) log('（未配置 server-config.json 的 github.token，跳过在线更新）'); return false; }
+  if (!repo) {
+    if (!silent) log('（未配置 github.updateRepo 更新仓库，跳过在线更新；请在网页 ⚙️设置 →「GitHub 在线更新」填写更新仓库）');
+    return false;
+  }
+  if (!token) { if (!silent) log('（未配置 github.token，跳过在线更新；请在 ⚙️设置 →「GitHub 在线更新」填写 Token）'); return false; }
   const files = ['index.html', 'relay.js', 'launch.js', 'server-config.json.example'];
   let changed = false, needRestart = false, launchChanged = false;
   for (const f of files) {
