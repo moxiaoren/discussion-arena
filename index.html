@@ -355,24 +355,6 @@ input{font-family:inherit}
     </div>
     <div class="hint" id="newHint"></div>
     <div id="serverAiBadge" class="hint" style="margin:12px 0 6px;font-weight:700;color:#0a7">🔒 正在连接服务器...</div>
-    <details id="advancedPanel" class="adv-panel">
-      <summary>🛠 高级设置(服务端已配好,一般无需填写)</summary>
-    <div class="lbl" style="margin-top:16px">🤖 真实 AI · DeepSeek(可选 · 后门)</div>
-    <div style="display:flex;gap:6px">
-      <input id="aiKey" class="inp" type="password" placeholder="粘贴你的 DeepSeek API Key(sk-...)" style="margin:0">
-      <button class="btn secondary" id="btnSaveKey" style="width:auto;margin:0;white-space:nowrap">保存</button>
-    </div>
-    <div class="hint" id="aiKeyState"></div>
-    <div class="lbl" style="margin-top:14px">☁️ GitHub 存档(可选 · 后门)</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <input id="ghToken" class="inp" type="password" placeholder="GitHub Token(PAT,需勾选 repo 权限)" style="margin:0;flex:1;min-width:200px">
-      <input id="ghRepo" class="inp" placeholder="仓库 owner/repo(如 moxiaoren/discussion-room-history)" style="margin:0;flex:1;min-width:200px">
-      <button class="btn secondary" id="btnSaveGh" style="width:auto;margin:0;white-space:nowrap">保存</button>
-    </div>
-    <div class="hint" id="ghState">把「历史讨论」一键存到 GitHub 私有仓库,实现云端留存、跨设备可见。Token 仅存当前浏览器,不发送给第三方。</div>
-    <div class="hint">创建方会自动生成一个口令;好友选「我有口令」输入即可。服务器版支持两台不同设备异地实时讨论。<br>以下为高级设置,服务端已配置好时无需改动。</div>
-    </details>
-    <style>.adv-panel{border:1px dashed #ccc;border-radius:8px;padding:4px 10px;margin-top:6px}.adv-panel summary{cursor:pointer;color:#888;font-size:13px;padding:6px 0;user-select:none}.adv-panel[open] summary{margin-bottom:4px}</style>
   </div>
 </div>
 
@@ -736,7 +718,7 @@ const NetBridge=(function(){
       else if(m.type==='join-failed'){ if(typeof API.onjoinfailed==='function') API.onjoinfailed(m.reason); }
       else if(m.type==='peer-joined'){ if(typeof API.onpeerjoined==='function') API.onpeerjoined(); }
       else if(m.type==='relay'){ if(typeof API.onmessage==='function') API.onmessage({data:m.data}); }
-      else if(m.type==='server-info'){ serverAi=!!m.ai; const _b=document.querySelector('#serverAiBadge'); if(_b) _b.textContent = serverAi ? '🔒 服务端 AI 已启用,无需填 Key' : '⚠️ 服务端未配置 AI Key,当前为模拟 / 可在下方高级设置手填'; }
+      else if(m.type==='server-info'){ serverAi=!!m.ai; const _b=document.querySelector('#serverAiBadge'); if(_b) _b.textContent = serverAi ? '🔒 服务端 AI 已启用,无需填 Key' : '⚠️ 服务端未配置 AI Key,当前为模拟 (可在服务器右上角「⚙️ 设置」配置)'; }
       else if(m.type==='ai-result'){ const h=aiMap[m.data&&m.data.reqId]; if(h){ delete aiMap[m.data.reqId]; h.resolve(m.data.content); } }
       else if(m.type==='ai-error'){ const h=aiMap[m.data&&m.data.reqId]; if(h){ delete aiMap[m.data.reqId]; h.reject(new Error((m.data&&m.data.message)||'AI error')); } }
       else if(m.type==='load-result'){ const r=pendingLoad; pendingLoad=null; if(r) r(m.data); } };
@@ -1737,7 +1719,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.2';
+const APP_VERSION='1.0.3';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
@@ -1891,19 +1873,6 @@ function showAiErr(msg){
   }
   el.textContent='⚠️ 真实 AI 调用失败:'+(msg||'未知错误')+'\n(当前已回退到内置模拟 AI)';
 }
-function loadAiKeyUI(){
-  const k=localStorage.getItem('discuss_dskey')||'';
-  $('#aiKey').value='';
-  $('#aiKeyState').textContent = k
-    ? '✅ 已配置 DeepSeek Key(仅存在当前浏览器 localStorage,双标签共用;调用按你账号计费)'
-    : '未配置时使用内置模拟 AI。Key 只保存在你自己的浏览器,不发送到任何服务器,也不泄露给他人。';
-}
-$('#btnSaveKey').onclick=()=>{
-  const k=$('#aiKey').value.trim();
-  if(k){ localStorage.setItem('discuss_dskey',k); $('#aiKeyState').textContent='✅ 已保存并启用真实 AI(DeepSeek)。'; }
-  else{ localStorage.removeItem('discuss_dskey'); $('#aiKeyState').textContent='已清除,改用内置模拟 AI。'; }
-  $('#aiKey').value='';
-};
 const GITHUB_SAVED_KEY='github_saved';
 function ghToken(){ return localStorage.getItem('github_token')||''; }
 function ghRepo(){ return localStorage.getItem('github_repo')||''; }
@@ -1972,11 +1941,7 @@ async function cmdGhSave(h, btn){
   try{ const url=await ghSaveToCloud(h); ghMarkSaved(h.id); if(btn){ btn.textContent='✅ 已存'; btn.disabled=false; btn.classList.add('saved'); } alert('已存档到 GitHub:'+(h.title||'')+'\n'+url); }
   catch(e){ if(btn){ btn.textContent='☁️ 存到GitHub'; btn.disabled=false; } alert('GitHub 存档失败:'+e.message); }
 }
-function loadGhUI(){ $('#ghToken').value=localStorage.getItem('github_token')||''; $('#ghRepo').value=localStorage.getItem('github_repo')||''; }
-$('#btnSaveGh').onclick=()=>{ localStorage.setItem('github_token',$('#ghToken').value.trim()); localStorage.setItem('github_repo',$('#ghRepo').value.trim()); $('#ghState').textContent=$('#ghRepo').value.trim() ? '✅ 已保存 · 历史将存到:'+$('#ghRepo').value.trim() : '✅ 已保存(Token 已存本地)。'; };
-loadAiKeyUI();
 loadState();
-loadGhUI();
 renderResumeCard();
 
 // 初始化(若此前已在 localStorage 有口令则提示)
