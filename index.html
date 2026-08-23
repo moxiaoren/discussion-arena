@@ -362,6 +362,7 @@ input{font-family:inherit}
       <div class="hint" style="margin:4px 0 8px;font-size:12px;color:#999">配好 Token 后，后端（relay.js / launch.js）更新由服务器每 8 分钟自动拉取覆盖并重启，无需再手动整包安装。</div>
       <div id="setMsg" class="hint" style="margin-top:6px"></div>
       <div class="confirm-row"><button class="btn" id="setSave">💾 保存</button></div>
+      <div class="confirm-row" style="margin-top:8px"><button class="btn secondary" id="setRestart">♻️ 重启服务器</button></div>
     </div>
   </div>
   <style>
@@ -2043,6 +2044,16 @@ document.getElementById('setSave').onclick=()=>{
     set$('setMsg').textContent = (j&&j.message)||'保存失败';
     if(j&&j.ok&&j.settings){ SET.data=j.settings; fillSetForm(j.settings); }
   });
+};
+document.getElementById('setRestart').onclick=()=>{
+  if(!confirm('确认重启服务器？\n重启后需重新连接（约 10-30 秒），期间将短暂无法访问。')) return;
+  set$('setMsg').style.color=''; set$('setMsg').textContent='正在发送重启指令…';
+  fetch('/api/restart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pwd:SET.pwd})})
+    .then(r=>r.json()).then(j=>{
+      if(j&&j.ok){ set$('setMsg').style.color='#059669'; set$('setMsg').textContent=j.message+'（本页面将暂时失效，请稍后刷新进入）'; }
+      else{ set$('setMsg').style.color=''; set$('setMsg').textContent=(j&&j.message)||'重启失败'; }
+    })
+    .catch(()=>{ set$('setMsg').textContent='请求失败，服务器可能已开始重启'; });
 };
 
 /* 历史 / 新话题 绑定 */

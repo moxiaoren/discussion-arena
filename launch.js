@@ -68,6 +68,10 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.0.19', notes: [
+    '新增「远端手动重启服务器」：在「⚙️ 设置」（密码保护）里新增「♻️ 重启服务器」按钮，输入管理密码后即可远程整体重启服务器（重抓隧道并自动更新入口页地址）',
+    'launch.js / relay.js 在线更新后不再需要手动重启：launch 检测到自身更新会自动重启生效'
+  ] },
   { version: 'v1.0.18', notes: [
     '新增「固定入口页 · PWA 自动连接」：启动隧道后自动把最新网址同步到入口仓库 discussion-arena-entry/latest.txt',
     '你和好友装好固定入口(https://moxiaoren.github.io/discussion-arena-entry/，可添加到主屏幕当 App 用)，无论隧道地址怎么变，打开入口都会自动连到最新讨论间'  ] },
@@ -254,6 +258,7 @@ async function sendMail(cfg, subject, text) {
 
 /* ---------------- 在线更新（从私有仓库拉最新 index.html） ---------------- */
 let srv = null;
+let cfProc = null; // 隧道子进程（用于优雅重启）
 function spawnRelay() {
   const s = spawn(process.execPath, ['relay.js'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
   s.stdout.on('data', (d) => process.stdout.write('  后端| ' + d));
@@ -270,9 +275,9 @@ async function checkUpdate(silent) {
   const token = gh && gh.token;
   if (!repo) {
     if (!silent) log('（未配置 github.updateRepo 更新仓库，跳过在线更新；请在网页 ⚙️设置 →「GitHub 在线更新」填写更新仓库）');
-    return false;
+    return { restart: false, launchChanged: false };
   }
-  if (!token) { if (!silent) log('（未配置 github.token，跳过在线更新；请在 ⚙️设置 →「GitHub 在线更新」填写 Token）'); return false; }
+  if (!token) { if (!silent) log('（未配置 github.token，跳过在线更新；请在 ⚙️设置 →「GitHub 在线更新」填写 Token）'); return { restart: false, launchChanged: false }; }
   const files = ['index.html', 'relay.js', 'launch.js', 'version.json', 'server-config.json.example'];
   let changed = false, needRestart = false, launchChanged = false;
   for (const f of files) {
@@ -296,14 +301,15 @@ async function checkUpdate(silent) {
     } catch (e) { if (!silent) log('⚠ ' + f + ' 更新失败: ' + e.message); }
   }
   if (!silent && !changed) log('✔ 服务器文件已是最新');
-  if (launchChanged && !silent) log('  （launch.js 已更新，请重启一次 start.bat 使其生效）');
-  return needRestart;
+  if (launchChanged && !silent) log('  （launch.js 已更新，将自动重启使其生效）');
+  return { restart: needRestart, launchChanged };
 }
 async function autoUpdateLoop() {
   try {
     if (!srv || srv.exitCode !== null) { log('  （检测到后端未运行，自动拉起）'); srv = spawnRelay(); }
-    const nd = await checkUpdate(true);
-    if (nd) {
+    const upd = await checkUpdate(true);
+    if (upd && upd.launchChanged) { log('♻️ launch.js 已更新，自动重启服务器生效…'); restartSelf(); return; }
+    if (upd && upd.restart) {
       log('♻️ 检测到新版，自动重启后端使更新生效（约 2 秒）…');
       const old = srv; srv = null;
       try { if (old) old.kill('SIGKILL'); } catch (e) {}
@@ -311,6 +317,28 @@ async function autoUpdateLoop() {
       srv = spawnRelay();
     }
   } catch (e) { /* 静默 */ }
+}
+
+/* ---------------- 服务器重启（手动 / launch 更新触发） ---------------- */
+function _kill(child) {
+  try { if (child && child.pid) { try { child.kill('SIGTERM'); } catch (e) {} setTimeout(() => { try { child.kill('SIGKILL'); } catch (e) {} }, 1500); } } catch (e) {}
+}
+function restartSelf() {
+  log('\n♻️ 正在重启服务器…');
+  try { fs.unlinkSync(path.join(ROOT, 'restart.flag')); } catch (e) {}
+  try { _kill(srv); } catch (e) {}
+  if (cfProc && cfProc !== srv) { try { _kill(cfProc); } catch (e) {} }
+  // 启动新实例（detached，脱离当前进程组），随后退出旧进程让出端口
+  const extra = process.argv.slice(1).filter((a) => !['--menu', '--send-test'].includes(a));
+  try {
+    const child = spawn(process.execPath, [__filename].concat(extra), { cwd: ROOT, detached: true, stdio: 'inherit' });
+    child.unref();
+  } catch (e) { log('⚠ 启动新实例失败: ' + e.message); }
+  log('已启动新实例，旧进程即将退出…');
+  setTimeout(() => { try { process.exit(0); } catch (e) {} }, 1800);
+}
+function restartWatchdog() {
+  try { if (fs.existsSync(path.join(ROOT, 'restart.flag'))) restartSelf(); } catch (e) {}
 }
 
 /* ---------------- 菜单（node 交互，替代 cmd 菜单） ---------------- */
@@ -404,15 +432,18 @@ async function main() {
   srv = spawnRelay();
   // 自动更新守护：每 8 分钟检查远程，有新版自动覆盖 + 自动重启后端；后端崩溃自动拉起
   setInterval(autoUpdateLoop, UPDATE_INTERVAL);
+  // 重启看门狗：检测到 restart.flag（网页「设置」点重启 或 遗留标记）即整体重启
+  setInterval(restartWatchdog, 6000);
 
   await new Promise((r) => setTimeout(r, 2000));
 
   log('[2/3] 启动 Cloudflare 隧道 ...');
   const cf = spawn(CF_BIN, ['tunnel', '--url', 'http://localhost:' + PORT + '/', '--no-autoupdate'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  cfProc = cf;
   cf.on('error', (e) => { log('⚠ 启动 Cloudflare 隧道失败: ' + ((e && e.code) || (e && e.message)) + '（cloudflared.exe 可能损坏或被杀软拦截。请删除后重跑 install-menu 选 1 重新下载，或手动放置新版）'); });
   cf.stdout.on('data', (d) => tryPush(String(d)));
   cf.stderr.on('data', (d) => tryPush(String(d)));
-  cf.on('exit', (c) => log('⚠ 隧道已退出 (code=' + c + ')，后端仍在运行'));
+  cf.on('exit', (c) => { cfProc = null; log('⚠ 隧道已退出 (code=' + c + ')，后端仍在运行'); });
 
   let pushed = false;
   function tryPush(text) {

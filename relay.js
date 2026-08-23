@@ -359,6 +359,20 @@ const server = http.createServer((req, res) => {
     if (!checkPwd(qs.get('pwd'))) { jsonRes(res, { ok: false, message: '管理密码错误' }); return; }
     jsonRes(res, { ok: true, settings: maskedSettings() }); return;
   }
+  // 远端手动重启：校验管理密码 → 写 restart.flag，由 launch.js 看门狗执行整体重启
+  if (p === '/api/restart') {
+    if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
+    let rbody = '';
+    req.on('data', (c) => { rbody += c; if (rbody.length > 1e5) req.destroy(); });
+    req.on('end', () => {
+      let data = {}; try { data = JSON.parse(rbody); } catch (e) {}
+      if (!authInfo().pwdHash) { jsonRes(res, { ok: false, needPassword: true, message: '请先在「设置」中设置管理密码' }); return; }
+      if (!checkPwd(data.pwd)) { jsonRes(res, { ok: false, message: '管理密码错误' }); return; }
+      try { fs.writeFileSync(path.join(ROOT, 'restart.flag'), String(Date.now()), 'utf8'); } catch (e) { }
+      jsonRes(res, { ok: true, message: '已接受重启指令，服务器即将重启（约 10-30 秒），请稍后刷新' });
+    });
+    return;
+  }
   if (p === '/api/admin/password' || p === '/api/admin/settings') {
     if (req.method !== 'POST') { jsonRes(res, { ok: false, message: '请用 POST' }); return; }
     let body = '';
