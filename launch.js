@@ -68,6 +68,9 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.0.18', notes: [
+    '新增「固定入口页 · PWA 自动连接」：启动隧道后自动把最新网址同步到入口仓库 discussion-arena-entry/latest.txt',
+    '你和好友装好固定入口(https://moxiaoren.github.io/discussion-arena-entry/，可添加到主屏幕当 App 用)，无论隧道地址怎么变，打开入口都会自动连到最新讨论间'  ] },
   { version: 'v1.0.17', notes: [
     '结束讨论后新增「四维深度梳理」：从整场讨论从头完整复盘，覆盖 ①逻辑(推理准确性/严谨性) ②语言(表述准确性) ③体系(框架结构/自洽/全面) ④价值(话题内涵/深度)，每维 0-10 评分+概括+要点，并给总体结论',
     '四维深度梳理在 AI 评价页展示，历史存档与导出的复盘网页也包含'
@@ -366,6 +369,28 @@ async function sendTest() {
 
 /* ---------------- 主流程（启动） ---------------- */
 const CF_URL_RE = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/i;
+
+/* ---------------- 入口页地址源更新（PWA 自动连接入口讨论-arena-entry） ---------------- */
+// 入口仓库（固定 GH Pages 入口页）的 latest.txt 作为“最新地址源”，手机/浏览器入口页从这里读取并自动跳转
+const ENTRY_REPO = 'moxiaoren/discussion-arena-entry';
+async function updateEntryAddr(url, token) {
+  if (!token) { log('  （未配置 github.token，无法更新入口页地址源；地址仍在下方 / last-url.txt）'); return; }
+  const api = 'https://api.github.com/repos/' + ENTRY_REPO + '/contents/latest.txt';
+  const head = { Authorization: 'Bearer ' + token, 'User-Agent': 'openclaw-note', 'Accept': 'application/vnd.github+json' };
+  try {
+    let sha = null;
+    const meta = await fetch(api + '?branch=main', { headers: head });
+    if (meta.status === 200) { try { sha = (await meta.json()).sha; } catch (e) {} }
+    const body = url + '\n' + new Date().toISOString();
+    const put = await fetch(api, {
+      method: 'PUT',
+      headers: Object.assign({}, head, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message: 'update latest address', content: Buffer.from(body).toString('base64'), branch: 'main', ...(sha ? { sha } : {}) })
+    });
+    if (put.ok) log('📌 已更新入口页地址源 (' + ENTRY_REPO + '/latest.txt)');
+    else log('✗ 更新入口页地址源失败(' + put.status + '): ' + (await put.text()).slice(0, 120));
+  } catch (e) { log('✗ 更新入口页地址源异常: ' + e.message); }
+}
 async function main() {
   log('============================================');
   log('   论证点评间 · 异地版 · 一键启动');
@@ -398,6 +423,8 @@ async function main() {
     log('\n\n🎉 你的聊天室新网址：' + url);
     try { fs.writeFileSync(path.join(ROOT, 'last-url.txt'), url + '\n'); } catch (e) {}
     log('（已保存到 last-url.txt）');
+    // 同步更新入口页地址源（PWA 自动连接）——复用在线更新同一个 github.token
+    updateEntryAddr(url, ((loadJson('settings.json') || {}).github || {}).token);
     if (DRY) { log('（--dryrun：不发送邮件）'); return; }
     const mailCfg = loadMailCfg();
     if (!mailCfg) { log('⚠ 未配置邮箱，跳过推送。\n   （在网页「⚙️ 设置」里填写发信邮箱后会自动推送）'); return; }
