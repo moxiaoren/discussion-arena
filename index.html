@@ -591,8 +591,8 @@ const AI = {
     if(!this._hasKey()) return this._mockSummarize(text, bg, ev);
     const EV_EXT = '另外请额外生成 **evidence 证据检索指引**(帮助发言者去核实观点,**不编造任何具体事实/数据/链接**):sourceTypes 为 2-4 个建议核实的资料渠道类型(如权威/行业报告、学术/期刊文献、官方/政府统计数据、主流媒体深度报道、可查证的案例资料);keywords 为 3-5 个推荐检索关键词(可含细分/英文)。返回 JSON 额外带字段 "evidence":{"sourceTypes":[...],"keywords":[...]};若不需要证据指引,evidence 返回空对象 {"sourceTypes":[],"keywords":[]}。';
     let sys = hasBg
-      ? '你是两人讨论的中立整理师。我将给你「之前对话背景」和发言者这次要总结的「新发言」。理解的核心是**准确把握发言者想表达什么、不要曲解**。请:1) 提炼新发言核心观点 core 和论据 points(points 最多3条);2) 判断新发言在回应背景中的哪个话题/哪句观点,用 focus 一句话说明(如"回应你关于做MVP的提议,补充了时间与人力约束";无明显对应则写"承接对当前话题的进一步阐述");3) 判断是否跑题--**反驳、提出反例、质疑、补充、举相反例子,都是围绕当前话题的正常交流,不算跑题**;只有明显偏离当前话题、另起不相干话题才算跑题,确实跑题才用 offtopic 一句提示,否则空字符串;4) 若发言语义不明确、无法确定其意图、或可能被曲解,用 clarify 一句向发言者提出提示(如"你是指...吗?能否补充说明"),让发言者明确或确认,否则 clarify 空字符串;论点明显缺乏论据支撑则用 issue 一句指出,否则空。不评价、不站队。返回严格 JSON:{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。'
-      : '你是两人讨论的中立整理师。这是**讨论的开头**,发言者的第一段表达,它将决定整个讨论的方向,请详尽总结。请:1) 提炼**讨论意图 / 话题** topic--这段想围绕什么核心问题讨论、想达成什么目的、重点想表达什么(一句话概括);2) 提炼核心观点 core 和论据 points(最多3条);3) 判断开头的意图与表达是否**足够清晰、能支撑起后续讨论**:若含糊、指向不明、可能被曲解,用 clarify 一句向发言者提出"建议补充/明确"的提示;若清晰则 clarify 为空字符串;4) 论点明显缺乏论据支撑用 issue 一句指出,否则空。**不要**判断是否回应、不要判断跑题(focus 与 offtopic 一律返回空字符串)。不评价、不站队。返回严格 JSON:{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。';
+      ? '你是两人讨论的评审整理师。我将给你「之前对话背景」和发言者这次要总结的「新发言」。由于这份发言通常是**对上面内容的回复**,请必须结合上下文评判本次回复的意图与质量,不要脱离上文孤立看待。请:1) 提炼新发言核心观点 core 和论据 points(points 最多3条);2) 判断**本次发言的意图**--它在回应上文中的哪个话题/哪句观点,用 focus 一句话精准说明(如"回应你关于做MVP的提议,补充了时间与人力约束";无明显对应则写"承接对当前话题的进一步阐述");3) 评判**本次回复的质量**--是否准确回应了上文,逻辑是否连贯,论点是否有足够支撑:若答非所问、逻辑断裂、明显缺乏论据,用 issue 一句指出,否则空;4) 判断是否跑题--反驳、提出反例、质疑、补充、举相反例子都是围绕当前话题的正常交流,不算跑题;只有明显偏离当前话题、另起不相干话题才算跑题,确实跑题才用 offtopic 一句提示,否则空字符串;5) 若发言语义不明确、无法确定其意图、或可能被曲解,用 clarify 一句请发言者明确或确认,否则 clarify 空字符串。对意图与质量的评判要客观、结合上下文。返回严格 JSON:{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。'
+      : '你是两人讨论的中立整理师。这是**讨论的开头**,发言者的第一段表达,它将决定整个讨论的方向。请:1) 明确提炼**本次讨论重点 / 话题** topic--这段想围绕什么核心问题讨论、想达成什么目的、重点表达的意图是什么(一句话概括,务必清晰明确,不要含糊);2) 提炼核心观点 core 和论据 points(最多3条);3) 确定发言者的**表达意图**并判断其是否足够清晰、能支撑起后续讨论:若意图含糊、指向不明、可能被曲解,用 clarify 一句请发言者建议补充/明确,否则 clarify 为空字符串;4) 论点明显缺乏论据支撑用 issue 一句指出,否则空。不要判断是否回应、不要判断跑题(focus 与 offtopic 一律返回空字符串)。不站队,但可对表达清晰度与意图明确性做客观评判。返回严格 JSON:{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。';
     if(ev) sys += EV_EXT;
     try{
       const out=await this._chat(sys,
@@ -1501,13 +1501,14 @@ async function ensureDeepReview(){
   const DIM='{"score":0,"summary":"一句概括","points":["要点1","要点2"]}';
   try{
     const out=await AI._chat(
-      '你是两人讨论结束后的复盘者。请对整场讨论做一次从头到尾的深入、完整梳理与复盘，覆盖四维：①逻辑（推理是否准确、论证是否严谨）②语言（表述是否准确、清晰）③体系（框架是否结构完整、逻辑自洽、覆盖全面）④价值（话题内涵与讨论的深度）。每维给出 0-10 评分 + 一句概括 + 2-3 条结合对话实际的具体要点；最后给一段 150 字内的总体结论。只返回严格 JSON：{"logic":'+DIM+',"language":'+DIM+',"structure":'+DIM+',"value":'+DIM+',"conclusion":"总体结论"}',
+      '你是两人讨论结束后的复盘者。请对整场讨论做一次从头到尾的深入、完整梳理与复盘，覆盖四维：①逻辑（推理是否准确、论证是否严谨）②语言（表述是否准确、清晰）③体系（框架是否结构完整、逻辑自洽、覆盖全面）④价值（话题内涵与讨论的深度）。每维给出 0-10 评分 + 一句概括 + 2-3 条结合对话实际的具体要点；然后**对两位发言者分别做“双方讨论评价”**：从各维度（逻辑、表达/语言、论据支撑、对讨论的推动）逐一点评分析，每位给出 score(0-10) + 各维一句评价 + 亮点 strength(最多3条) + 不足 weak(最多2条) + 一句综合评价 overall。最后给一段 150 字内的总体结论。只返回严格 JSON：{"logic":'+DIM+',"language":'+DIM+',"structure":'+DIM+',"value":'+DIM+',"members":[{"name":"发言者名","score":0,"logic":"","language":"","evidence":"","contribution":"","strength":["亮1","亮2"],"weak":["不足1"],"overall":""}],"conclusion":"总体结论"}',
       '讨论主题:'+(S.topic||'未命名')+'\n\n完整对话记录:\n'+(msgs.join('\n')||'(无讨论消息)'));
     const mm=out.match(/\{[\s\S]*\}/);
     if(mm){
       const j=JSON.parse(mm[0]);
       const pick=o=>{ o=o||{}; return {score:Math.max(0,Math.min(10,parseInt(o.score,10)||0)), summary:sanitize(o.summary||''), points:(Array.isArray(o.points)?o.points.slice(0,3).map(s=>sanitize(String(s))):[])}; };
-      S.deepReview={logic:pick(j.logic),language:pick(j.language),structure:pick(j.structure),value:pick(j.value),conclusion:sanitize(j.conclusion||'')};
+      const mems = Array.isArray(j.members) ? j.members.slice(0,4).map(o=>{ o=o||{}; return {name:sanitize(o.name||''), score:Math.max(0,Math.min(10,parseInt(o.score,10)||0)), logic:sanitize(o.logic||''), language:sanitize(o.language||''), evidence:sanitize(o.evidence||''), contribution:sanitize(o.contribution||''), strength:(Array.isArray(o.strength)?o.strength.slice(0,3).map(s=>sanitize(String(s))):[]), weak:(Array.isArray(o.weak)?o.weak.slice(0,2).map(s=>sanitize(String(s))):[]), overall:sanitize(o.overall||'')}; }).filter(x=>x.name) : [];
+      S.deepReview={logic:pick(j.logic),language:pick(j.language),structure:pick(j.structure),value:pick(j.value),members:mems,conclusion:sanitize(j.conclusion||'')};
       persistState();
     } else S.deepReview=null;
   }catch(e){ console.warn('deepseek deepReview fail',e); showAiErr('四维深度梳理:'+(e&&e.message||e)); S.deepReview=null; }
@@ -1706,6 +1707,20 @@ function renderEvaluate(){
     const dims=[['logic','① 逻辑','推理准确性 · 严谨性'],['language','② 语言','表述准确性 · 清晰度'],['structure','③ 体系','框架结构 · 自洽 · 全面'],['value','④ 价值','话题内涵 · 深度']];
     drHtml+=dims.map(d=>{ const dr=S.deepReview[d[0]]||{}; return '<div class="dr-dim"><div class="dr-head">'+d[1]+'<span class="dr-sub">'+d[2]+'</span><span class="dr-score">'+((dr.score==null)?'-':dr.score)+' / 10</span></div>'+(dr.summary?'<div class="dr-sum">'+esc(dr.summary)+'</div>':'')+((dr.points&&dr.points.length)?'<div class="dr-points">'+dr.points.map(p=>'<div>· '+esc(p)+'</div>').join('')+'</div>':'')+'</div>'; }).join('');
     if(S.deepReview.conclusion) drHtml+='<div class="dr-concl">📌 总体结论：'+esc(S.deepReview.conclusion)+'</div>';
+    if(S.deepReview.members && S.deepReview.members.length){
+      drHtml+='<h4 style="margin:14px 0 6px">👥 双方讨论评价</h4>';
+      drHtml+=S.deepReview.members.map(mb=>{
+        return '<div class="dr-dim"><div class="dr-head">'+esc(mb.name||'发言者')+'<span class="dr-sub">各维度点评</span><span class="dr-score">'+((mb.score==null)?'-':mb.score)+' / 10</span></div>'
+          +'<div class="dr-sum">逻辑：'+esc(mb.logic||'-')+'</div>'
+          +'<div class="dr-sum">表达：'+esc(mb.language||'-')+'</div>'
+          +'<div class="dr-sum">论据：'+esc(mb.evidence||'-')+'</div>'
+          +'<div class="dr-sum">推动：'+esc(mb.contribution||'-')+'</div>'
+          +((mb.strength&&mb.strength.length)?'<div class="dr-points">'+mb.strength.map(p=>'<div>✨ '+esc(p)+'</div>').join('')+'</div>':'')
+          +((mb.weak&&mb.weak.length)?'<div class="dr-points">'+mb.weak.map(p=>'<div>⚠️ '+esc(p)+'</div>').join('')+'</div>':'')
+          +(mb.overall?'<div class="dr-concl">💬 '+esc(mb.overall)+'</div>':'')
+          +'</div>';
+      }).join('');
+    }
   }
   drHtml+='</div>';
   pane.innerHTML=
@@ -1766,7 +1781,7 @@ function buildReviewHTML(data){
   });
   if(comments&&comments.length){ body+='<h2>🤖 逐段 AI 点评</h2>'; comments.forEach(c=>{ body+='<div class="cm '+(c.good===false?'off':'good')+'"><b>'+(c.good===false?'🤨 待商榷':'👍 亮点')+'</b> · '+esc(c.text||'')+'</div>'; }); }
   if(verdict) body+='<div class="v">🏁 复盘总评</div><div class="vbox">'+esc(verdict)+'</div>';
-  if(dr){ body+='<h2>🧭 四维深度梳理</h2>'; const dims=[['logic','① 逻辑'],['language','② 语言'],['structure','③ 体系'],['value','④ 价值']]; dims.forEach(d=>{ const x=dr[d[0]]||{}; body+='<div class="v">'+d[1]+' · '+((x.score==null)?'-':x.score)+'/10</div><div class="vbox">'+esc(x.summary||'')+(x.points&&x.points.length?'<br>'+x.points.map(p=>'· '+esc(p)).join('<br>'):'')+'</div>'; }); if(dr.conclusion) body+='<div class="v">📌 总体结论</div><div class="vbox">'+esc(dr.conclusion)+'</div>'; }
+  if(dr){ body+='<h2>🧭 四维深度梳理</h2>'; const dims=[['logic','① 逻辑'],['language','② 语言'],['structure','③ 体系'],['value','④ 价值']]; dims.forEach(d=>{ const x=dr[d[0]]||{}; body+='<div class="v">'+d[1]+' · '+((x.score==null)?'-':x.score)+'/10</div><div class="vbox">'+esc(x.summary||'')+(x.points&&x.points.length?'<br>'+x.points.map(p=>'· '+esc(p)).join('<br>'):'')+'</div>'; }); if(dr.conclusion) body+='<div class="v">📌 总体结论</div><div class="vbox">'+esc(dr.conclusion)+'</div>'; if(dr.members&&dr.members.length){ body+='<h2>👥 双方讨论评价</h2>'; dr.members.forEach(mb=>{ body+='<div class="v">'+esc(mb.name||'发言者')+' · '+(mb.score==null?'-':mb.score)+'/10</div><div class="vbox">逻辑：'+esc(mb.logic||'-')+'<br>表达：'+esc(mb.language||'-')+'<br>论据：'+esc(mb.evidence||'-')+'<br>推动：'+esc(mb.contribution||'-')+(mb.strength&&mb.strength.length?'<br>✨ '+mb.strength.map(esc).join('<br>✨ '):'')+(mb.weak&&mb.weak.length?'<br>⚠️ '+mb.weak.map(esc).join('<br>⚠️ '):'')+(mb.overall?'<br>💬 '+esc(mb.overall):'')+'</div>'; }); } }
   const html='<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>'+title+'</title><style>'+
     'body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;max-width:760px;margin:28px auto;padding:0 18px 60px;color:#222;background:#f6f5fb}'+
     'h1{font-size:20px;color:#6d28d9}.sub{color:#888;font-size:13px;margin:4px 0 22px}'+
@@ -1905,7 +1920,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.19';
+const APP_VERSION='1.0.20';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
