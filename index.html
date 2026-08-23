@@ -296,7 +296,7 @@ input{font-family:inherit}
         <li><b>🤖 AI</b>:由服务器托管(DeepSeek),无需填 Key,自动做真实整理与点评</li>
       </ul>
       <h4>3 AI 总结怎么用</h4>
-      <p>说了一段后点 <b>「总结 ✨」</b> → 选择 <b>你自己的发言</b>(可多条)一起总结,表达「我说完了、请对方理解回复」;<b>开头发言会提炼「🧭 讨论意图」</b>(意图不明会提示补充);卡片会展示「🎯 在回应 / ↔️ 是否跑题 / 💬 建议补充 / ⚠️ 论据支撑问题」;可「🧠重新生成 / 📝补充 / 🕘历史版本」。</p>
+      <p>说了一段后点 <b>「总结 ✨」</b> → 选择 <b>你自己的发言</b>(可多条)一起总结,表达「我说完了、请对方理解回复」;<b>开头发言会提炼「🧭 讨论意图」</b>(意图不明会提示补充);卡片会展示「🎯 在回应 / ↔️ 是否跑题 / 💬 表达需明确 / ⚠️ 论证需修正」;可「🧠重新生成 / 📝补充 / 🕘历史版本」。</p>
       <p style="color:#999;font-size:12px">💡 开头第一段发言没有之前上下文,不做「回应/跑题」判断;「反驳、举反例、质疑」算同一话题的正常交流,不算跑题。</p>
       <h4>4 整理 / 点评双模式</h4>
       <p>房间栏「⚖️ 整理/点评」随时切换:整理=中立梳理总结;点评=多维度论证评估(逻辑/语言/体系/价值/漏洞 0-10)+总体评分+反方质询,帮你们把观点打磨扎实。</p>
@@ -591,8 +591,8 @@ const AI = {
     if(!this._hasKey()) return this._mockSummarize(text, bg, ev);
     const EV_EXT = '另外请额外生成 **evidence 证据检索指引**(帮助发言者去核实观点,**不编造任何具体事实/数据/链接**):sourceTypes 为 2-4 个建议核实的资料渠道类型(如权威/行业报告、学术/期刊文献、官方/政府统计数据、主流媒体深度报道、可查证的案例资料);keywords 为 3-5 个推荐检索关键词(可含细分/英文)。返回 JSON 额外带字段 "evidence":{"sourceTypes":[...],"keywords":[...]};若不需要证据指引,evidence 返回空对象 {"sourceTypes":[],"keywords":[]}。';
     let sys = hasBg
-      ? '你是两人讨论的评审整理师。我将给你「之前对话背景」和发言者这次要总结的「新发言」。由于这份发言通常是**对上面内容的回复**,请必须结合上下文评判本次回复的意图与质量,不要脱离上文孤立看待。请:1) 提炼新发言核心观点 core 和论据 points(points 最多3条);2) 判断**本次发言的意图**--它在回应上文中的哪个话题/哪句观点,用 focus 一句话精准说明(如"回应你关于做MVP的提议,补充了时间与人力约束";无明显对应则写"承接对当前话题的进一步阐述");3) 评判**本次回复的质量**--是否准确回应了上文,逻辑是否连贯,论点是否有足够支撑:若答非所问、逻辑断裂、明显缺乏论据,用 issue 一句指出,否则空;4) 判断是否跑题--反驳、提出反例、质疑、补充、举相反例子都是围绕当前话题的正常交流,不算跑题;只有明显偏离当前话题、另起不相干话题才算跑题,确实跑题才用 offtopic 一句提示,否则空字符串;5) 若发言语义不明确、无法确定其意图、或可能被曲解,用 clarify 一句请发言者明确或确认,否则 clarify 空字符串。对意图与质量的评判要客观、结合上下文。返回严格 JSON:{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。'
-      : '你是两人讨论的中立整理师。这是**讨论的开头**,发言者的第一段表达,它将决定整个讨论的方向。请:1) 明确提炼**本次讨论重点 / 话题** topic--这段想围绕什么核心问题讨论、想达成什么目的、重点表达的意图是什么(一句话概括,务必清晰明确,不要含糊);2) 提炼核心观点 core 和论据 points(最多3条);3) 确定发言者的**表达意图**并判断其是否足够清晰、能支撑起后续讨论:若意图含糊、指向不明、可能被曲解,用 clarify 一句请发言者建议补充/明确,否则 clarify 为空字符串;4) 论点明显缺乏论据支撑用 issue 一句指出,否则空。不要判断是否回应、不要判断跑题(focus 与 offtopic 一律返回空字符串)。不站队,但可对表达清晰度与意图明确性做客观评判。返回严格 JSON:{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。';
+      ? '你是一位直言的「论述表达述评教练」。这次是**讨论的开头**,发言者的第一段表达将决定整个讨论的方向,你的目标核心是**锻炼双方把观点论述清楚**。请:1) **详细理清定调** topic--用 1-2 句说清这段讨论**围绕什么核心问题、想达成什么目的、整体是什么基调和方向**(务必具体明确,不要含糊一句带过);2) 提炼核心观点 core 和论据 points(最多3条);3) **直接检查表达**:若这段表达不清晰、意图不明、意义含混、让人抓不住重点--不要委婉,直接在 clarify 里**明确指出哪里表达含混/意图不明/让人费解**,并点出应如何说明才能让人听懂;表达清楚则 clarify 为空;4) **直接检查明显错误**:若存在明显逻辑错误、事实错误、自相矛盾、前提不成立、或论据明显不足,直接在 issue 里**直言指出**(说明错在何处、如何补强),否则为空。目标不是讨好,而是帮发言者把论述打磨清楚,发现问题要**直言指正**、不要回避。不判断是否回应、不判断跑题(focus/offtopic 返回空)。返回严格 JSON:{"topic":"...","core":"...","points":[...],"issue":"...","clarify":"...","focus":"","offtopic":""}。'
+      : '你是一位直言的「论述表达述评教练」。这是对之前内容的**回复**,目标核心是锻炼双方把论述表达清楚、回应到位。请结合上下文,从**是否回应、是否跑题、论述质量**三方面综合考量,发现问题**直言指正**、不要回避:1) 提炼新发言核心观点 core 和论据 points(最多3条);2) 判断**本次发言在回应上文的哪一点** focus--一句话精准说明(如"回应你关于做MVP的提议,补充了时间与人力约束";无对应则写"承接对当前话题的进一步阐述");3) **直接审查论述质量**:是否准确回应了上文、逻辑是否连贯、论点是否有足够支撑:存在答非所问、逻辑断裂、漏洞、明显错误、或论据不足,直接用 issue **直言指出**(说清问题与如何补强),否则空;4) **综合判断是否跑题**--反驳、反例、质疑、补充、举相反例子都是围绕话题的正常交流,不算跑题;只有明显偏离当前话题、另起不相干话题才是跑题,确实跑题则 offtopic 一句点明,否则空;5) 若发言语义不明确、无法确定意图或可能被曲解,clarify **直接指出**并请其明确,否则空。返回严格 JSON:{"topic":"","core":"...","points":[...],"issue":"...","clarify":"...","focus":"...","offtopic":"..."}。';
     if(ev) sys += EV_EXT;
     try{
       const out=await this._chat(sys,
@@ -1125,8 +1125,8 @@ function renderSummaryCard(sm, msg){
       '<div style="color:#999;font-size:11px;margin-top:4px">仅给核实方向与关键词,请到搜索引擎/资料平台自行查证,不提供具体事实。</div></div>':'')+
     (v.focus?'<div class="body"><span class="field">🎯 在回应</span>'+esc(v.focus)+'</div>':'')+
     (v.offtopic?'<div class="body" style="color:#b45309"><span class="field" style="color:#b45309">↔️ 是否跑题</span>'+esc(v.offtopic)+'</div>':'')+
-    (v.clarify?'<div class="body" style="color:#1d4ed8"><span class="field" style="color:#1d4ed8">💬 建议补充</span>'+esc(v.clarify)+'</div>':'')+
-    (v.issue?'<div class="body" style="color:#be2346"><span class="field" style="color:#be2346">⚠️ 论据支撑问题</span>'+esc(v.issue)+'</div>':'')+
+    (v.clarify?'<div class="body" style="color:#1d4ed8"><span class="field" style="color:#1d4ed8">💬 表达需明确</span>'+esc(v.clarify)+'</div>':'')+
+    (v.issue?'<div class="body" style="color:#be2346"><span class="field" style="color:#be2346">⚠️ 论证需修正</span>'+esc(v.issue)+'</div>':'')+
     '<div class="btns">'+
       (ownerName===S.me.name?'<button class="sb-redo" data-redo="'+sm.id+'">🧠 重新生成</button>':'')+
       (ownerName===S.me.name?'<button class="sb-fill" data-fill="'+sm.messageId+'">📝 补充</button>':'')+
@@ -1777,8 +1777,8 @@ function buildReviewHTML(data){
         (v.points&&v.points.length?'<br><span class="f">【论据】</span>'+v.points.map(p=>esc(p)).join(';'):'')+
         (v.focus?'<br><span class="f">🎯 在回应:</span>'+esc(v.focus):'')+
         (v.offtopic?'<br><span class="f">↔️ 是否跑题:</span>'+esc(v.offtopic):'')+
-        (v.clarify?'<br><span class="f">💬 建议补充:</span>'+esc(v.clarify):'')+
-        (v.issue?'<br><span class="f">⚠️ 论据支撑:</span>'+esc(v.issue):'')+
+        (v.clarify?'<br><span class="f">💬 表达需明确:</span>'+esc(v.clarify):'')+
+        (v.issue?'<br><span class="f">⚠️ 论证需修正:</span>'+esc(v.issue):'')+
         (v.evidence&&v.evidence.sourceTypes&&v.evidence.sourceTypes.length?'<br><span class="f">🔍 证据·渠道:</span>'+v.evidence.sourceTypes.map(esc).join('、'):'')+
         (v.evidence&&v.evidence.keywords&&v.evidence.keywords.length?'<br><span class="f">🔍 证据·关键词:</span>'+v.evidence.keywords.map(esc).join('、'):'')+
       '</div>';
@@ -1941,7 +1941,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.21';
+const APP_VERSION='1.0.22';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
