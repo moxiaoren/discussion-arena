@@ -869,9 +869,10 @@ $('#btnResumeConfirm').onclick=()=>{
 };
 
 function resetCurrent(){ S.messages=[]; S.summaries=[]; S.arenas=[]; S.comments=[]; S.verdict=null; S.deepReview=null; try{localStorage.removeItem(STATE_KEY);}catch(e){} }
-function leaveToLobby(){ S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
+function leaveToLobby(){ reviewShown=false; S.inRoom=false; $('#room').classList.add('hidden'); $('#reviewView').classList.add('hidden'); $('#lobby').classList.remove('hidden'); renderResumeCard(); }
 $('#btnHome').onclick=()=>{ leaveToLobby(); }; // 讨论间→回到主页(大厅)
 function startNewTopic(){
+  const oldRid=currentRoomId();
   const has=S.messages.length>0;
   const m=has ? '将把当前讨论存为存档(本地 + 服务器 + GitHub 三层备份),然后开启一个全新空白的新话题。确定吗?' : '将开启一个全新空白的新话题。确定吗?';
   if(!confirm(m)) return;
@@ -887,6 +888,7 @@ function startNewTopic(){
       if($('#roomTopic') && j.room.title && j.room.title!=='新话题') $('#roomTopic').textContent='💬 '+j.room.title;
       NetBridge.onjoined=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
       NetBridge.onjoinfailed=()=>enterRoom(S.me.name, S.me.account===j.room.creator, j.room);
+      try{ if(oldRid && oldRid!==rid) NetBridge.postMessage({type:'topic-new'}); }catch(e){}
       NetBridge.join(rid);
       const n=$('#newHint'); if(n) n.textContent='';
     });
@@ -921,6 +923,7 @@ function fmtTL(ts){ const d=new Date(ts); return String(d.getHours()).padStart(2
 
 /* ================= 进入 / 注册 ================= */
 function enterRoom(name, isCreator, room){
+  if(reviewShown) return; // 复盘期间屏蔽再次进入房间(避免输入框/对话框重新出现)
   S.me.name = name; S.me.isCreator = isCreator; S.inRoom = true;
   if(room) ROOMINFO=room;
   $('#lobby').classList.add('hidden');
@@ -943,6 +946,7 @@ function enterRoom(name, isCreator, room){
 /* ================= 账号登录 ================= */
 let LOGIN={ account:'', accounts:[] };
 let ROOMINFO=null;
+let reviewShown=false; // 已进入复盘:阻止后续 onjoined/onmessage 再把房间显示回来
 function currentRoomId(){ if(ROOMINFO&&ROOMINFO.roomId) return ROOMINFO.roomId; return (localStorage.getItem('arena_room')||'').trim(); }
 function loadLoginAccounts(){
   fetch('/api/auth/status').then(r=>r.json()).then(j=>{
@@ -1450,6 +1454,7 @@ let dragging=false;
 $('#btnExport').onclick=exportReview;
 
 async function enterReview(){
+  reviewShown=true;
   S.inRoom=false;
   $('#room').classList.add('hidden');
   $('#reviewView').classList.remove('hidden');
@@ -1869,13 +1874,29 @@ NetBridge.onhistory=(arr)=>{
   if(!Array.isArray(arr)||!arr.length) return;
   let changed=false;
   const _del=(S.deleted||[]);
-  arr.forEach(m=>{ if(m&&m.id&&!_del.includes(m.id)&&!S.messages.find(x=>x.id===m.id)){ S.messages.push(m); changed=true; } });
+  arr.forEach(h=>{
+    if(!h) return;
+    if(h._t){ // 新版 live:带类型(msg/summary/arena/comment)
+      const d=h.d||{};
+      if(h._t==='summary'&&d.sm&&d.sm.id&&!S.summaries.find(x=>x.id===d.sm.id)){ S.summaries.push(d.sm); changed=true; }
+      else if(h._t==='arena'&&d.ar&&d.ar.id&&!S.arenas.find(x=>x.id===d.ar.id)){ S.arenas.push(d.ar); changed=true; }
+      else if(h._t==='comment'&&d.cm&&d.cm.id&&!S.comments.find(x=>x.id===d.cm.id)){ S.comments.push(d.cm); changed=true; }
+      else if(h._t==='msg'&&d.m&&d.m.id&&!_del.includes(d.m.id)&&!S.messages.find(x=>x.id===d.m.id)){ S.messages.push(d.m); changed=true; }
+      return;
+    }
+    // 旧版 live(纯消息对象)
+    if(h&&h.id&&!_del.includes(h.id)&&!S.messages.find(x=>x.id===h.id)){ S.messages.push(h); changed=true; }
+  });
   if(changed){ S.messages.sort((a,b)=>(a.ts||0)-(b.ts||0)); persistState(); renderStatus(); renderStream(); }
 };
 bc.onmessage=(e)=>{
   if(histView) return; // 历史复盘视图期间忽略广播,避免污染
   const d=e.data; if(!d) return;
   switch(d.type){
+    case 'topic-new':
+      // 创建者另开新话题:让仍在旧房间的一方重新加载进入最新房间
+      try{ location.reload(); }catch(e){}
+      break;
     case 'hello':
       if(!S.messages.some(x=>x.name===d.name)) { /* 提示在线 */ }
       renderStatus();
@@ -1920,7 +1941,7 @@ bc.onmessage=(e)=>{
 
 
 /* ================= 版本与更新检查 ================= */
-const APP_VERSION='1.0.20';
+const APP_VERSION='1.0.21';
 $('#verBadge').textContent='v'+APP_VERSION;
 $('#btnHelp').onclick=()=>$('#helpOverlay').classList.remove('hidden');
 $('#btnHelpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
