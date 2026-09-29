@@ -2,5 +2,5 @@
   "appId": "com.moxiaoren.discussionapp",
   "appName": "论证点评间",
   "webDir": "www",
-  "server": { "androidScheme": "https" }
+  "server": { "androidScheme": "https", "allowNavigation": ["*"] }
 }
