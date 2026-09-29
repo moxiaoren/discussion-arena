@@ -21,7 +21,7 @@ const { WebSocketServer } = require('ws');
 
 const ROOT = __dirname;
 const PORT = parseInt(process.env.PORT || '8788', 10);
-const APP_VERSION = '1.0.22';
+const APP_VERSION = '1.1.0';
 const DATA_DIR = path.join(ROOT, 'data');
 try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
@@ -204,7 +204,7 @@ function ghPush(gitPath, content, commitMsg) {
     if (!token) { resolve(false); return; }
     const base = 'https://api.github.com/repos/' + backupRepo() + '/contents/' + gitPath;
     const getSha = () => new Promise((r) => {
-      const req = https.get(base, { headers: { Authorization: 'Bearer ' + token, 'User-Agent': 'discussion-room-server', 'Accept': 'application/vnd.github+json' } }, (res) => {
+      const req = https.get(base, { headers: { Authorization: 'Bearer ' + token, 'User-Agent': 'discussion-arena', 'Accept': 'application/vnd.github+json' } }, (res) => {
         let d = ''; res.on('data', (c) => d += c);
         res.on('end', () => { try { const j = JSON.parse(d); r(j && j.sha ? j.sha : null); } catch (e) { r(null); } });
       });
@@ -216,7 +216,7 @@ function ghPush(gitPath, content, commitMsg) {
       if (sha) payload.sha = sha;
       const req = https.request(base, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, 'User-Agent': 'discussion-room-server', 'Accept': 'application/vnd.github+json' }
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, 'User-Agent': 'discussion-arena', 'Accept': 'application/vnd.github+json' }
       }, (res) => { res.resume(); res.on('end', () => resolve(res.statusCode === 200 || res.statusCode === 201)); });
       req.on('error', () => resolve(false));
       req.write(JSON.stringify(payload)); req.end();
@@ -230,15 +230,24 @@ const rooms = new Map();
 const LIVE_DIR = path.join(DATA_DIR, 'live');
 const liveMsgs = new Map();
 try { if (fs.existsSync(LIVE_DIR)) { for (const f of fs.readdirSync(LIVE_DIR)) { if (/\.json$/i.test(f)) { try { const d = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, f), 'utf8')); if (d && d.roomId && Array.isArray(d.msgs)) liveMsgs.set(d.roomId, d.msgs); } catch (e) {} } } } } catch (e) {}
+function nextLiveSeq(roomId){
+  const arr = liveMsgs.get(roomId) || [];
+  let max = 0;
+  for (const x of arr) if (x && typeof x._s === 'number' && x._s > max) max = x._s;
+  return max + 1;
+}
 function recordLive(roomId, data){
   if (!data || data.type==='rmmsg' || !data.type || !/^\d{6}$/.test(roomId)) return;
   const key = (data.m && data.m.id) || data.id || data.smId || data.arId || '';
   if (!key) return;
   let arr = liveMsgs.get(roomId);
   if (!arr) { arr = []; liveMsgs.set(roomId, arr); }
-  if (arr.find(x => x._k === key)) return;
-  arr.push({ _t: data.type, _k: key, d: data });
+  const ex = arr.find(x => x._k === key);
+  if (ex) return (typeof ex._s === 'number') ? ex._s : undefined; // 已存在→返回既有 seq(实时重发/去重)
+  const s = nextLiveSeq(roomId);
+  arr.push({ _s: s, _t: data.type, _k: key, d: data }); // _s=房间内全局自增 seq:顺序/增量补拉/去重依据
   try { fs.mkdirSync(LIVE_DIR, { recursive: true }); fs.writeFile(path.join(LIVE_DIR, roomId + '.json'), JSON.stringify({ roomId, msgs: arr }), 'utf8', () => {}); } catch (e) {}
+  return s;
 }
 function delLive(roomId, id){
   if (!roomId || !id || !/^\d{6}$/.test(roomId)) return;
@@ -457,11 +466,20 @@ wss.on('connection', (ws) => {
       send(ws, { type: 'joined' });
       broadcast(id, { type: 'room-size', count: rooms.get(id).size }); // 通知全体当前人数(仅自己在线时可单方面结束)
       const hist = liveMsgs.get(id);
-      if (hist && hist.length) send(ws, { type: 'room-history', roomId: id, msgs: hist.slice() });
+      if (hist && hist.length) {
+        let ms = hist.slice();
+        // 增量补拉：前端带最近已收 seq(lastSeq)，只回 seq 之后的，解决断线少消息/乱序
+        if (typeof m.since === 'number') ms = ms.filter(x => typeof x._s !== 'number' || x._s > m.since);
+        if (ms.length) send(ws, { type: 'room-history', roomId: id, msgs: ms, nextSeq: nextLiveSeq(id) });
+      }
     } else if (m.type === 'relay' && r) {
-      broadcast(r, { type: 'relay', data: m.data }, ws);
-      if (m.data && m.data.type === 'rmmsg') delLive(r, m.data.id); // 撤回:同步从服务端 live 删除,防止刷新回放旧消息
-      else recordLive(r, m.data); // 记录消息供后来者登录后回放
+      if (m.data && m.data.type === 'rmmsg') {
+        delLive(r, m.data.id); // 撤回:同步从服务端 live 删除,防刷新回放旧消息
+        broadcast(r, { type: 'relay', data: m.data }, ws);
+      } else {
+        const seq = recordLive(r, m.data); // 先落盘分配 seq,再广播(对端可同步 lastSeq)
+        broadcast(r, { type: 'relay', data: m.data, seq: seq || undefined }, ws);
+      }
     } else if (m.type === 'ping') {
       send(ws, { type: 'pong' });
     } else if (m.type === 'ai') {

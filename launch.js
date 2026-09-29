@@ -68,6 +68,13 @@ const APP_INTRO = [
   '· AI 由服务器托管，无需填 Key；配置见网页右上角「⚙️ 设置」(密码保护)'
 ].join('\n');
 const RELEASE_NOTES = [
+  { version: 'v1.1.0', notes: [
+    '重构升级：全面规范化，统一口径/收口/校验/逻辑/代码/UI',
+    '手机/安卓优先：渐变卡片风 UI 重做，移动端体验优先，桌面端保持可用',
+    '修消息可靠性(P0)：送达/已读/去重/服务端串行分发',
+    '版本真源四方对齐(1.1.0)，清理历史遗留旧命名标识',
+    '新增安卓 APK（Capacitor WebView 壳 · 云构建 · 侧载安装）'
+  ] },
   { version: 'v1.0.22', notes: [
     '总结升级为「述评教练」风格，核心目标是锻炼双方论述表达能力',
     '首次总结：详细理清定调（讨论核心问题/目的/基调），对表达不清、意图不明、明显错误直言指正',
@@ -415,6 +422,35 @@ const CF_URL_RE = /https:\/\/[a-z0-9-]+\.trycloudflare\.com/i;
 /* ---------------- 入口页地址源更新（PWA 自动连接入口讨论-arena-entry） ---------------- */
 // 入口仓库（固定 GH Pages 入口页）的 latest.txt 作为“最新地址源”，手机/浏览器入口页从这里读取并自动跳转
 const ENTRY_REPO = 'moxiaoren/discussion-arena-entry';
+/* 多主机看板仓库：每台主机把自己当前地址上报到这里 hosts.json（合并、不互相覆盖），固定看板页/APK 从 raw 读取展示可选用 */
+const HOSTS_REPO = 'moxiaoren/discussion-arena';
+function getHostName(){
+  try { if (process.env.HOST_NAME) return process.env.HOST_NAME; } catch (e) {}
+  try { const sc = loadJson('server-config.json'); if (sc && sc.server && sc.server.hostName) return sc.server.hostName; } catch (e) {}
+  try { const s = loadJson('settings.json'); if (s && s.hostName) return s.hostName; } catch (e) {}
+  return '主机';
+}
+async function updateHosts(name, url, token) {
+  if (!token) { log('  （未配置 github.token，无法更新看板主机列表；地址仍在下方 / last-url.txt）'); return; }
+  if (!name) name = '主机';
+  const id = name;
+  const api = 'https://api.github.com/repos/' + HOSTS_REPO + '/contents/hosts.json';
+  const head = { Authorization: 'Bearer ' + token, 'User-Agent': 'openclaw-note', 'Accept': 'application/vnd.github+json' };
+  try {
+    let arr = [], sha = null;
+    const meta = await fetch(api + '?branch=main', { headers: head });
+    if (meta.status === 200) { try { const j = await meta.json(); sha = j.sha; arr = JSON.parse(Buffer.from(j.content, 'base64').toString('utf8')); if (!Array.isArray(arr)) arr = []; } catch (e) { arr = []; } }
+    arr = arr.filter(h => h && h.id !== id);          // 去重：更新当前主机自己的条目，不覆盖别人
+    arr.push({ id: id, name: name, url: url, updatedAt: new Date().toISOString() });
+    arr = arr.slice(-8);                              // 最多保留 8 台，去掉最旧
+    const put = await fetch(api, {
+      method: 'PUT', headers: Object.assign({}, head, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message: 'update host: ' + name, content: Buffer.from(JSON.stringify(arr, null, 2)).toString('base64'), branch: 'main', ...(sha ? { sha } : {}) })
+    });
+    if (put.ok) log('📌 已更新看板主机(' + name + ') → ' + HOSTS_REPO + '/hosts.json');
+    else log('✗ 更新看板主机失败(' + put.status + '): ' + (await put.text()).slice(0, 120));
+  } catch (e) { log('✗ 更新看板主机异常: ' + e.message); }
+}
 async function updateEntryAddr(url, token) {
   if (!token) { log('  （未配置 github.token，无法更新入口页地址源；地址仍在下方 / last-url.txt）'); return; }
   const api = 'https://api.github.com/repos/' + ENTRY_REPO + '/contents/latest.txt';
@@ -470,6 +506,8 @@ async function main() {
     log('（已保存到 last-url.txt）');
     // 同步更新入口页地址源（PWA 自动连接）——复用在线更新同一个 github.token
     updateEntryAddr(url, ((loadJson('settings.json') || {}).github || {}).token);
+    // 多主机看板：把当前主机地址上报（固定看板页/APK 从 hosts.json 发现可选主机）
+    updateHosts(getHostName(), url, ((loadJson('settings.json') || {}).github || {}).token);
     if (DRY) { log('（--dryrun：不发送邮件）'); return; }
     const mailCfg = loadMailCfg();
     if (!mailCfg) { log('⚠ 未配置邮箱，跳过推送。\n   （在网页「⚙️ 设置」里填写发信邮箱后会自动推送）'); return; }

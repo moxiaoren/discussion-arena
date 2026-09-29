@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>论证点评间 · 主机看板</title>
+<meta name="theme-color" content="#7c3aed">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    background:linear-gradient(165deg,#ece8ff,#e4ecff);display:flex;flex-direction:column;align-items:center;
+    padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));overflow-y:auto}
+  header{width:100%;max-width:520px;text-align:center;margin-bottom:18px}
+  header h1{font-size:24px;background:linear-gradient(135deg,#6d28d9,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  header .sub{color:#8a8fa8;font-size:13px;margin-top:6px;line-height:1.6}
+  .list{width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px}
+  .host{background:rgba(255,255,255,.96);border:1px solid rgba(124,58,237,.16);border-radius:18px;padding:16px;
+    box-shadow:0 8px 24px rgba(90,50,180,.10)}
+  .host .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .host .name{font-weight:800;font-size:16px;color:#2c2a4a;display:flex;align-items:center;gap:8px}
+  .host .dot{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+  .host .time{font-size:11px;color:#b0aec8}
+  .host .url{font-size:12.5px;color:#6b6f8f;word-break:break-all;background:#f4f1ff;border-radius:8px;padding:7px 10px;margin-bottom:12px;line-height:1.5}
+  .row{display:flex;gap:8px}
+  .btn{flex:1;padding:11px;border:none;border-radius:11px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;
+    background:linear-gradient(135deg,#6d28d9,#a855f7);box-shadow:0 6px 16px rgba(124,58,237,.26)}
+  .btn.cp{flex:0 0 auto;background:#eeeafc;color:#6c5ce7;box-shadow:none;padding:11px 16px}
+  .empty{color:#a4a7c0;text-align:center;padding:40px 20px;font-size:14px;line-height:1.8;background:rgba(255,255,255,.6);border-radius:18px;width:100%;max-width:520px}
+  .empty code{background:#eeeafc;color:#7c3aed;padding:1px 6px;border-radius:6px;font-size:12px}
+  .foot{color:#c0c2d8;font-size:11px;margin-top:22px;text-align:center;line-height:1.7}
+  .refresh{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:44px;height:44px;border-radius:22px;
+    background:rgba(255,255,255,.9);border:1px solid #e5e0f7;color:#7c3aed;font-size:20px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 16px rgba(90,50,180,.16);cursor:pointer}
+  .tag{font-size:10px;color:#a4a7c0}
+</style>
+</head>
+<body>
+<header>
+  <h1>论证点评间 · 主机看板</h1>
+  <div class="sub">各主机打开后自动上报当前地址。选一个可用主机进入，或直接打开其地址。</div>
+</header>
+<div id="list" class="list"></div>
+<button class="refresh" id="refresh" title="刷新">🔄</button>
+<div class="foot">数据源 raw hosts.json · 地址会自动刷新</div>
+<script>
+var HOSTS_RAW='https://raw.githubusercontent.com/moxiaoren/discussion-arena/main/hosts.json';
+var listEl=document.getElementById('list');
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmtTime(iso){ try{ var d=new Date(iso); return d.toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){return '';} }
+function copyText(t){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok).catch(tryExec); } else tryExec(); function ok(){flash('已复制');} function tryExec(){ try{ var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); flash('已复制'); }catch(e){ prompt('手动复制:', t); } } }
+function flash(msg){ var d=document.getElementById('list'); if(!d)return; }
+function render(hosts){
+  if(!hosts||!hosts.length){ listEl.innerHTML='<div class="empty">暂无主机在线。<br>请在每台主机上：启动讨论间 → 配置 GitHub token 与 <code>HOST_NAME</code>/<code>hostName</code> 后刷新本页。</div>'; return; }
+  listEl.innerHTML=hosts.map(function(h){
+    var name=esc(h.name||h.id||'主机'), url=esc(h.url||''), t=fmtTime(h.updatedAt);
+    var enc=encodeURIComponent(h.url||'');
+    return '<div class="host"><div class="top"><span class="name"><span class="dot"></span>'+name+'</span><span class="time">'+t+'</span></div>'+
+      '<div class="url">'+url+'</div><div class="row">'+
+      '<button class="btn" onclick="location.href=\''+h.url.replace(/'/g,'')+'\'">打开 ▶</button>'+
+      '<button class="btn" onclick="location.href=\'?url='+enc+'\'">设为入口</button>'+
+      '<button class="cp" onclick="copyText(this.parentNode.previousElementSibling.textContent)">📋</button>'+
+      '</div></div>';
+  }).join('');
+}
+function load(){
+  fetch(HOSTS_RAW, {cache:'no-store'}).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.json(); })
+    .then(render)
+    .catch(function(){ listEl.innerHTML='<div class="empty">读取主机列表失败（可能未上报，或未开公开仓库访问）。</div>'; });
+}
+// ?url=xxx 直接跳转到指定主机
+try{ var q=new URLSearchParams(location.search); var u=q.get('url'); if(u){ location.href=u; } }catch(e){}
+load();
+setInterval(load, 30000);
+document.getElementById('refresh').onclick=load;
+</script>
+</body>
+</html>

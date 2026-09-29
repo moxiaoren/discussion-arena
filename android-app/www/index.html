@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>论证点评间</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    background:linear-gradient(160deg,#ece8ff,#e4ecff);display:flex;align-items:flex-start;justify-content:center;padding:26px 16px;overflow-y:auto}
+  .wrap{width:100%;max-width:440px}
+  .card{background:rgba(255,255,255,.96);border-radius:20px;padding:26px 22px; box-shadow:0 18px 50px rgba(90,50,180,.16);margin-bottom:14px}
+  h1{font-size:22px;margin-bottom:6px;background:linear-gradient(135deg,#6d28d9,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:#8a8fa8;font-size:13px;line-height:1.6;margin-bottom:16px}
+  .sec{font-size:13px;font-weight:700;color:#6d28d9;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+  input{width:100%;padding:13px 14px;border:1.5px solid #e5e0f7;border-radius:12px;font-size:15px}
+  input:focus{outline:none;border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+  button{width:100%;padding:13px;margin-top:12px;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#6d28d9,#a855f7);box-shadow:0 8px 20px rgba(124,58,237,.26)}
+  .change{margin-top:8px;background:#eeeafc;color:#6c5ce7;box-shadow:none}
+  .hint{color:#d03050;font-size:12.5px;margin-top:10px;line-height:1.5}
+  .saved{color:#16a34a;font-size:12px;margin-top:10px;word-break:break-all;line-height:1.5}
+  .host{display:block;width:100%;text-align:left;padding:12px;border-radius:13px;border:1px solid rgba(124,58,237,.16);background:#faf8ff;margin-bottom:8px;cursor:pointer}
+  .host .n{font-weight:800;color:#2c2a4a;font-size:14px;display:flex;align-items:center;gap:8px}
+  .host .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+  .host .u{font-size:11.5px;color:#6b6f8f;margin-top:4px;word-break:break-all}
+  .host .t{font-size:10.5px;color:#b0aec8;margin-top:3px}
+  .empty{color:#a4a7c0;font-size:12.5px;text-align:center;padding:16px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>论证点评间</h1>
+    <div class="sub">从主机看板发现可用主机一键进入；或手动输入服务器地址。</div>
+    <div class="sec">🛰 发现主机</div>
+    <div id="hosts"></div>
+    <div class="sec">⌨ 手输地址</div>
+    <input id="url" placeholder="https://xxx.trycloudflare.com" autocomplete="off" autocapitalize="off" inputmode="url">
+    <button id="go">进入 ▶</button>
+    <button id="change" class="change" style="display:none">✎ 清空已记地址</button>
+    <div class="hint" id="hint"></div>
+    <div class="saved" id="saved"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY='***app-server-url***';
+  var HOSTS_RAW='https://raw.githubusercontent.com/moxiaoren/discussion-arena/main/hosts.json';
+  var EDIT=/[?&]edit=1/.test(location.search);
+  var url=document.getElementById('url'), goBtn=document.getElementById('go'),
+      chgBtn=document.getElementById('change'), hint=document.getElementById('hint'),
+      savedEl=document.getElementById('saved'), hostsEl=document.getElementById('hosts');
+  var saved=null; try{ saved=localStorage.getItem(KEY); }catch(e){}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function fmtTime(iso){ try{ return new Date(iso).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }catch(e){return '';} }
+  function goto(u){
+    u=(u||'').trim();
+    if(!/^https?:\/\//i.test(u)) u='https://'+u;
+    if(!/^https?:\/\/[^\s]+$/.test(u)){ hint.textContent='请输入可用地址，如 https://xxx.com'; return; }
+    try{ localStorage.setItem(KEY,u); }catch(e){}
+    window.location.href=u;
+  }
+  function loadHosts(){
+    hostsEl.innerHTML='<div class="empty">正在发现主机…</div>';
+    fetch(HOSTS_RAW,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(list){
+      if(!list||!list.length){ hostsEl.innerHTML='<div class="empty">暂无主机在线，稍后刷新重试。</div>'; return; }
+      hostsEl.innerHTML=list.map(function(h){
+        var u=h.url||'';
+        return '<div class="host" onclick="goto(\''+u.replace(/'/g,'')+'\')">'+
+          '<div class="n"><span class="dot"></span>'+esc(h.name||h.id||'主机')+'</div>'+
+          '<div class="u">'+esc(u)+'</div><div class="t">更新于 '+fmtTime(h.updatedAt)+'</div></div>';
+      }).join('')+'<button class="change" style="margin-top:4px" onclick="loadHosts()">🔄 刷新</button>';
+    }).catch(function(){ hostsEl.innerHTML='<div class="empty">无法读取主机看板（可能尚未上报，或需联网）。<br>可先手动输入地址或稍后刷新。</div>'; });
+  }
+  if(saved){
+    savedEl.textContent='已记住地址：'+saved;
+    if(EDIT){ url.value=saved; }
+    else { goBtn.textContent='进入已记主机 ▶'; }
+  }
+  loadHosts();
+  setInterval(loadHosts, 40000);
+  goBtn.onclick=function(){ goto(url.value||saved||''); };
+  chgBtn.onclick=function(){ try{localStorage.removeItem(KEY);}catch(e){} savedEl.textContent=''; chgBtn.style.display='none'; hint.textContent='已清空，可重新选择或输入'; };
+  if(saved) chgBtn.style.display='block';
+  url.addEventListener('keydown',function(e){ if(e.key==='Enter') goto(url.value); });
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,16 @@ node_modules/
 data/
 push-config.json
 server-config.json
+settings.json
 cloudflared.exe
 autostart.log
 last-url.txt
+restart.flag
 *.log
+# 内部规范文档 / 迁移工具（不进公开仓库）
+_docs/
+_tools/
+# 构建/临时产物
+*.zip
+*.tmp
+.npmrc

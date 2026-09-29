@@ -1,1 +1,8 @@
-{"port": 8788, "deepseek": {"apiKey": "sk-x", "model": "deepseek-chat"}, "github": {"token": "ghp_x"}, "updater": {"repo": "moxiaoren\/discussion-arena", "branch": "main"}, "mail": {"host": "smtp.qq.com", "port": 465, "user": "a@qq.com", "pass": "auth", "to": ["b@qq.com"]}}
+{
+  "port": 8788,
+  "deepseek": { "apiKey": "sk-x", "model": "deepseek-chat" },
+  "github": { "token": "ghp_x" },
+  "updater": { "repo": "moxiaoren\/discussion-arena", "branch": "main" },
+  "server": { "hostName": "小张主机" },
+  "mail": { "host": "smtp.qq.com", "port": 465, "user": "a@qq.com", "pass": "auth", "to": ["b@qq.com"] }
+}
