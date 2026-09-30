@@ -34,6 +34,25 @@ jobs:
         working-directory: android-app
         run: npx cap sync android
 
+      - name: Install NDK + CMake
+        shell: bash
+        run: |
+          yes | sdkmanager "ndk;26.1.10909125" "cmake;3.22.1" >/dev/null 2>&1 || echo "sdkmanager 未安装到(可能 runner 已预装)"
+
+      - name: Inject nodejs-mobile (libnode.so + headers)
+        shell: bash
+        working-directory: android-app/android
+        run: |
+          cd /tmp
+          curl -sL -o njs.zip https://github.com/nodejs-mobile/nodejs-mobile/releases/download/v18.20.4/nodejs-mobile-v18.20.4-android.zip
+          rm -rf njs && mkdir -p njs && cd njs
+          unzip -q -o ../njs.zip
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p android-app/android/app/libnode/bin/arm64-v8a android-app/android/app/libnode/include
+          cp /tmp/njs/bin/arm64-v8a/libnode.so android-app/android/app/libnode/bin/arm64-v8a/
+          cp -r /tmp/njs/include/node android-app/android/app/libnode/include/
+          ls -la android-app/android/app/libnode/bin/arm64-v8a/libnode.so
+
       - name: Restore signing keystore
         working-directory: android-app/android
         shell: bash
