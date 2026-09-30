@@ -79,6 +79,7 @@ input,textarea{font-family:inherit}
 .arena-chip.on{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-color:transparent}
 #roomBar #btnNewRoom{white-space:nowrap;flex:0 0 auto}
 #roomBar #btnHome{white-space:nowrap;flex:0 0 auto;padding:3px 8px;font-size:12px;background:#f3f0ff;color:#6d28d9;border:1px solid #d8cdf7;border-radius:9px}
+#roomBar #btnSwitch{white-space:nowrap;flex:0 0 auto;padding:3px 8px;font-size:12px;background:linear-gradient(135deg,#e9d5ff,#dbe6ff);color:#5b23d6;border:1px solid #d8cdf7;border-radius:9px;cursor:pointer}
 #roomBar #btnEnd{white-space:nowrap;flex:0 0 auto;padding:0 9px;height:26px;font-size:12px;background:#ef4444;color:#fff;border-radius:9px}
 
 /* ---------- 大厅(进入) ---------- */
@@ -451,6 +452,7 @@ input,textarea{font-family:inherit}
       <button id="btnCopyPwd" class="rm-copy">📋</button>
     </div>
     <div style="flex:1"></div>
+    <button id="btnSwitch" title="临时切换身份(模拟对方发言:把当前对话角色切到对端身份,再点切回)">🔄切换身份</button>
     <button id="btnArena" class="arena-chip" title="切换「论证点评」玩法:总结时做多维度论证评估与质询反问">⚖️ 整理</button>
     <button id="btnHome" title="回到主页(大厅,保留登录)">🏠</button>
     <button id="btnNewRoom" title="开启全新空白的新话题">🆕 新话题</button>
@@ -1256,6 +1258,33 @@ function emitMsg(m){
   renderStream();
   broadcast({type:'msg',m});
 }
+/* ===== 临时切换角色(测试/模拟双人,纯前端;服务端对 relay 不校验发送者) ===== */
+var _origIdentity=null;
+function _otherName(){
+  if(ROOMINFO){
+    const c=ROOMINFO.creator, p=ROOMINFO.peer;
+    if(S.me.name===c && p) return p;
+    if(S.me.name===p && c) return c;
+  }
+  for(let i=S.messages.length-1;i>=0;i--){ const m=S.messages[i]; if(m.name && m.name!==S.me.name) return m.name; }
+  return null;
+}
+function toggleIdentity(){
+  if(_origIdentity){
+    S.me.name=_origIdentity.name; S.me.account=_origIdentity.account; S.me.avatar=_origIdentity.avatar; S.me.isCreator=_origIdentity.isCreator;
+    _origIdentity=null;
+  }else{
+    const oname=_otherName();
+    if(!oname){ alert('暂未识别对端身份:请等「'+S.me.name+'」先发一条消息，或确认房间两人后再切换'); return; }
+    _origIdentity={name:S.me.name,account:S.me.account,avatar:S.me.avatar,isCreator:S.me.isCreator};
+    S.me.name=oname; S.me.isCreator=!_origIdentity.isCreator; S.me.account='';
+  }
+  const sub=$('#topSub'); if(sub) sub.textContent='讨论进行中 · '+S.me.name+(_origIdentity?'（🔄临时扮演）':'');
+  if(S.inRoom) renderStatus();
+  renderStream();
+}
+document.addEventListener('click',function(e){ if(e.target && e.target.id==='btnSwitch'){ try{toggleIdentity();}catch(err){ console.warn(err);} } });
+
 function sendDiscuss(content, withSummary){
   const m={id:uid(),name:S.me.name,ts:now(),content,channel:'discuss',appendTo:null};
   emitMsg(m);

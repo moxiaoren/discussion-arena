@@ -67,10 +67,10 @@
       if(!list||!list.length){ hostsEl.innerHTML='<div class="empty">暂无主机在线，稍后刷新重试。</div>'; return; }
       hostsEl.innerHTML=list.map(function(h){
         var u=h.url||'';
-        return '<div class="host" onclick="goto(\''+u.replace(/'/g,'')+'\')">'+
+        return '<div class="host" data-url="'+u.replace(/"/g,'')+'">'+
           '<div class="n"><span class="dot"></span>'+esc(h.name||h.id||'主机')+'</div>'+
           '<div class="u">'+esc(u)+'</div><div class="t">更新于 '+fmtTime(h.updatedAt)+'</div></div>';
-      }).join('')+'<button class="change" style="margin-top:4px" onclick="loadHosts()">🔄 刷新</button>';
+      }).join('')+'<button class="change" style="margin-top:4px" data-refresh="1">🔄 刷新</button>';
     }).catch(function(){ hostsEl.innerHTML='<div class="empty">无法读取主机看板（可能尚未上报，或需联网）。<br>可先手动输入地址或稍后刷新。</div>'; });
   }
   if(saved){
@@ -78,6 +78,13 @@
     if(EDIT){ url.value=saved; }
     else { goBtn.textContent='进入已记主机 ▶'; }
   }
+  // 事件委托(避免内联 onclick 作用域问题)：点击主机关卡→填入并连接；点刷新→重新拉列表
+  hostsEl.addEventListener('click', function(e){
+    var t=e.target;
+    if(t && t.getAttribute && t.getAttribute('data-refresh')==='1'){ loadHosts(); return; }
+    var el=t.closest?t.closest('.host'):null;
+    if(el && el.getAttribute('data-url')){ goto(el.getAttribute('data-url')); }
+  });
   loadHosts();
   setInterval(loadHosts, 40000);
   goBtn.onclick=function(){ goto(url.value||saved||''); };
