@@ -41,6 +41,10 @@
     <button id="change" class="change" style="display:none">✎ 清空已记地址</button>
     <div class="hint" id="hint"></div>
     <div class="saved" id="saved"></div>
+    <hr style="border:none;border-top:1px solid #eeeafc;margin:16px 0 4px">
+    <div class="sec" style="margin:8px 0">🚀 App 更新</div>
+    <button id="btnUpd" class="change">🔄 检查更新</button>
+    <div class="saved" id="updEl"></div>
   </div>
 </div>
 <script>
@@ -90,6 +94,23 @@
   goBtn.onclick=function(){ goto(url.value||saved||''); };
   chgBtn.onclick=function(){ try{localStorage.removeItem(KEY);}catch(e){} savedEl.textContent=''; chgBtn.style.display='none'; hint.textContent='已清空，可重新选择或输入'; };
   if(saved) chgBtn.style.display='block';
+  // ===== App 内检查更新(读版本清单,比当前版本新则提示下载) =====
+  var APP_VER='1.2.0';
+  var REL_JSON='https://raw.githubusercontent.com/moxiaoren/discussion-arena/main/apk-release.json';
+  var updEl=document.getElementById('updEl');
+  function verCmp(a,b){ var pa=String(a).replace(/^v/,'').split('.').map(Number), pb=String(b).replace(/^v/,'').split('.').map(Number); for(var i=0;i<Math.max(pa.length,pb.length);i++){ var x=pa[i]||0,y=pb[i]||0; if(x>y)return 1; if(x<y)return -1; } return 0; }
+  function checkUpdate(){
+    updEl.textContent='正在检查…';
+    fetch(REL_JSON,{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+      if(!j || !j.version || !j.url){ updEl.textContent='暂无更新信息'; return; }
+      if(verCmp(j.version, APP_VER)>0){
+        updEl.innerHTML='发现新版本 <b>v'+esc(j.version)+'</b>'+ (j.notes?('<br>'+esc(j.notes)):'') +'<br><a href="'+esc(j.url)+'" style="color:#6d28d9;font-weight:700">⬇️ 下载并安装</a>';
+      } else {
+        updEl.textContent='已是最新版本 v'+APP_VER;
+      }
+    }).catch(function(){ updEl.textContent='检查更新失败（请联网后重试）'; });
+  }
+  document.getElementById('btnUpd').onclick=checkUpdate;
   url.addEventListener('keydown',function(e){ if(e.key==='Enter') goto(url.value); });
 })();
 </script>
