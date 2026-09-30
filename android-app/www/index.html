@@ -33,7 +33,9 @@
   <div class="card">
     <h1>论证点评间</h1>
     <div class="sub">从主机看板发现可用主机一键进入；或手动输入服务器地址。</div>
-    <div class="sec">🛰 发现主机</div>
+    <div class="sec" style="margin:10px 0 4px">📱 手机主机 <button id="btnPhone" class="change" style="margin-left:8px">🔄 重新检测</button></div>
+    <div class="saved" id="phoneHost">检测中…</div>
+    <div class="sec" style="margin:10px 0 4px">🛰 发现主机</div>
     <div id="hosts"></div>
     <div class="sec">⌨ 手输地址</div>
     <input id="url" placeholder="https://xxx.trycloudflare.com" autocomplete="off" autocapitalize="off" inputmode="url">
@@ -111,6 +113,21 @@
     }).catch(function(){ updEl.textContent='检查更新失败（请联网后重试）'; });
   }
   document.getElementById('btnUpd').onclick=checkUpdate;
+  if(saved) chgBtn.style.display='block';
+  // ===== 手机主机状态检测(本机 nodejs-mobile 服务器) =====
+  var phoneEl=document.getElementById('phoneHost');
+  function checkPhoneHost(){
+    fetch('http://127.0.0.1:8788/',{cache:'no-store'}).then(function(r){ if(!r.ok) throw 0; return r.text(); }).then(function(t){
+      phoneEl.textContent='✅ 手机主机服务器运行中 (端口8788)';
+      phoneEl.style.color='#059669';
+    }).catch(function(){
+      phoneEl.textContent='手机主机未运行 (127.0.0.1:8788 无响应)';
+      phoneEl.style.color='#94a3b8';
+    });
+  }
+  document.getElementById('btnPhone').onclick=checkPhoneHost;
+  checkPhoneHost();
+  setInterval(checkPhoneHost, 5000);
   url.addEventListener('keydown',function(e){ if(e.key==='Enter') goto(url.value); });
 })();
 </script>
