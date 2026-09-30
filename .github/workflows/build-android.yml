@@ -34,8 +34,22 @@ jobs:
         working-directory: android-app
         run: npx cap sync android
 
+      - name: Restore signing keystore
+        working-directory: android-app/android
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          mkdir -p app
+          echo "$KEYSTORE_B64" | base64 -d > app/keystore.jks
+
       - name: Build debug APK
         working-directory: android-app/android
+        env:
+          KEYSTORE_FILE: keystore.jks
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASS }}
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
